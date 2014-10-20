@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+         xmlns:s="http://www.springframework.org/schema/security"
+         xmlns:beans="http://www.springframework.org/schema/beans"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.springframework.org/schema/beans
+                             http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+                             http://www.springframework.org/schema/security
+                             http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+   <http entry-point-ref="oAuth2EntryPoint">
+        <custom-filter ref="oauth2AuthFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
+        <logout logout-success-url="/index.html"/>
+    </http>
+
+    <beans:bean id="oAuth2EntryPoint" class="com.racquettrack.security.oauth.OAuth2AuthenticationEntryPoint">
+        <beans:property name="oAuth2ServiceProperties" ref="oauth2ServiceProperties"/>
+    </beans:bean>
+
+    <beans:bean id="oauth2AuthFilter" class="com.racquettrack.security.oauth.OAuth2AuthenticationFilter">
+        <beans:constructor-arg name="defaultFilterProcessesUrl" value="/oauth/callback"/>
+        <beans:property name="authenticationManager" ref="authenticationManager"/>
+        <beans:property name="oAuth2ServiceProperties" ref="oauth2ServiceProperties"/>
+    </beans:bean>
+
+    <beans:bean id="oauth2AuthenticationProvider" class="com.racquettrack.security.oauth.OAuth2AuthenticationProvider">
+        <beans:property name="authenticatedUserDetailsService" ref="oAuth2UserDetailsService"/>
+        <beans:property name="oAuth2ServiceProperties" ref="oauth2ServiceProperties"/>
+    </beans:bean>
+
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider ref="oauth2AuthenticationProvider">
+        </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="oauth2ServiceProperties" class="org.auscope.portal.core.server.security.oauth2.GoogleOAuth2ServiceProperties">
+        <beans:constructor-arg name="redirectUri" value="/oauth/callback"/>
+        <beans:constructor-arg name="clientId" value="${env.oauth2.google.clientid}"/>
+        <beans:constructor-arg name="clientSecret" value="${env.oauth2.google.clientsecret}"/>
+    </beans:bean>
+
+    <beans:bean id="simpleUserLoader" class="org.auscope.portal.core.server.security.oauth2.GoogleOAuth2UserDetailsLoader">
+        <beans:constructor-arg name="defaultRole" value="ROLE_USER"/>
+        <beans:constructor-arg name="rolesByUser">
+            <beans:map>
+            </beans:map>
+        </beans:constructor-arg>
+    </beans:bean>
+
+    <beans:bean id="oAuth2DefaultUserInfoProvider" class="com.racquettrack.security.oauth.DefaultOAuth2UserInfoProvider">
+        <beans:property name="oAuth2ServiceProperties" ref="oauth2ServiceProperties"/>
+    </beans:bean>
+
+    <beans:bean id="oAuth2UserDetailsService" class="com.racquettrack.security.oauth.OAuth2UserDetailsService">
+        <beans:property name="oAuth2UserDetailsLoader" ref="simpleUserLoader"/>
+        <beans:property name="oAuth2ServiceProperties" ref="oauth2ServiceProperties"/>
+        <beans:property name="oAuth2UserInfoProvider" ref="oAuth2DefaultUserInfoProvider"/>
+    </beans:bean>
+
+
+</beans:beans>
