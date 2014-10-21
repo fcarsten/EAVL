@@ -10,6 +10,10 @@
     </head>
     <body>
         <h1>Early Access Virtual Laboratory</h1>
+        
+        <p>This page is still a work in progress. It will contain links to general EAVL info and how to get started</p>
+        
+        <p><a href="upload.html">Go to Upload Page</a></p>
     </body>
 </html>
 
