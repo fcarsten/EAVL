@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.auscope.portal.core.services.PortalServiceException;
 import org.springframework.stereotype.Service;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -28,10 +30,10 @@ public class CSVService {
      * @return
      * @throws IOException
      */
-    public List<String[]> readLines(InputStream csvData, int startLine, int maximum) throws IOException {
+    public List<String[]> readLines(InputStream csvData, int startLine, int maximum) throws PortalServiceException {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), '\t', '\'', startLine);
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', startLine);
 
             List<String[]> lines = new ArrayList<String[]>(maximum);
             String[] nextLine;
@@ -40,6 +42,8 @@ public class CSVService {
             }
 
             return lines;
+        } catch (Exception ex) {
+            throw new PortalServiceException((HttpRequestBase)null, ex);
         } finally {
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(csvData);
@@ -57,10 +61,10 @@ public class CSVService {
      * @return
      * @throws IOException
      */
-    public int estimateColumnCount(InputStream csvData) throws IOException {
+    public int estimateColumnCount(InputStream csvData) throws PortalServiceException {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), '\t', '\'', 0);
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
 
             String[] nextLine;
             while ((nextLine = reader.readNext()) != null) {
@@ -75,6 +79,8 @@ public class CSVService {
             }
 
             return 0; //Empty CSV files will return 0 columns
+        } catch (Exception ex) {
+            throw new PortalServiceException((HttpRequestBase)null, ex);
         } finally {
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(csvData);
