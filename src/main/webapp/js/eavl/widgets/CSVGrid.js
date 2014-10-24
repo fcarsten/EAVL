@@ -26,9 +26,10 @@ Ext.define('eavl.widgets.CSVGrid', {
             remoteGroup: true,
             // allow the grid to interact with the paging scroller by buffering
             buffered: true,
-            leadingBufferZone: 300,
             pageSize: 100,
+            leadingBufferZone: 300,
             fields : fields,
+            autoLoad: true,
             proxy: {
                 // load using script tags for cross domain, if the data in on the same domain as
                 // this page, an Ajax proxy would be better
@@ -38,32 +39,20 @@ Ext.define('eavl.widgets.CSVGrid', {
                     type : 'array',
                     root: 'rows',
                     totalProperty: 'totalCount'
-                },
-                // sends single sort as multi parameter
-                simpleSortMode: true,
-                // sends single group as multi parameter
-                simpleGroupMode: true,
-
-                // This particular service cannot sort on more than one field, so grouping === sorting.
-                groupParam: undefined,
-                groupDirectionParam: undefined
-            },
-            autoLoad: true
+                }
+            }
         });
 
         Ext.apply(config, {
             columns : columns,
             store : csvStore,
             loadMask: true,
+            multiSelect: true,
             selModel: {
                 pruneRemoved: false
             },
-            multiSelect: true,
             viewConfig: {
                 trackOver: false
-            },
-            verticalScroller : {
-                variableRowHeight: true
             }
         });
 

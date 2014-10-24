@@ -101,11 +101,11 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            InputStream csvData = fss.readFile(job, "example-data.csv");
-            List<String[]> data = csvService.readLines(csvData, start, limit);
+            List<String[]> data = csvService.readLines(fss.readFile(job, "example-data.csv"), start, limit);
+            int totalData = csvService.countLines(fss.readFile(job, "example-data.csv")); //This could be cached
 
             ModelMap response = new ModelMap();
-            response.put("totalCount", data.size());
+            response.put("totalCount", totalData);
             response.put("rows", data);
             return new ModelAndView(new JSONView(), response);
         } catch (Exception e) {
