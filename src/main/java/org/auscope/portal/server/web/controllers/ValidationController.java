@@ -84,7 +84,7 @@ public class ValidationController extends BasePortalController {
 
         try {
             InputStream csvData = fss.readFile(job, "example-data.csv");
-            return generateJSONResponseMAV(false, new Integer(csvService.estimateColumnCount(csvData)), "Error reading file");
+            return generateJSONResponseMAV(true, new Integer(csvService.estimateColumnCount(csvData)), "");
         } catch (Exception e) {
             return generateJSONResponseMAV(false, null, "Error reading file");
         }

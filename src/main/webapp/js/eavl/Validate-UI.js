@@ -4,56 +4,69 @@
 Ext.application({
     name : 'eavl-validate',
 
+    init: function() {
+        eavl.widget.SplashScren.showLoadingSplash('Loading Validator, please stand by ...');
+    },
+
     //Here we build our GUI from existing components - this function should only be assembling the GUI
     //Any processing logic should be managed in dedicated classes - don't let this become a
     //monolithic 'do everything' function
     launch : function() {
+        //Called if the init code fails badly
+        var initError = function() {
+            eavl.widget.SplashScren.hideLoadingScreen();
+            eavl.widget.SplashScren.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+        };
 
-        var csvStore = Ext.create('Ext.data.Store', {
-            remoteGroup: true,
-            // allow the grid to interact with the paging scroller by buffering
-            buffered: true,
-            leadingBufferZone: 300,
-            pageSize: 100,
-            proxy: {
-                // load using script tags for cross domain, if the data in on the same domain as
-                // this page, an Ajax proxy would be better
-                type: 'ajax',
-                url: 'validation/streamRows.do',
-                reader: {
-                    root: 'rows',
-                    totalProperty: 'totalCount'
-                },
-                // sends single sort as multi parameter
-                simpleSortMode: true,
-                // sends single group as multi parameter
-                simpleGroupMode: true,
+        var initSuccess = function(colCount) {
+            eavl.widget.SplashScren.hideLoadingScreen();
 
-                // This particular service cannot sort on more than one field, so grouping === sorting.
-                groupParam: undefined,
-                groupDirectionParam: undefined
-            },
-            autoLoad: true
-        });
+            var viewport = Ext.create('Ext.container.Viewport', {
+                layout: 'border',
+                items: [{
+                    xtype: 'panel',
+                    region: 'north',
+                    height: 100,
+                    layout: {
+                        type: 'hbox',
+                        pack: 'start'
+                    },
+                    items: [{
+                        xtype: 'image',
+                        src: 'img/eavl-banner.png',
+                        height: 100
+                    }]
+                },{
+                    xtype: 'panel',
+                    region: 'center',
+                    layout: 'fit',
+                    items: [{
+                        title : 'The data you\'ve uploaded needs to be validated',
+                        xtype: 'csvgrid',
+                        margin : '50 100 50 100',
+                        columnCount : colCount
+                    }]
+                }]
+            });
+        };
 
-        var viewport = Ext.create('Ext.container.Viewport', {
-            layout: 'border',
-            items: [{
-                xtype: 'csvgrid',
-                region: 'center',
-                store : csvStore,
-                loadMask: true,
-                selModel: {
-                    pruneRemoved: false
-                },
-                multiSelect: true,
-                viewConfig: {
-                    trackOver: false
-                },
-                verticalScroller : {
-                    variableRowHeight: true
+        // Start off by figuring out how many columns we need. From here we can start the rest of the process
+        Ext.Ajax.request({
+            url: 'validation/getColumnCount.do',
+            callback: function(options, success, response) {
+                if (!success || !response.responseText) {
+                    initError();
+                    return;
                 }
-            }]
+
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (!responseObj.success) {
+                    initError();
+                    return;
+                }
+
+                initSuccess(responseObj.data);
+            }
         });
     }
 
