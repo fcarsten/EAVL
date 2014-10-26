@@ -9,6 +9,7 @@ import junit.framework.Assert;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.test.PortalTestClass;
 import org.auscope.portal.core.test.ResourceUtil;
+import org.auscope.portal.server.eavl.ParameterDetails;
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,5 +77,57 @@ public class TestCSVService extends PortalTestClass{
         }});
 
         service.estimateColumnCount(mockStream);
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testParameterDetailsClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            atLeast(1).of(mockStream).close();
+        }});
+
+        service.extractParameterDetails(mockStream);
+    }
+
+    @Test
+    public void testExtractParameterDetailsParsing() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+
+        List<ParameterDetails> details = service.extractParameterDetails(is);
+
+        Assert.assertNotNull(details);
+        Assert.assertEquals(5, details.size());
+
+        Assert.assertEquals("sample", details.get(0).getName());
+        Assert.assertEquals("gold (au) ppm", details.get(1).getName());
+        Assert.assertEquals("something-else", details.get(2).getName());
+        Assert.assertEquals("D", details.get(3).getName());
+        Assert.assertEquals("data", details.get(4).getName());
+
+        Assert.assertEquals(0, details.get(0).getTotalText());
+        Assert.assertEquals(8, details.get(0).getTotalNumeric());
+        Assert.assertEquals(0, details.get(0).getTotalMissing());
+
+        Assert.assertEquals(1, details.get(2).getTotalText());
+        Assert.assertEquals(7, details.get(2).getTotalNumeric());
+        Assert.assertEquals(0, details.get(2).getTotalMissing());
+        Assert.assertEquals(1, details.get(2).getTextValues().size());
+        Assert.assertTrue(details.get(2).getTextValues().contains("D/L"));
+
+        Assert.assertEquals(0, details.get(4).getTotalText());
+        Assert.assertEquals(5, details.get(4).getTotalNumeric());
+        Assert.assertEquals(3, details.get(4).getTotalMissing());
+    }
+
+    @Test
+    public void testExtractParameterDetailsEmptyInput() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/empty-data.csv");
+
+        List<ParameterDetails> details = service.extractParameterDetails(is);
+
+        Assert.assertNotNull(details);
+        Assert.assertEquals(0, details.size());
     }
 }

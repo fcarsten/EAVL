@@ -192,10 +192,35 @@ public class CSVService {
         return true;
     }
 
-    /*private String integerToHeaderName(int index) {
+    /**
+     * Utility for generating a column header based on a number in a spreadsheet format:
+     *
+     * eg: Columns read A, B, C ... Y, Z, AA, AB, AC ...
+     * @param index 0 based index
+     * @return
+     */
+    private String integerToHeaderName(int index) {
+        String name = "";
+        while(index > 0) {
+            name += (char) ('A' + (index % 26));
+            index -= 26;
+        }
+        return name;
+    }
 
-    }*/
-
+    /**
+     * Iterates through the entire CSV dataset generating statistics on each column. Each column will
+     * be treated as an independent parameter. Returns the statistics as a list of "ParameterDetails"
+     * objects.
+     *
+     * Returns 0 if the CSV file is empty
+     *
+     * Closes InputStream before returning.
+     *
+     * @param csvData InputStream containing CSV data. Will be closed by this method
+     * @return
+     * @throws PortalServiceException
+     */
     public List<ParameterDetails> extractParameterDetails(InputStream csvData) throws PortalServiceException {
         CSVReader reader = null;
         List<ParameterDetails> details = new ArrayList<ParameterDetails>();
@@ -225,21 +250,31 @@ public class CSVService {
                 }
             }
 
+            //Initialize the parameters (one for each column)
             if (numericCount == 0 && textCount > 1) {
-
-            } else {
-                //We don't have a header line (probably). Just treat this as data
+                //It looks like we have a header line, let's try and parse it
                 for (int i = 0; i < headerLine.length; i++) {
-
+                    if (headerLine[i].trim().isEmpty()) {
+                        details.add(new ParameterDetails(integerToHeaderName(i)));
+                    } else {
+                        details.add(new ParameterDetails(headerLine[i].trim()));
+                    }
                 }
-
-
-                //applyRowToDetails(details, value);
+            } else {
+                //We don't have a header line (probably). This row will be data.
+                //Instead autogenerate details
+                for (int i = 0; i < headerLine.length; i++) {
+                    details.add(new ParameterDetails(integerToHeaderName(i)));
+                }
+                applyRowToDetails(details, headerLine); // Make sure we don't forget to treat this line as data
             }
 
-
+            String[] dataLine;
+            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
+                applyRowToDetails(details, dataLine);
+            }
         } catch (Exception ex) {
-            throw new PortalServiceException((HttpRequestBase)null, ex);
+            throw new PortalServiceException("Unable to parse Parameter Details", ex);
         } finally {
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(csvData);

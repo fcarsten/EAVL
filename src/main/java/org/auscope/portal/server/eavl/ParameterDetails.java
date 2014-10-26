@@ -1,10 +1,11 @@
 package org.auscope.portal.server.eavl;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ParameterDetails implements Serializable {
-    /** Unique name of this parameter (default to column number) */
+    /** Unique name of this parameter */
     private String name;
     /** Total number of numeric values in this parameter*/
     private int totalNumeric;
@@ -16,14 +17,22 @@ public class ParameterDetails implements Serializable {
     private Set<String> textValues;
 
     /**
-     * Unique name of this parameter (default to column number)
+     * @param name Unique name of this parameter
+     */
+    public ParameterDetails(String name) {
+        this.name = name;
+        this.textValues = new HashSet<String>();
+    }
+
+    /**
+     * Unique name of this parameter
      * @return
      */
     public String getName() {
         return name;
     }
     /**
-     * Unique name of this parameter (default to column number)
+     * Unique name of this parameter
      * @param name
      */
     public void setName(String name) {
@@ -86,5 +95,8 @@ public class ParameterDetails implements Serializable {
         this.textValues = textValues;
     }
 
-
+    @Override
+    public String toString() {
+        return "ParameterDetails [name=" + name + "]";
+    }
 }
