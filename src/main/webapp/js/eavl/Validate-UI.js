@@ -39,12 +39,31 @@ Ext.application({
                 },{
                     xtype: 'panel',
                     region: 'center',
-                    layout: 'fit',
+                    layout: {
+                        type: 'hbox',
+                        align : 'stretch',
+                        pack : 'center'
+                    },
+                    bodyPadding : '50 100 50 100',
                     items: [{
-                        title : 'The data you\'ve uploaded needs to be validated',
+                        itemid : 'csvpanel',
                         xtype: 'csvgrid',
-                        margin : '50 100 50 100',
-                        parameterDetails : parameterDetails
+                        title : 'The data you\'ve uploaded needs to be validated',
+                        parameterDetails : parameterDetails,
+                        flex : 1,
+                        margin : '0 10 0 0',
+                        listeners : {
+                            parameterselect : function(csvGrid, parameterDetails) {
+                                csvGrid.ownerCt.queryById('inspectpanel').showParameterDetails(parameterDetails);
+                            }
+                        }
+                    },{
+                        itemId : 'inspectpanel',
+                        xtype : 'pdpanel',
+                        title : 'Parameter Details',
+                        emptyText : 'Select a column to inspect it.',
+                        flex : 1,
+                        margin : '0 0 0 10',
                     }]
                 }]
             });
@@ -72,27 +91,6 @@ Ext.application({
                 }
             }
         });
-
-
-
-        // Start off by figuring out how many columns we need. From here we can start the rest of the process
-        /*Ext.Ajax.request({
-            url: 'validation/getParameterDetails.do',
-            callback: function(options, success, response) {
-                if (!success || !response.responseText) {
-                    initError();
-                    return;
-                }
-
-                var responseObj = Ext.JSON.decode(response.responseText);
-                if (!responseObj.success) {
-                    initError();
-                    return;
-                }
-
-                initSuccess(responseObj.data);
-            }
-        });*/
     }
 
 });

@@ -10,7 +10,14 @@ Ext.define('eavl.widgets.CSVGrid', {
     parameterDetails : null,
 
     /**
-     * parameterDetails : eavl.models.ParameterDetails[] - The data columns in this CSVGrid
+     * Adds the following config options
+     * {
+     *  parameterDetails : eavl.models.ParameterDetails[] - The data columns in this CSVGrid
+     * }
+     *
+     * Adds the following events
+     *
+     * parameterselect : function(this, parameterDetails)
      */
     constructor: function(config) {
 
@@ -21,7 +28,7 @@ Ext.define('eavl.widgets.CSVGrid', {
         for (var i = 0; i < this.parameterDetails.length; i++) {
             var name = this.parameterDetails[i].get('name');
             fields.push(name);
-            columns.push({dataIndex: name, text: name});
+            columns.push({itemId: name, dataIndex: name, text: name});
         }
 
         var csvStore = Ext.create('Ext.data.Store', {
@@ -59,5 +66,23 @@ Ext.define('eavl.widgets.CSVGrid', {
         });
 
         this.callParent(arguments);
+
+        this.addEvents('parameterselect');
+
+        this.on('cellclick', this._handleCellClick, this);
+    },
+
+    _handleCellClick : function(csvGrid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+
+        var column = this.columns[cellIndex];
+        var name = column.getItemId();
+
+        for (var i = 0; i < this.parameterDetails.length; i++) {
+            if (this.parameterDetails[i].get('name') === name) {
+
+                this.fireEvent('parameterselect', this, this.parameterDetails[i]);
+                break;
+            }
+        }
     }
 });
