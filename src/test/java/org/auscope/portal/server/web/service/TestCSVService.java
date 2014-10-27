@@ -119,7 +119,8 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(6, details.get(2).getTotalNumeric());
         Assert.assertEquals(1, details.get(2).getTotalMissing());
         Assert.assertEquals(1, details.get(2).getTextValues().size());
-        Assert.assertTrue(details.get(2).getTextValues().contains("D/L"));
+        Assert.assertTrue(details.get(2).getTextValues().containsKey((" D/L")));
+        Assert.assertEquals(1, (int)details.get(2).getTextValues().get(" D/L"));
 
         Assert.assertEquals(0, details.get(4).getTotalText());
         Assert.assertEquals(5, details.get(4).getTotalNumeric());
@@ -154,7 +155,8 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(6, details.get(2).getTotalNumeric());
         Assert.assertEquals(0, details.get(2).getTotalMissing());
         Assert.assertEquals(1, details.get(2).getTextValues().size());
-        Assert.assertTrue(details.get(2).getTextValues().contains("D/L"));
+        Assert.assertTrue(details.get(2).getTextValues().containsKey((" D/L")));
+        Assert.assertEquals(2, (int)details.get(2).getTextValues().get(" D/L"));
 
         Assert.assertEquals(0, details.get(4).getTotalText());
         Assert.assertEquals(5, details.get(4).getTotalNumeric());

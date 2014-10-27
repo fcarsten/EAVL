@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -184,7 +185,14 @@ public class CSVService {
                 break;
             case Text:
                 pd.setTotalText(pd.getTotalText() + 1);
-                pd.getTextValues().add(value.trim());
+
+                Map<String, Integer> tValues = pd.getTextValues();
+                Integer amount = tValues.get(value);
+                if (amount == null) {
+                    tValues.put(value, 1);
+                } else {
+                    tValues.put(value, amount + 1);
+                }
                 break;
             }
         }

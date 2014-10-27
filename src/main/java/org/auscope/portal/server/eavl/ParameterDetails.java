@@ -1,8 +1,8 @@
 package org.auscope.portal.server.eavl;
 
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ParameterDetails implements Serializable {
     /** Unique name of this parameter */
@@ -13,8 +13,8 @@ public class ParameterDetails implements Serializable {
     private int totalMissing;
     /** Total number of values that are NOT parseable as a number and are non empty*/
     private int totalText;
-    /** A list of every non numeric value (including null string)*/
-    private Set<String> textValues;
+    /** A map of every non numeric value (including null string) and their associated counts.*/
+    private Map<String, Integer> textValues;
     /** The index of the column in the CSV file (0 based)*/
     private int columnIndex;
     /**
@@ -24,7 +24,7 @@ public class ParameterDetails implements Serializable {
     public ParameterDetails(String name, int columnIndex) {
         this.name = name;
         this.columnIndex = columnIndex;
-        this.textValues = new HashSet<String>();
+        this.textValues = new HashMap<String, Integer>();
     }
 
     /**
@@ -84,17 +84,17 @@ public class ParameterDetails implements Serializable {
         this.totalText = totalText;
     }
     /**
-     * A list of every non numeric value (including null string)
+     * A map of every non numeric value (including null string) and their associated counts.
      * @return
      */
-    public Set<String> getTextValues() {
+    public Map<String, Integer> getTextValues() {
         return textValues;
     }
     /**
-     * A list of every non numeric value (including null string)
+     * A map of every non numeric value (including null string) and their associated counts.
      * @param textValues
      */
-    public void setTextValues(Set<String> textValues) {
+    public void setTextValues(Map<String, Integer> textValues) {
         this.textValues = textValues;
     }
 

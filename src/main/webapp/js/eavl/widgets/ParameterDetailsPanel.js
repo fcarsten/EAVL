@@ -10,6 +10,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     parameterDetails : null,
     emptyText : null,
     pieStore : null,
+    textValuesStore : null,
 
     /**
      * Adds the following config to Ext.panel.Panel
@@ -23,6 +24,11 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this.pieStore = Ext.create('Ext.data.Store', {
             fields : ['name', 'total']
         });
+
+        this.textValuesStore = Ext.create('Ext.data.Store', {
+            fields : ['name', 'total']
+        });
+
         var me = this;
         Ext.apply(config, {
             layout : {
@@ -99,8 +105,47 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                     },{
                         itemId : 'textlist',
                         flex: 1,
-                        xtype : 'panel',
-                        html : 'This will be a list of text values'
+                        xtype : 'grid',
+                        store : this.textValuesStore,
+                        hideHeaders : true,
+                        disableSelection : true,
+                        viewConfig : {
+                            emptyText : '<b>This parameter doesn\'t have any non numeric values</b>'
+                        },
+                        listeners : {
+                            cellclick : Ext.bind(this._handleTextValueClick, this)
+                        },
+                        columns : [{
+                            dataIndex : 'name',
+                            flex : 1,
+                            renderer : function(value, md, record) {
+                                var emptyString = value === '';
+
+                                return Ext.DomHelper.markup({
+                                    tag : 'div',
+                                    style : {
+                                        cursor: 'pointer'
+                                    },
+                                    children : [{
+                                        tag : 'b',
+                                        style : {
+                                            'font-size' : '170%',
+                                            'font-style' : emptyString ? 'italic' : 'normal'
+                                        },
+                                        html : emptyString ? '(empty string)' : value
+                                    },{tag : 'br'},{tag : 'br'},{
+                                        tag : 'span',
+                                        style : {
+                                            color : '#555',
+                                            'font-size' : '120%'
+                                        },
+                                        children : [{
+                                            html : Ext.util.Format.format('{0} occurrence(s)', record.get('total'))
+                                        }]
+                                    }]
+                                });
+                            }
+                        }]
                     }]
                 },{
                     itemId : 'values',
@@ -117,6 +162,34 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     initComponent : function() {
         this.callParent(arguments);
         this.hideParameterDetails();
+    },
+
+    /**
+     * Fired when a user clicks a cell value
+     */
+    _handleTextValueClick : function(grid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+        Ext.MessageBox.show({
+            title: 'Find and Replace',
+            msg: Ext.util.Format.format('Replace <b>{0}</b> with what:', record.get('name') === '' ? '<i>(empty string)</i>' : record.get('name')),
+            animateTarget: grid.getEl(),
+            icon: Ext.window.MessageBox.QUESTION,
+            prompt: true,
+            scope : this,
+            buttons : Ext.MessageBox.OK,
+            fn : function(buttonId, text, opt) {
+                if (buttonId === 'ok' && text) {
+                    this._handleFindReplace(record.get('name'), text);
+                }
+            }
+        });
+    },
+
+    _handleFindReplace : function(find, replace) {
+        if (replace === null || replace === undefined) {
+            return;
+        }
+
+        console.log('Finding: ', find, ' and replacing with ', replace);
     },
 
     /**
@@ -147,6 +220,24 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     },
 
     /**
+     * Loads the text value data store from the specified param details.
+     */
+    _loadTextValueStore : function(parameterDetails) {
+        var data = [];
+
+        values = parameterDetails.get('textValues');
+        for (textValue in values) {
+            data.push({name : textValue, total : values[textValue]});
+        }
+
+        if (parameterDetails.get('totalMissing') > 0) {
+            data.push({name : '', total : parameterDetails.get('totalMissing')});
+        }
+
+        this.textValuesStore.loadData(data);
+    },
+
+    /**
      * Inspects the specified parameter details. Removes any parameter details that is current being inspected
      *
      * @param parameterDetails Can be null, if so this will call hideParameterDetails
@@ -165,6 +256,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
 
 
         this._loadPieStore(parameterDetails);
+        this._loadTextValueStore(parameterDetails);
 
         if (this.getLayout().getActiveItem().getItemId() !== 'card-inspect') {
             this.getLayout().setActiveItem('card-inspect');
