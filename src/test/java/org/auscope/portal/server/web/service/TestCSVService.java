@@ -101,17 +101,57 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(5, details.size());
 
         Assert.assertEquals("sample", details.get(0).getName());
+        Assert.assertEquals(0, details.get(0).getColumnIndex());
         Assert.assertEquals("gold (au) ppm", details.get(1).getName());
+        Assert.assertEquals(1, details.get(1).getColumnIndex());
         Assert.assertEquals("something-else", details.get(2).getName());
+        Assert.assertEquals(2, details.get(2).getColumnIndex());
         Assert.assertEquals("D", details.get(3).getName());
+        Assert.assertEquals(3, details.get(3).getColumnIndex());
         Assert.assertEquals("data", details.get(4).getName());
+        Assert.assertEquals(4, details.get(4).getColumnIndex());
 
         Assert.assertEquals(0, details.get(0).getTotalText());
         Assert.assertEquals(8, details.get(0).getTotalNumeric());
         Assert.assertEquals(0, details.get(0).getTotalMissing());
 
         Assert.assertEquals(1, details.get(2).getTotalText());
-        Assert.assertEquals(7, details.get(2).getTotalNumeric());
+        Assert.assertEquals(6, details.get(2).getTotalNumeric());
+        Assert.assertEquals(1, details.get(2).getTotalMissing());
+        Assert.assertEquals(1, details.get(2).getTextValues().size());
+        Assert.assertTrue(details.get(2).getTextValues().contains("D/L"));
+
+        Assert.assertEquals(0, details.get(4).getTotalText());
+        Assert.assertEquals(5, details.get(4).getTotalNumeric());
+        Assert.assertEquals(3, details.get(4).getTotalMissing());
+    }
+
+    @Test
+    public void testExtractParameterDetailsNoHeaders() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+
+        List<ParameterDetails> details = service.extractParameterDetails(is);
+
+        Assert.assertNotNull(details);
+        Assert.assertEquals(5, details.size());
+
+        Assert.assertEquals("A", details.get(0).getName());
+        Assert.assertEquals(0, details.get(0).getColumnIndex());
+        Assert.assertEquals("B", details.get(1).getName());
+        Assert.assertEquals(1, details.get(1).getColumnIndex());
+        Assert.assertEquals("C", details.get(2).getName());
+        Assert.assertEquals(2, details.get(2).getColumnIndex());
+        Assert.assertEquals("D", details.get(3).getName());
+        Assert.assertEquals(3, details.get(3).getColumnIndex());
+        Assert.assertEquals("E", details.get(4).getName());
+        Assert.assertEquals(4, details.get(4).getColumnIndex());
+
+        Assert.assertEquals(0, details.get(0).getTotalText());
+        Assert.assertEquals(8, details.get(0).getTotalNumeric());
+        Assert.assertEquals(0, details.get(0).getTotalMissing());
+
+        Assert.assertEquals(2, details.get(2).getTotalText());
+        Assert.assertEquals(6, details.get(2).getTotalNumeric());
         Assert.assertEquals(0, details.get(2).getTotalMissing());
         Assert.assertEquals(1, details.get(2).getTextValues().size());
         Assert.assertTrue(details.get(2).getTextValues().contains("D/L"));
@@ -129,5 +169,65 @@ public class TestCSVService extends PortalTestClass{
 
         Assert.assertNotNull(details);
         Assert.assertEquals(0, details.size());
+    }
+
+    @Test
+    public void testExtractParameterValuesEmptyInput() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/empty-data.csv");
+
+        List<Double> vals = service.getParameterValues(is, 0);
+
+        Assert.assertNotNull(vals);
+        Assert.assertEquals(0, vals.size());
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testParameterValuesClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            atLeast(1).of(mockStream).close();
+        }});
+
+        service.getParameterValues(mockStream, 0);
+    }
+
+    @Test
+    public void testGetParameterValuesParsing() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+
+        List<Double> data = service.getParameterValues(is, 2);
+
+        Assert.assertNotNull(data);
+        Assert.assertEquals(8, data.size());
+
+        Assert.assertEquals(100, data.get(0), 0.01);
+        Assert.assertNull(data.get(1));
+        Assert.assertEquals(103, data.get(2), 0.01);
+        Assert.assertEquals(101, data.get(3), 0.01);
+        Assert.assertEquals(103, data.get(4), 0.01);
+        Assert.assertEquals(100, data.get(5), 0.01);
+        Assert.assertNull(data.get(6));
+        Assert.assertEquals(101, data.get(7), 0.01);
+    }
+
+    @Test
+    public void testGetParameterValuesNoHeaders() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+
+        List<Double> data = service.getParameterValues(is, 2);
+
+        Assert.assertNotNull(data);
+        Assert.assertEquals(8, data.size());
+
+        Assert.assertNull(data.get(0));
+        Assert.assertEquals(102, data.get(1), 0.01);
+        Assert.assertEquals(103, data.get(2), 0.01);
+        Assert.assertEquals(101, data.get(3), 0.01);
+        Assert.assertEquals(103, data.get(4), 0.01);
+        Assert.assertEquals(100, data.get(5), 0.01);
+        Assert.assertNull(data.get(6));
+        Assert.assertEquals(101, data.get(7), 0.01);
     }
 }

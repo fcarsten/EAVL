@@ -15,12 +15,15 @@ public class ParameterDetails implements Serializable {
     private int totalText;
     /** A list of every non numeric value (including null string)*/
     private Set<String> textValues;
-
+    /** The index of the column in the CSV file (0 based)*/
+    private int columnIndex;
     /**
      * @param name Unique name of this parameter
+     * @param columnIndex The index of the column in the CSV file (0 based)
      */
-    public ParameterDetails(String name) {
+    public ParameterDetails(String name, int columnIndex) {
         this.name = name;
+        this.columnIndex = columnIndex;
         this.textValues = new HashSet<String>();
     }
 
@@ -93,6 +96,16 @@ public class ParameterDetails implements Serializable {
      */
     public void setTextValues(Set<String> textValues) {
         this.textValues = textValues;
+    }
+
+    /** The index of the column in the CSV file*/
+    public int getColumnIndex() {
+        return columnIndex;
+    }
+
+    /** The index of the column in the CSV file*/
+    public void setColumnIndex(int columnIndex) {
+        this.columnIndex = columnIndex;
     }
 
     @Override

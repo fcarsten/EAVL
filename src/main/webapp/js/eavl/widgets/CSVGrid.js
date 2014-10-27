@@ -7,19 +7,21 @@ Ext.define('eavl.widgets.CSVGrid', {
 
     alias: 'widget.csvgrid',
 
-    dataModelDef : null,
+    parameterDetails : null,
 
     /**
-     * columnCount : int - How many data columns will this CSVGrid represent?
+     * parameterDetails : eavl.models.ParameterDetails[] - The data columns in this CSVGrid
      */
     constructor: function(config) {
 
+        this.parameterDetails = config.parameterDetails ? config.parameterDetails : [];
+
         var fields = [];
         var columns = [];
-        for (var i = 0; i < config.columnCount; i++) {
-            var tempName = 'C' + i;
-            fields.push(tempName);
-            columns.push({dataIndex: tempName});
+        for (var i = 0; i < this.parameterDetails.length; i++) {
+            var name = this.parameterDetails[i].get('name');
+            fields.push(name);
+            columns.push({dataIndex: name, text: name});
         }
 
         var csvStore = Ext.create('Ext.data.Store', {

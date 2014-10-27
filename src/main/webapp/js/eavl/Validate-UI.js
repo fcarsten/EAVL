@@ -18,7 +18,7 @@ Ext.application({
             eavl.widget.SplashScren.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
         };
 
-        var initSuccess = function(colCount) {
+        var initSuccess = function(parameterDetails) {
             eavl.widget.SplashScren.hideLoadingScreen();
 
             var viewport = Ext.create('Ext.container.Viewport', {
@@ -44,15 +44,40 @@ Ext.application({
                         title : 'The data you\'ve uploaded needs to be validated',
                         xtype: 'csvgrid',
                         margin : '50 100 50 100',
-                        columnCount : colCount
+                        parameterDetails : parameterDetails
                     }]
                 }]
             });
         };
 
+
+        var pdStore = Ext.create('Ext.data.Store', {
+            model : 'eavl.models.ParameterDetails',
+            autoLoad : true,
+            proxy : {
+                type : 'ajax',
+                url : 'validation/getParameterDetails.do',
+                reader : {
+                    type : 'json',
+                    root : 'data'
+                }
+            },
+            listeners: {
+                load : function(pdStore, records, successful, eOpts) {
+                    if (successful) {
+                        initSuccess(records)
+                    } else {
+                        initError();
+                    }
+                }
+            }
+        });
+
+
+
         // Start off by figuring out how many columns we need. From here we can start the rest of the process
-        Ext.Ajax.request({
-            url: 'validation/getColumnCount.do',
+        /*Ext.Ajax.request({
+            url: 'validation/getParameterDetails.do',
             callback: function(options, success, response) {
                 if (!success || !response.responseText) {
                     initError();
@@ -67,7 +92,7 @@ Ext.application({
 
                 initSuccess(responseObj.data);
             }
-        });
+        });*/
     }
 
 });

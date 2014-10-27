@@ -77,14 +77,29 @@ public class ValidationController extends BasePortalController {
         return generateHTMLResponseMAV(true, Arrays.asList(fileInfo), "");
     }
 
-    @RequestMapping("/getColumnCount.do")
-    public ModelAndView getColumnCount(HttpServletRequest request) {
+    @RequestMapping("/getParameterDetails.do")
+    public ModelAndView getParameterDetails(HttpServletRequest request) {
         //Lookup our job - TODO - use temp job at the moment
         EAVLJob job = new EAVLJob(1);
 
         try {
             InputStream csvData = fss.readFile(job, "example-data.csv");
-            return generateJSONResponseMAV(true, new Integer(csvService.estimateColumnCount(csvData)), "");
+            return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
+        } catch (Exception e) {
+            return generateJSONResponseMAV(false, null, "Error reading file");
+        }
+    }
+
+    @RequestMapping("/getParameterValues.do")
+    public ModelAndView getParameterValues(HttpServletRequest request,
+            @RequestParam("columnIndex") int columnIndex) {
+
+        //Lookup our job - TODO - use temp job at the moment
+        EAVLJob job = new EAVLJob(1);
+
+        try {
+            InputStream csvData = fss.readFile(job, "example-data.csv");
+            return generateJSONResponseMAV(true, csvService.getParameterValues(csvData, columnIndex), "");
         } catch (Exception e) {
             return generateJSONResponseMAV(false, null, "Error reading file");
         }

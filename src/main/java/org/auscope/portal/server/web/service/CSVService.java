@@ -201,11 +201,37 @@ public class CSVService {
      */
     private String integerToHeaderName(int index) {
         String name = "";
-        while(index > 0) {
+        while(index >= 0) {
             name += (char) ('A' + (index % 26));
             index -= 26;
         }
         return name;
+    }
+
+    /**
+     * Returns true if a line of data could be considered a header line (if it's at the top of the CSV file)
+     * @param data
+     * @return
+     */
+    private boolean isHeaderLine(String[] data) {
+        //If our first line has non numeric values (and at least 1 one text value) assume it's a header
+        //Otherwise assume it's data. This isn't a perfect test but it should catch all but the most ugly edge cases
+        int missingCount = 0, textCount = 0, numericCount = 0;
+        for (String value : data) {
+            switch(getDataValueType(value)) {
+            case Missing:
+                missingCount++;
+                break;
+            case Numeric:
+                numericCount++;
+                break;
+            case Text:
+                textCount++;
+                break;
+            }
+        }
+
+        return numericCount == 0 && textCount > 1;
     }
 
     /**
@@ -233,38 +259,21 @@ public class CSVService {
                 return details;
             }
 
-            //If our first line has non numeric values (and at least 1 one text value) assume it's a header
-            //Otherwise assume it's data. This isn't a perfect test but it should catch all but the most ugly edge cases
-            int missingCount = 0, textCount = 0, numericCount = 0;
-            for (String value : headerLine) {
-                switch(getDataValueType(value)) {
-                case Missing:
-                    missingCount++;
-                    break;
-                case Numeric:
-                    numericCount++;
-                    break;
-                case Text:
-                    textCount++;
-                    break;
-                }
-            }
-
             //Initialize the parameters (one for each column)
-            if (numericCount == 0 && textCount > 1) {
+            if (isHeaderLine(headerLine)) {
                 //It looks like we have a header line, let's try and parse it
                 for (int i = 0; i < headerLine.length; i++) {
                     if (headerLine[i].trim().isEmpty()) {
-                        details.add(new ParameterDetails(integerToHeaderName(i)));
+                        details.add(new ParameterDetails(integerToHeaderName(i), i));
                     } else {
-                        details.add(new ParameterDetails(headerLine[i].trim()));
+                        details.add(new ParameterDetails(headerLine[i].trim(), i));
                     }
                 }
             } else {
                 //We don't have a header line (probably). This row will be data.
                 //Instead autogenerate details
                 for (int i = 0; i < headerLine.length; i++) {
-                    details.add(new ParameterDetails(integerToHeaderName(i)));
+                    details.add(new ParameterDetails(integerToHeaderName(i), i));
                 }
                 applyRowToDetails(details, headerLine); // Make sure we don't forget to treat this line as data
             }
@@ -281,5 +290,61 @@ public class CSVService {
         }
 
         return details;
+    }
+
+    /**
+     * Converts and appends a data value to a list of numeric values. Appends null if the value is non numeric
+     * @param data
+     * @param data
+     * @param index
+     * @return
+     */
+    private void appendValueToList(List<Double> values, String[] data, int index) {
+        try {
+            values.add(new Double(Double.parseDouble(data[index])));
+        } catch (NumberFormatException ex) {
+            values.add(null);
+        }
+    }
+
+    /**
+     * Streams through the CSV data, pulling out every numeric value as a floating point value. Null values will be inserted
+     * for any value that does not parse into a double.
+     * Closes InputStream before returning.
+     *
+     * @param csvData InputStream containing CSV data. Will be closed by this method
+     * @param columnIndex The column index to pull numbers from
+     * @return
+     * @throws PortalServiceException
+     */
+    public List<Double> getParameterValues(InputStream csvData, int columnIndex) throws PortalServiceException {
+        CSVReader reader = null;
+        List<Double> values = new ArrayList<Double>();
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (headerLine == null) {
+                return values;
+            }
+
+            //Initialize the parameters (one for each column)
+            if (!isHeaderLine(headerLine)) {
+                appendValueToList(values, headerLine, columnIndex);
+            }
+
+            String[] dataLine;
+            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
+                appendValueToList(values, dataLine, columnIndex);
+            }
+
+            return values;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to parse parameter values", ex);
+        } finally {
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(csvData);
+        }
     }
 }
