@@ -21,6 +21,8 @@ Ext.application({
         var initSuccess = function(parameterDetails) {
             eavl.widget.SplashScren.hideLoadingScreen();
 
+            Ext.tip.QuickTipManager.init();
+
             var viewport = Ext.create('Ext.container.Viewport', {
                 layout: 'border',
                 items: [{

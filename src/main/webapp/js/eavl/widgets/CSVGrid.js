@@ -28,9 +28,25 @@ Ext.define('eavl.widgets.CSVGrid', {
         var fields = [];
         var columns = [];
         for (var i = 0; i < this.parameterDetails.length; i++) {
-            var name = this.parameterDetails[i].get('name');
+            var pd = this.parameterDetails[i];
+            var name = pd.get('name');
+
+            var totalDataPoints = pd.get('totalNumeric') + pd.get('totalText') + pd.get('totalMissing');
+            var percentageNumeric = (pd.get('totalNumeric') * 100) / totalDataPoints;
+            var img = 'img/tick.png';
+            var tip = 'This parameter contains more than 95% numeric values';
+
+            if (percentageNumeric < 70) {
+                img = 'img/exclamation.png';
+                tip = 'This parameter contains less than 70% numeric values';
+            } else if (percentageNumeric < 95) {
+                img = 'img/error.png';
+                tip = 'This parameter contains between 70% and 95% numeric values';
+            }
+
             fields.push(name);
-            columns.push({itemId: name, dataIndex: name, text: name, renderer : Ext.bind(this._handleCellRender, this)});
+            columns.push({itemId: name, dataIndex: name, renderer : Ext.bind(this._handleCellRender, this),
+                header : Ext.util.Format.format('<img data-qtip="{2}" class="csv-grid-header-icon" style="vertical-align:middle;margin-bottom:4px;" src="{0}"/>{1}', img, name, tip)});
         }
 
         var csvStore = Ext.create('Ext.data.Store', {
@@ -62,42 +78,15 @@ Ext.define('eavl.widgets.CSVGrid', {
             selModel: {
                 pruneRemoved: false
             },
+            bodyCls : 'csv-grid-body',
             viewConfig: {
-                trackOver: false
+                trackOver: false,
             }
         });
 
         this.callParent(arguments);
 
         this.addEvents('parameterselect');
-
-        this._calculateCachedStyles();
-    },
-
-    /**
-     * Creates a map of styles based on parameter details.
-     */
-    _calculateCachedStyles : function() {
-        this.cachedStyles = {};
-
-        for (var i = 0; i < this.parameterDetails.length; i++) {
-            var pd = this.parameterDetails[i];
-
-            var totalDataPoints = pd.get('totalNumeric') + pd.get('totalText') + pd.get('totalMissing');
-            var percentageNumeric = (pd.get('totalNumeric') * 100) / totalDataPoints;
-
-
-            var bgColor = '#FFFFFF';
-            var textColor = '#000000';
-
-            if (percentageNumeric < 70) {
-                textColor = '#FF6961';
-            } else if (percentageNumeric < 95) {
-                textColor = '#FFB347';
-            }
-
-            this.cachedStyles[pd.get('name')] = Ext.util.Format.format("color:{0};", textColor);
-        }
     },
 
     /**
@@ -121,12 +110,16 @@ Ext.define('eavl.widgets.CSVGrid', {
     },
 
     _handleCellRender : function(value, metadata, record, rowIndex, colIndex, store, view) {
-        var pd = this._getParameterDetails(colIndex);
-        if (!pd) {
-            return value;
-        }
+        var isNumber = function(n) {return !isNaN(parseFloat(n)) && isFinite(n);}
 
-        metadata.style = this.cachedStyles[pd.get('name')];
-        return value;
+        if (isNumber(value)) {
+            return value;
+        } else {
+            if (value.trim() === "") {
+                return '<span class="csv-grid-missing">Missing</span>';
+            } else {
+                return Ext.util.Format.format('<span class="csv-grid-text">{0}</span>', value);
+            }
+        }
     }
 });

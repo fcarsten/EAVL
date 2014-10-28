@@ -1,0 +1,20 @@
+.csv-grid-header-icon {
+	width: 16px;
+	height: 16px;
+	margin-right: 5px;
+}
+
+.csv-grid-body .x-grid-row .x-grid-cell {
+	font-size : 14px;
+}
+
+.csv-grid-body .csv-grid-missing {
+	color : #BBBBBB;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.csv-grid-body .csv-grid-text {
+    color : #FF6961;
+    font-weight: bold;
+}

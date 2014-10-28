@@ -7,8 +7,9 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
-        <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/CSVGrid.css">
         
+        <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
