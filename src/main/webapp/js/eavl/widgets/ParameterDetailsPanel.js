@@ -292,7 +292,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                 }
 
                 var data = [];
-                for (var i = 0; i < responseObj.data.length; i+=100) {
+                for (var i = 0; i < responseObj.data.length; i+=10) {
                     if (responseObj.data[i] !== null) {
                         data.push({index : i, data : responseObj.data[i]});
                     }
@@ -324,6 +324,8 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this._loadTextValueStore(parameterDetails);
         this._loadNumericValuesStore(parameterDetails);
 
+        this.setTitle(Ext.util.Format.format('Inspecting parameter "{0}"', parameterDetails.get('name')));
+
         if (this.getLayout().getActiveItem().getItemId() !== 'card-inspect') {
             this.getLayout().setActiveItem('card-inspect');
         }
@@ -336,5 +338,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this.parameterDetails = null;
 
         this.getLayout().setActiveItem('card-empty');
+
+        this.setTitle('No parameter selected');
     }
 });

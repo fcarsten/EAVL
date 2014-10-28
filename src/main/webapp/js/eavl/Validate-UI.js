@@ -46,24 +46,52 @@ Ext.application({
                     },
                     bodyPadding : '50 100 50 100',
                     items: [{
-                        itemid : 'csvpanel',
+                        itemId : 'csvpanel',
                         xtype: 'csvgrid',
-                        title : 'The data you\'ve uploaded needs to be validated',
+                        title : 'Uploaded data file',
                         parameterDetails : parameterDetails,
                         flex : 1,
-                        margin : '0 10 0 0',
-                        listeners : {
-                            parameterselect : function(csvGrid, parameterDetails) {
-                                csvGrid.ownerCt.queryById('inspectpanel').showParameterDetails(parameterDetails);
-                            }
-                        }
+                        margin : '0 10 0 0'
                     },{
                         itemId : 'inspectpanel',
                         xtype : 'pdpanel',
                         title : 'Parameter Details',
-                        emptyText : 'Select a column to inspect it.',
+                        emptyText : 'Drag a column header into this panel to inspect it.',
                         flex : 1,
                         margin : '0 0 0 10',
+                        listeners : {
+                            afterrender : function(pdpanel) {
+
+                                //OK - we hack into the grid's header's reordering plugin to pull out
+                                //the drag/drop group ID. We create a new drop zone using that ID
+                                //and apply it to the inspect panel.
+                                var csvPanel = pdpanel.ownerCt.queryById('csvpanel');
+                                var header = csvPanel.getView().headerCt;
+                                var reorderPlugin = header.plugins[1]; //header.getPlugin doesn't work during afterrender
+                                var ddGroup = reorderPlugin.dropZone.ddGroup;
+
+                                var body = pdpanel.body;
+                                pdpanel.dropTarget = new Ext.dd.DropTarget(body, {
+                                    ddGroup : ddGroup,
+                                    notifyEnter: function(ddSource, e, data) {
+                                        body.stopAnimation();
+                                        body.highlight();
+                                    },
+                                    notifyDrop: function(ddSource, e, data) {
+                                        var paramDetails = pdStore.getById(data.header.itemId)
+                                        pdpanel.showParameterDetails(paramDetails);
+                                        return true
+                                    }
+                                });
+                            },
+                            beforeDestroy: function() {
+                                if (this.dropTarget) {
+                                    this.dropTarget.unreg();
+                                    this.dropTarget = null;
+                                }
+                                this.callParent();
+                            }
+                        }
                     }]
                 }]
             });

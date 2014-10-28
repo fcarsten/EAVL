@@ -8,6 +8,7 @@ Ext.define('eavl.widgets.CSVGrid', {
     alias: 'widget.csvgrid',
 
     parameterDetails : null,
+    cachedStyles : null,
 
     /**
      * Adds the following config options
@@ -22,13 +23,14 @@ Ext.define('eavl.widgets.CSVGrid', {
     constructor: function(config) {
 
         this.parameterDetails = config.parameterDetails ? config.parameterDetails : [];
+        this.cachedStyles = null;
 
         var fields = [];
         var columns = [];
         for (var i = 0; i < this.parameterDetails.length; i++) {
             var name = this.parameterDetails[i].get('name');
             fields.push(name);
-            columns.push({itemId: name, dataIndex: name, text: name});
+            columns.push({itemId: name, dataIndex: name, text: name, renderer : Ext.bind(this._handleCellRender, this)});
         }
 
         var csvStore = Ext.create('Ext.data.Store', {
@@ -69,20 +71,62 @@ Ext.define('eavl.widgets.CSVGrid', {
 
         this.addEvents('parameterselect');
 
-        this.on('cellclick', this._handleCellClick, this);
+        this._calculateCachedStyles();
     },
 
-    _handleCellClick : function(csvGrid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+    /**
+     * Creates a map of styles based on parameter details.
+     */
+    _calculateCachedStyles : function() {
+        this.cachedStyles = {};
 
+        for (var i = 0; i < this.parameterDetails.length; i++) {
+            var pd = this.parameterDetails[i];
+
+            var totalDataPoints = pd.get('totalNumeric') + pd.get('totalText') + pd.get('totalMissing');
+            var percentageNumeric = (pd.get('totalNumeric') * 100) / totalDataPoints;
+
+
+            var bgColor = '#FFFFFF';
+            var textColor = '#000000';
+
+            if (percentageNumeric < 70) {
+                textColor = '#FF6961';
+            } else if (percentageNumeric < 95) {
+                textColor = '#FFB347';
+            }
+
+            this.cachedStyles[pd.get('name')] = Ext.util.Format.format("color:{0};", textColor);
+        }
+    },
+
+    /**
+     * Gets a parameter details for a column based on the relative view of the grid.
+     *
+     * Returns null if it cant be found
+     *
+     * @param cellIndex - The displayed column index (not the actual columnIndex)
+     */
+    _getParameterDetails : function(cellIndex) {
         var column = this.columns[cellIndex];
         var name = column.getItemId();
 
         for (var i = 0; i < this.parameterDetails.length; i++) {
             if (this.parameterDetails[i].get('name') === name) {
-
-                this.fireEvent('parameterselect', this, this.parameterDetails[i]);
-                break;
+                return this.parameterDetails[i];
             }
         }
+
+        return null;
+    },
+
+    _handleCellRender : function(value, metadata, record, rowIndex, colIndex, store, view) {
+        var pd = this._getParameterDetails(colIndex);
+        if (!pd) {
+            return value;
+        }
+
+        metadata.style = this.cachedStyles[pd.get('name')];
+        return value;
     }
 });

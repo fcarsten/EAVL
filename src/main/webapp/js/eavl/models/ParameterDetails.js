@@ -12,5 +12,7 @@ Ext.define('eavl.models.ParameterDetails', {
         { name: 'totalText', type: 'int' }, //Total number of text values in this parameter
         { name: 'columnIndex', type: 'int' }, //The index of the column in the CSV file (0 based)
         { name: 'textValues', type: 'auto' } //Hashmap of totals keyed by each text (non numeric) value in this parameter
-    ]
+    ],
+
+    idProperty : 'name'
 });
