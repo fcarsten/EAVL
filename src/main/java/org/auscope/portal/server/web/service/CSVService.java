@@ -3,6 +3,8 @@ package org.auscope.portal.server.web.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import org.auscope.portal.server.eavl.ParameterDetails;
 import org.springframework.stereotype.Service;
 
 import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * Service for reading/writing subsets of a CSV file
@@ -353,6 +356,57 @@ public class CSVService {
         } finally {
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(csvData);
+        }
+    }
+
+    /**
+     * Streams csvData into replacedCsv data replacing all instances of find with the value replace in the specified column index
+     *
+     * Any empty lines will be removed as part of this copying
+     *
+     * Closes InputStream and OutputStream before returning.
+     *
+     * Returns the number of lines written (including header, if any)
+     *
+     * @param csvData
+     * @param replacedCsvData
+     * @param columnIndex
+     * @param find (if null, no finding/replacing will occur)
+     * @param replace
+     * @return
+     * @throws PortalServiceException
+     */
+    public int findReplace(InputStream csvData, OutputStream replacedCsvData, int columnIndex, String find, String replace) throws PortalServiceException {
+        CSVReader reader = null;
+        CSVWriter writer = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            writer = new CSVWriter(new OutputStreamWriter(replacedCsvData), ',', '\'');
+
+            String[] dataLine;
+            int linesWritten = 0;
+            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
+                if (columnIndex < dataLine.length) {
+                    if (find != null && find.equals(dataLine[columnIndex])){
+                        dataLine[columnIndex] = replace;
+                    }
+                }
+                writer.writeNext(dataLine);
+                linesWritten++;
+            }
+
+            return linesWritten;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to find/replace", ex);
+        } finally {
+            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
+            //Ensure the writers close BEFORE we close the underlying streams
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(replacedCsvData);
+            IOUtils.closeQuietly(csvData);
+
         }
     }
 }

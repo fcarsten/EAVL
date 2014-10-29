@@ -1,11 +1,17 @@
 package org.auscope.portal.server.web.service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.test.PortalTestClass;
 import org.auscope.portal.core.test.ResourceUtil;
@@ -22,11 +28,13 @@ import org.junit.Test;
 public class TestCSVService extends PortalTestClass{
     private CSVService service;
     private InputStream mockStream;
+    private OutputStream mockOutputStream;
 
     @Before
     public void setup() {
         service = new CSVService();
         mockStream = context.mock(InputStream.class);
+        mockOutputStream = context.mock(OutputStream.class);
     }
 
     @Test
@@ -231,5 +239,85 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(100, data.get(5), 0.01);
         Assert.assertNull(data.get(6));
         Assert.assertEquals(101, data.get(7), 0.01);
+    }
+
+    @Test
+    public void testFindReplace() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        Assert.assertEquals(6, service.findReplace(is, os, 1, "DL", "999"));
+        String expected = "'sample',' gold (au) ppm'\n" +
+                           "'40','40'\n" +
+                           "'','42'\n" +
+                           "'DL','999'\n" +
+                           "'DLVal','DLVal'\n" +
+                           "'DL','999'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testFindReplaceNoReplace() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        Assert.assertEquals(6, service.findReplace(is, os, 1, null, null));
+        String expected = "'sample',' gold (au) ppm'\n" +
+                           "'40','40'\n" +
+                           "'','42'\n" +
+                           "'DL','DL'\n" +
+                           "'DLVal','DLVal'\n" +
+                           "'DL','DL'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    /**
+     * This is an edge case but there was a bug where CSVWriter was being sensitive to the underlying stream being closed
+     * before the writer resulting in partially written files. It could only be reproduced with a file stream so hence this
+     * temporary file nonsense.
+     * @throws Exception
+     */
+    @Test
+    public void testFindReplaceLargeFileOnDisk() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-large.csv");
+
+        File tmp = File.createTempFile("TestCSVService", "csv-tmp");
+        FileOutputStream fos = null;
+        FileReader reader = null;
+        String actual = null;
+        try {
+            fos = new FileOutputStream(tmp);
+
+            Assert.assertEquals(10001, service.findReplace(is, fos, 1, null, null));
+
+            reader = new FileReader(tmp);
+            actual = IOUtils.toString(reader);
+        } finally {
+            IOUtils.closeQuietly(fos);
+            IOUtils.closeQuietly(reader);
+            if (!tmp.delete()) {
+                tmp.deleteOnExit();
+            }
+        }
+
+        //This is to test that the output streams get properly flushed
+        Assert.assertTrue(actual.endsWith("'9999',' 35',' D/L',' 80',' '\n"));
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testFindReplaceClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            allowing(mockOutputStream).flush();
+
+            atLeast(1).of(mockStream).close();
+            atLeast(1).of(mockOutputStream).close();
+        }});
+
+        service.findReplace(mockStream, mockOutputStream, 1, "DL", "999");
     }
 }
