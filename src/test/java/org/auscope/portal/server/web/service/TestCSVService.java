@@ -262,10 +262,26 @@ public class TestCSVService extends PortalTestClass{
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        Assert.assertEquals(6, service.findReplace(is, os, 1, null, null));
+        Assert.assertEquals(6, service.findReplace(is, os, -1, "40", "SHOULD NOT REPLACE"));
         String expected = "'sample',' gold (au) ppm'\n" +
                            "'40','40'\n" +
                            "'','42'\n" +
+                           "'DL','DL'\n" +
+                           "'DLVal','DLVal'\n" +
+                           "'DL','DL'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testFindReplaceWhitespaceReplace() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        Assert.assertEquals(6, service.findReplace(is, os, 0, null, "REPLACED"));
+        String expected = "'sample',' gold (au) ppm'\n" +
+                           "'40','40'\n" +
+                           "'REPLACED','42'\n" +
                            "'DL','DL'\n" +
                            "'DLVal','DLVal'\n" +
                            "'DL','DL'\n";

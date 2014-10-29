@@ -1,19 +1,19 @@
 package org.auscope.portal.server.web.controllers;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
-import org.auscope.portal.server.eavl.FileInformation;
 import org.auscope.portal.server.web.service.CSVService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,6 +31,10 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping("validation")
 public class ValidationController extends BasePortalController {
+
+    private static final String FILE_DATA_CSV = "data.csv";
+    private static final String FILE_TEMP_DATA_CSV = "data-tmp.csv";
+
     private FileStagingService fss;
     private CSVService csvService;
 
@@ -57,24 +61,37 @@ public class ValidationController extends BasePortalController {
         //Lookup our job - TODO - use temp job at the moment
         EAVLJob job = new EAVLJob(1);
 
+        InputStream inputCsv = null;
+        OutputStream outputCsv = null;
+
         //Handle incoming file
         StagedFile file = null;
         try {
-            fss.generateStageInDirectory(job);
+            if (!fss.stageInDirectoryExists(job)) {
+                fss.generateStageInDirectory(job);
+            }
             file = fss.handleFileUpload(job, (MultipartHttpServletRequest) request);
+
+            //Rename it to a temp file, remove missing lines and put it into the correct file
+            if (!fss.renameStageInFile(job, file.getName(), FILE_TEMP_DATA_CSV)) {
+                throw new IOException("Unable to operate on files in staging area - rename file failed");
+            }
+
+            inputCsv = fss.readFile(job, FILE_TEMP_DATA_CSV);
+            outputCsv = fss.writeFile(job, FILE_DATA_CSV);
+            csvService.findReplace(inputCsv, outputCsv, 0, null, null); //This just culls missing lines
         } catch (Exception ex) {
             log.error("Error uploading file", ex);
             return generateHTMLResponseMAV(false, null, "Error uploading file");
+        } finally {
+            IOUtils.closeQuietly(inputCsv);
+            IOUtils.closeQuietly(outputCsv);
         }
-
-        File internalFile = file.getFile();
-        long length = internalFile == null ? 0 : internalFile.length();
-        FileInformation fileInfo = new FileInformation(file.getName(), length, false, "");
 
         //We have to use a HTML response due to ExtJS's use of a hidden iframe for file uploads
         //Failure to do this will result in the upload working BUT the user will also get prompted
         //for a file download containing the encoded response from this function (which we don't want).
-        return generateHTMLResponseMAV(true, Arrays.asList(fileInfo), "");
+        return generateHTMLResponseMAV(true, null, "");
     }
 
     @RequestMapping("/getParameterDetails.do")
@@ -83,9 +100,10 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            InputStream csvData = fss.readFile(job, "example-data.csv");
+            InputStream csvData = fss.readFile(job, FILE_DATA_CSV);
             return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
-        } catch (Exception e) {
+        } catch (Exception ex) {
+            log.warn("Unable to get parameter details: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");
         }
     }
@@ -98,9 +116,10 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            InputStream csvData = fss.readFile(job, "example-data.csv");
+            InputStream csvData = fss.readFile(job, FILE_DATA_CSV);
             return generateJSONResponseMAV(true, csvService.getParameterValues(csvData, columnIndex), "");
-        } catch (Exception e) {
+        } catch (Exception ex) {
+            log.warn("Unable to get parameter values: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");
         }
     }
@@ -116,15 +135,51 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            List<String[]> data = csvService.readLines(fss.readFile(job, "example-data.csv"), start, limit);
-            int totalData = csvService.countLines(fss.readFile(job, "example-data.csv")); //This could be cached
+            List<String[]> data = csvService.readLines(fss.readFile(job, FILE_DATA_CSV), start, limit);
+            int totalData = csvService.countLines(fss.readFile(job, FILE_DATA_CSV)); //This could be cached
 
             ModelMap response = new ModelMap();
             response.put("totalCount", totalData);
             response.put("rows", data);
             return new ModelAndView(new JSONView(), response);
-        } catch (Exception e) {
+        } catch (Exception ex) {
+            log.warn("Unable to stream rows: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");
         }
+    }
+
+    @RequestMapping("/findReplace.do")
+    public ModelAndView findReplace(HttpServletRequest request,
+            @RequestParam("find") String find,
+            @RequestParam("replace") String replace,
+            @RequestParam("columnIndex") int columnIndex) {
+
+        //Lookup our job - TODO - use temp job at the moment
+        EAVLJob job = new EAVLJob(1);
+
+        OutputStream os = null;
+        InputStream is = null;
+
+        //Whitespace matches should match on ANY whitespace
+        if (find.trim().isEmpty()) {
+            find = null;
+        }
+
+        try {
+            os = fss.writeFile(job, FILE_TEMP_DATA_CSV);
+            is = fss.readFile(job, FILE_DATA_CSV);
+
+            csvService.findReplace(is, os, columnIndex, find, replace);
+
+            fss.renameStageInFile(job, FILE_TEMP_DATA_CSV, FILE_DATA_CSV);
+        } catch (Exception ex) {
+            log.error("Error replacing within file: ", ex);
+            return generateJSONResponseMAV(false, null, "Unable to find/replace");
+        } finally {
+            IOUtils.closeQuietly(os);
+            IOUtils.closeQuietly(is);
+        }
+
+        return generateJSONResponseMAV(true, null, "");
     }
 }

@@ -359,8 +359,10 @@ public class CSVService {
         }
     }
 
+
     /**
      * Streams csvData into replacedCsv data replacing all instances of find with the value replace in the specified column index
+     * arbitrary Whitespace can be matched by setting find to null
      *
      * Any empty lines will be removed as part of this copying
      *
@@ -370,8 +372,8 @@ public class CSVService {
      *
      * @param csvData
      * @param replacedCsvData
-     * @param columnIndex
-     * @param find (if null, no finding/replacing will occur)
+     * @param columnIndex (if < 0, no finding/replacing will occur)
+     * @param find (if null, match whitespace)
      * @param replace
      * @return
      * @throws PortalServiceException
@@ -387,9 +389,15 @@ public class CSVService {
             String[] dataLine;
             int linesWritten = 0;
             while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                if (columnIndex < dataLine.length) {
-                    if (find != null && find.equals(dataLine[columnIndex])){
-                        dataLine[columnIndex] = replace;
+                if (columnIndex >= 0 && columnIndex < dataLine.length) {
+                    if (find == null) {
+                        if (dataLine[columnIndex].trim().isEmpty()) {
+                            dataLine[columnIndex] = replace;
+                        }
+                    } else {
+                        if (find.equals(dataLine[columnIndex])){
+                            dataLine[columnIndex] = replace;
+                        }
                     }
                 }
                 writer.writeNext(dataLine);
