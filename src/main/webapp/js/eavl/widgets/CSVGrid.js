@@ -17,8 +17,9 @@ Ext.define('eavl.widgets.CSVGrid', {
      * }
      *
      * Adds the following events
-     *
-     * parameterselect : function(this, parameterDetails)
+     * {
+     *  parameterchanged : function(this, parameterDetails)
+     * }
      */
     constructor: function(config) {
 
@@ -31,22 +32,9 @@ Ext.define('eavl.widgets.CSVGrid', {
             var pd = this.parameterDetails[i];
             var name = pd.get('name');
 
-            var totalDataPoints = pd.get('totalNumeric') + pd.get('totalText') + pd.get('totalMissing');
-            var percentageNumeric = (pd.get('totalNumeric') * 100) / totalDataPoints;
-            var img = 'img/tick.png';
-            var tip = 'This parameter contains more than 95% numeric values';
-
-            if (percentageNumeric < 70) {
-                img = 'img/exclamation.png';
-                tip = 'This parameter contains less than 70% numeric values';
-            } else if (percentageNumeric < 95) {
-                img = 'img/error.png';
-                tip = 'This parameter contains between 70% and 95% numeric values';
-            }
-
             fields.push(name);
             columns.push({itemId: name, dataIndex: name, renderer : Ext.bind(this._handleCellRender, this),
-                header : Ext.util.Format.format('<img data-qtip="{2}" class="csv-grid-header-icon" style="vertical-align:middle;margin-bottom:4px;" src="{0}"/>{1}', img, name, tip)});
+                header : this._parameterDetailsToColHeader(pd)});
         }
 
         var csvStore = Ext.create('Ext.data.Store', {
@@ -80,13 +68,97 @@ Ext.define('eavl.widgets.CSVGrid', {
             },
             bodyCls : 'csv-grid-body',
             viewConfig: {
-                trackOver: false,
+                trackOver: false
             }
         });
 
         this.callParent(arguments);
 
-        this.addEvents('parameterselect');
+        this.addEvents('parameterchanged');
+        this.on('cellclick', this._handleCellClick, this);
+    },
+
+    _handleCellClick : function(me, td, cellIndex, record, tr, rowIndex, e, eOpts ) {
+        var pd = this._getParameterDetails(cellIndex);
+        var find = record.get(pd.get('name'));
+
+        Ext.MessageBox.show({
+            title: 'Find and Replace',
+            msg: Ext.util.Format.format('Replace <b>{0}</b> with what:', find ? find : '<i>(Missing)</i>'),
+            animateTarget: this.getEl(),
+            icon: Ext.window.MessageBox.QUESTION,
+            prompt: true,
+            scope : this,
+            buttons : Ext.MessageBox.OK,
+            fn : function(buttonId, text, opt) {
+                if (buttonId === 'ok' && text) {
+                    Ext.Ajax.request({
+                        url: 'validation/findReplace.do',
+                        params: {
+                            find: find,
+                            replace: text,
+                            columnIndex: pd.get('columnIndex')
+                        },
+                        scope: this,
+                        callback: function(options, success, response) {
+                            if (!success) {
+                                return;
+                            }
+
+                            var responseObj = Ext.JSON.decode(response.responseText);
+                            if (!responseObj.success) {
+                                return;
+                            }
+
+                            this.fireEvent('parameterchanged', this, pd);
+                        }
+                    });
+                }
+            }
+        });
+    },
+
+    _parameterDetailsToColHeader : function(pd) {
+        var totalDataPoints = pd.get('totalNumeric') + pd.get('totalText') + pd.get('totalMissing');
+        var percentageNumeric = (pd.get('totalNumeric') * 100) / totalDataPoints;
+        var img = 'img/tick.png';
+        var tip = 'This parameter contains more than 95% numeric values';
+
+        if (percentageNumeric < 70) {
+            img = 'img/exclamation.png';
+            tip = 'This parameter contains less than 70% numeric values';
+        } else if (percentageNumeric < 95) {
+            img = 'img/error.png';
+            tip = 'This parameter contains between 70% and 95% numeric values';
+        }
+
+        return Ext.util.Format.format('<img data-qtip="{2}" class="csv-grid-header-icon" style="vertical-align:middle;margin-bottom:4px;" src="{0}"/>{1}', img, pd.get('name'), tip);
+    },
+
+    /**
+     * Causes this grid to completely reload its data and headers in accordance to updated parameter details.
+     *
+     * @param parameterDetails eavl.models.ParameterDetails[] - The updated parameter details (must be the same set of parameter details with updated values)
+     */
+    reloadParameterDetails : function(parameterDetails) {
+        this.parameterDetails = parameterDetails;
+        for (var i = 0; i < this.columns.length; i++) {
+            var parameterDetails = this._getParameterDetails(i);
+
+            //This will dive into the guts of the column header and replace the text
+            var colEl = Ext.get(this.columns[i].id);
+            var textParent = colEl.down('span.x-column-header-text');
+            Ext.each(textParent.select('*'), function(el) {
+                el.destroy();
+            });
+            textParent.dom.innerHTML = this._parameterDetailsToColHeader(parameterDetails);
+        }
+
+        //Updating the view is really tough! Unfortunately I can only go with the nuclear option.
+        //This means scroll position is NOT preserved. Would be great to figure out a fix!
+        //(preserveScrollOnRefresh doesn't seem to work either)
+        this.getStore().removeAll();
+        this.getStore().load();
     },
 
     /**

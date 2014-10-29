@@ -17,6 +17,11 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
      * {
      *  emptyText : String - text to show when nothing is selected
      * }
+     *
+     * Adds the following events
+     * {
+     *  parameterchanged : function(this, parameterDetails) - Fired whenever the CSV data changes
+     * }
      */
     constructor : function(config) {
         this.emptyText = config.emptyText ? config.emptyText : "";
@@ -192,6 +197,8 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         });
 
         this.callParent(arguments);
+
+        this.addEvents(['parameterchanged']);
     },
 
     initComponent : function() {
@@ -224,7 +231,27 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
             return;
         }
 
-        console.log('Finding: ', find, ' and replacing with ', replace);
+        Ext.Ajax.request({
+            url: 'validation/findReplace.do',
+            params: {
+                find: find,
+                replace: replace,
+                columnIndex: this.parameterDetails.get('columnIndex')
+            },
+            scope: this,
+            callback: function(options, success, response) {
+                if (!success) {
+                    return;
+                }
+
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (!responseObj.success) {
+                    return;
+                }
+
+                this.fireEvent('parameterchanged', this, this.parameterDetails);
+            }
+        });
     },
 
     /**
@@ -310,10 +337,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     showParameterDetails : function(parameterDetails) {
         if (parameterDetails == null) {
             this.hideParameterDetails();
-            return;
-        }
-
-        if (this.parameterDetails != null && this.parameterDetails.get('name') === parameterDetails.get('name')) {
             return;
         }
 

@@ -8,6 +8,8 @@ Ext.application({
         eavl.widget.SplashScren.showLoadingSplash('Loading Validator, please stand by ...');
     },
 
+    viewport : null,
+
     //Here we build our GUI from existing components - this function should only be assembling the GUI
     //Any processing logic should be managed in dedicated classes - don't let this become a
     //monolithic 'do everything' function
@@ -23,7 +25,25 @@ Ext.application({
 
             Ext.tip.QuickTipManager.init();
 
-            var viewport = Ext.create('Ext.container.Viewport', {
+            //If we are just reloading the store, tell our widgets to update instead of recreating everything
+            if (Ext.app.Application.viewport) {
+                Ext.app.Application.viewport.queryById('csvpanel').reloadParameterDetails(parameterDetails);
+
+                //Update parameter details panel
+                var pdpanel = Ext.app.Application.viewport.queryById('pdpanel');
+                var newPd = null;
+                if (pdpanel.parameterDetails) {
+                    var name = pdpanel.parameterDetails.get('name');
+                    Ext.each(parameterDetails, function(pd) {
+                       if (pd.get('name') === name) {
+                           newPd = pd;
+                       }
+                    });
+                }
+                pdpanel.showParameterDetails(newPd);
+                return;
+            }
+            Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
                 layout: 'border',
                 items: [{
                     xtype: 'panel',
@@ -53,17 +73,26 @@ Ext.application({
                         title : 'Uploaded data file',
                         parameterDetails : parameterDetails,
                         flex : 1,
-                        margin : '0 10 0 0'
+                        margin : '0 10 0 0',
+                        listeners : {
+                            parameterchanged : function(pdpanel, parameterDetails) {
+                                eavl.widget.SplashScren.showLoadingSplash('Reloading CSV Data...');
+                                pdStore.load();
+                            }
+                        }
                     },{
-                        itemId : 'inspectpanel',
+                        itemId : 'pdpanel',
                         xtype : 'pdpanel',
                         title : 'Parameter Details',
                         emptyText : 'Drag a column header into this panel to inspect it.',
                         flex : 1,
                         margin : '0 0 0 10',
                         listeners : {
+                            parameterchanged : function(pdpanel, parameterDetails) {
+                                eavl.widget.SplashScren.showLoadingSplash('Reloading CSV Data...');
+                                pdStore.load();
+                            },
                             afterrender : function(pdpanel) {
-
                                 //OK - we hack into the grid's header's reordering plugin to pull out
                                 //the drag/drop group ID. We create a new drop zone using that ID
                                 //and apply it to the inspect panel.

@@ -12,9 +12,13 @@
 	color : #BBBBBB;
     font-weight: bold;
     font-style: italic;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .csv-grid-body .csv-grid-text {
     color : #FF6961;
     font-weight: bold;
+    text-decoration: underline;
+    cursor: pointer;
 }
