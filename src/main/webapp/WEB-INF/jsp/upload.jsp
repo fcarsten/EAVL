@@ -7,6 +7,7 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
+        <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/Upload-UI.js"></script>
     </head>
     <body>
