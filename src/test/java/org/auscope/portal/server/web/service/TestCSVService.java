@@ -336,4 +336,23 @@ public class TestCSVService extends PortalTestClass{
 
         service.findReplace(mockStream, mockOutputStream, 1, "DL", "999");
     }
+
+    @Test
+    public void testFindReplaceCreateHeaders() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        Assert.assertEquals(9, service.findReplace(is, os, -1, null, null, true));
+        String expected = "'A','B','C','D','E'\n" +
+        "'0',' 40',' D/L',' ',' 12'\n" +
+        "'1',' 42',' 102',' 52',' 12'\n" +
+        "'2',' 16',' 103',' 6',' 15'\n" +
+        "'3',' 13',' 101',' 43',' '\n" +
+        "'4',' 16',' 103',' 74',' 16'\n" +
+        "'5',' 48',' 100',' 32',' '\n" +
+        "'6',' 41',' D/L',' 72',' 14'\n" +
+        "'7',' 11',' 101',' 69',' '\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
 }

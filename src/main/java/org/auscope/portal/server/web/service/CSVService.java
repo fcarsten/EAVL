@@ -361,6 +361,91 @@ public class CSVService {
 
 
     /**
+     * Internal utility for performing the actual find/replace operation on dataLine. Returns dataLine
+     */
+    private String[] findReplace(String[] dataLine, int columnIndex, String find, String replace) {
+        if (columnIndex >= 0 && columnIndex < dataLine.length) {
+            if (find == null) {
+                if (dataLine[columnIndex].trim().isEmpty()) {
+                    dataLine[columnIndex] = replace;
+                }
+            } else {
+                if (find.equals(dataLine[columnIndex])){
+                    dataLine[columnIndex] = replace;
+                }
+            }
+        }
+
+        return dataLine;
+    }
+
+    /**
+     * Streams csvData into replacedCsv data replacing all instances of find with the value replace in the specified column index
+     * arbitrary Whitespace can be matched by setting find to null
+     *
+     * Any empty lines will be removed as part of this copying
+     *
+     * Closes InputStream and OutputStream before returning.
+     *
+     * Returns the number of lines written (including header, if any)
+     *
+     * @param csvData
+     * @param replacedCsvData
+     * @param columnIndex (if < 0, no finding/replacing will occur)
+     * @param find (if null, match whitespace)
+     * @param replace
+     * @param forceHeaderLine Forces the creation of a header line if none exists.
+     * @return
+     * @throws PortalServiceException
+     */
+    public int findReplace(InputStream csvData, OutputStream replacedCsvData, int columnIndex, String find, String replace, boolean forceHeaderLine) throws PortalServiceException {
+        CSVReader reader = null;
+        CSVWriter writer = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            writer = new CSVWriter(new OutputStreamWriter(replacedCsvData), ',', '\'');
+
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (headerLine == null) {
+                return 0;
+            }
+
+            int linesWritten = 0;
+            if (!isHeaderLine(headerLine) && forceHeaderLine) {
+                //Insert a header line
+                String[] newHeaderLine = new String[headerLine.length];
+                for (int i = 0; i < headerLine.length; i++) {
+                    newHeaderLine[i] = integerToHeaderName(i);
+                }
+                writer.writeNext(newHeaderLine);
+                linesWritten++;
+            }
+            findReplace(headerLine, columnIndex, find, replace);
+            writer.writeNext(headerLine);
+            linesWritten++;
+
+            String[] dataLine;
+            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
+                findReplace(dataLine, columnIndex, find, replace);
+                writer.writeNext(dataLine);
+                linesWritten++;
+            }
+
+            return linesWritten;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to find/replace", ex);
+        } finally {
+            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
+            //Ensure the writers close BEFORE we close the underlying streams
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(replacedCsvData);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
+
+    /**
      * Streams csvData into replacedCsv data replacing all instances of find with the value replace in the specified column index
      * arbitrary Whitespace can be matched by setting find to null
      *
@@ -379,42 +464,6 @@ public class CSVService {
      * @throws PortalServiceException
      */
     public int findReplace(InputStream csvData, OutputStream replacedCsvData, int columnIndex, String find, String replace) throws PortalServiceException {
-        CSVReader reader = null;
-        CSVWriter writer = null;
-
-        try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
-            writer = new CSVWriter(new OutputStreamWriter(replacedCsvData), ',', '\'');
-
-            String[] dataLine;
-            int linesWritten = 0;
-            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                if (columnIndex >= 0 && columnIndex < dataLine.length) {
-                    if (find == null) {
-                        if (dataLine[columnIndex].trim().isEmpty()) {
-                            dataLine[columnIndex] = replace;
-                        }
-                    } else {
-                        if (find.equals(dataLine[columnIndex])){
-                            dataLine[columnIndex] = replace;
-                        }
-                    }
-                }
-                writer.writeNext(dataLine);
-                linesWritten++;
-            }
-
-            return linesWritten;
-        } catch (Exception ex) {
-            throw new PortalServiceException("Unable to find/replace", ex);
-        } finally {
-            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
-            //Ensure the writers close BEFORE we close the underlying streams
-            IOUtils.closeQuietly(reader);
-            IOUtils.closeQuietly(writer);
-            IOUtils.closeQuietly(replacedCsvData);
-            IOUtils.closeQuietly(csvData);
-
-        }
+        return findReplace(csvData, replacedCsvData, columnIndex, find, replace, false);
     }
 }

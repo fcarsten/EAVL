@@ -79,7 +79,7 @@ public class ValidationController extends BasePortalController {
 
             inputCsv = fss.readFile(job, FILE_TEMP_DATA_CSV);
             outputCsv = fss.writeFile(job, FILE_DATA_CSV);
-            csvService.findReplace(inputCsv, outputCsv, 0, null, null); //This just culls missing lines
+            csvService.findReplace(inputCsv, outputCsv, 0, null, null, true); //This just culls empty lines and autogenerates a header (if missing)
         } catch (Exception ex) {
             log.error("Error uploading file", ex);
             return generateHTMLResponseMAV(false, null, "Error uploading file");
@@ -135,8 +135,8 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            List<String[]> data = csvService.readLines(fss.readFile(job, FILE_DATA_CSV), start, limit);
-            int totalData = csvService.countLines(fss.readFile(job, FILE_DATA_CSV)); //This could be cached
+            List<String[]> data = csvService.readLines(fss.readFile(job, FILE_DATA_CSV), start + 1, limit); //we add 1 to start to skip header
+            int totalData = csvService.countLines(fss.readFile(job, FILE_DATA_CSV)) - 1; //we skip 1 for the header too (This could be cached)
 
             ModelMap response = new ModelMap();
             response.put("totalCount", totalData);
