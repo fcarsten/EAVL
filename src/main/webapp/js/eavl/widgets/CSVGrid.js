@@ -37,6 +37,35 @@ Ext.define('eavl.widgets.CSVGrid', {
                 header : this._parameterDetailsToColHeader(pd), sortable: false});
         }
 
+        //Sort our columns so that "bad" columns are first
+        columns = Ext.Array.sort(columns, function(a, b) {
+            var aVal = 2;
+            var bVal = 2;
+            if (a.header.contains('error.png')) {
+                aVal = 1;
+            } else if (a.header.contains('exclamation.png')) {
+                aVal = 0;
+            }
+
+            if (b.header.contains('error.png')) {
+                bVal = 1;
+            } else if (b.header.contains('exclamation.png')) {
+                bVal = 0;
+            }
+
+            if (aVal != bVal) {
+                return aVal - bVal;
+            }
+
+            if (a.itemId > b.itemId) {
+                return 1;
+            }
+            if (a.itemId < b.itemId) {
+                return -1;
+            }
+            return 0;
+        });
+
         var csvStore = Ext.create('Ext.data.Store', {
             remoteGroup: true,
             // allow the grid to interact with the paging scroller by buffering
@@ -80,11 +109,16 @@ Ext.define('eavl.widgets.CSVGrid', {
 
     _handleCellClick : function(me, td, cellIndex, record, tr, rowIndex, e, eOpts ) {
         var pd = this._getParameterDetails(cellIndex);
-        var find = record.get(pd.get('name'));
+        var find = record.get(pd.get('name')).trim();
+
+        //Don't do popup if we selected a number
+        if (this._isNumber(find)) {
+            return;
+        }
 
         Ext.MessageBox.show({
             title: 'Find and Replace',
-            msg: Ext.util.Format.format('Replace <b>{0}</b> with what:', find ? find : '<i>(Missing)</i>'),
+            msg: Ext.util.Format.format('Replace <b>{0}</b> with what:', find ? find : '<i>(No sample)</i>'),
             animateTarget: this.getEl(),
             icon: Ext.window.MessageBox.QUESTION,
             prompt: true,
@@ -181,14 +215,19 @@ Ext.define('eavl.widgets.CSVGrid', {
         return null;
     },
 
-    _handleCellRender : function(value, metadata, record, rowIndex, colIndex, store, view) {
-        var isNumber = function(n) {return !isNaN(parseFloat(n)) && isFinite(n);}
+    /**
+     * Return true if n is a number
+     */
+    _isNumber : function(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    },
 
-        if (isNumber(value)) {
+    _handleCellRender : function(value, metadata, record, rowIndex, colIndex, store, view) {
+        if (this._isNumber(value)) {
             return value;
         } else {
             if (value.trim() === "") {
-                return '<span class="csv-grid-missing">Missing</span>';
+                return '<span class="csv-grid-missing">No sample</span>';
             } else {
                 return Ext.util.Format.format('<span class="csv-grid-text">{0}</span>', value);
             }

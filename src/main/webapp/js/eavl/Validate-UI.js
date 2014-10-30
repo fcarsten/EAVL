@@ -68,12 +68,31 @@ Ext.application({
                     },
                     bodyPadding : '50 100 50 100',
                     items: [{
+                        itemId : 'trashpanel',
+                        xtype : 'pdlist',
+                        title : 'Trashed Parameters',
+                        width : 200,
+                        margin : '0 10 0 0',
+                        viewConfig : {
+                            emptyText : '<h1>TESTING</h1><br><p>HTML</p>'
+                        },
+                        plugins : [{
+                            ptype : 'headerdraglink',
+                            removeOnDrop : true,
+                            allowDrag : true,
+                            grid : function(pdlist) {return pdlist.ownerCt.queryById('csvpanel');},
+                            dropFn : function(pdlist, columnId) {
+                                var paramDetails = pdStore.getById(columnId)
+                                pdlist.getStore().add(paramDetails);
+                            }
+                        }]
+                    },{
                         itemId : 'csvpanel',
                         xtype: 'csvgrid',
                         title : 'Uploaded data file',
                         parameterDetails : parameterDetails,
                         flex : 1,
-                        margin : '0 10 0 0',
+                        margin : '0 10 0 10',
                         listeners : {
                             parameterchanged : function(pdpanel, parameterDetails) {
                                 eavl.widget.SplashScren.showLoadingSplash('Reloading CSV Data...');
@@ -87,40 +106,18 @@ Ext.application({
                         emptyText : 'Drag a column header into this panel to inspect it.',
                         flex : 1,
                         margin : '0 0 0 10',
+                        plugins : [{
+                            ptype : 'headerdraglink',
+                            grid : function(pdpanel) {return pdpanel.ownerCt.queryById('csvpanel');},
+                            dropFn : function(pdpanel, columnId) {
+                                var paramDetails = pdStore.getById(columnId)
+                                pdpanel.showParameterDetails(paramDetails);
+                            }
+                        }],
                         listeners : {
                             parameterchanged : function(pdpanel, parameterDetails) {
                                 eavl.widget.SplashScren.showLoadingSplash('Reloading CSV Data...');
                                 pdStore.load();
-                            },
-                            afterrender : function(pdpanel) {
-                                //OK - we hack into the grid's header's reordering plugin to pull out
-                                //the drag/drop group ID. We create a new drop zone using that ID
-                                //and apply it to the inspect panel.
-                                var csvPanel = pdpanel.ownerCt.queryById('csvpanel');
-                                var header = csvPanel.getView().headerCt;
-                                var reorderPlugin = header.plugins[1]; //header.getPlugin doesn't work during afterrender
-                                var ddGroup = reorderPlugin.dropZone.ddGroup;
-
-                                var body = pdpanel.body;
-                                pdpanel.dropTarget = new Ext.dd.DropTarget(body, {
-                                    ddGroup : ddGroup,
-                                    notifyEnter: function(ddSource, e, data) {
-                                        body.stopAnimation();
-                                        body.highlight();
-                                    },
-                                    notifyDrop: function(ddSource, e, data) {
-                                        var paramDetails = pdStore.getById(data.header.itemId)
-                                        pdpanel.showParameterDetails(paramDetails);
-                                        return true
-                                    }
-                                });
-                            },
-                            beforeDestroy: function() {
-                                if (this.dropTarget) {
-                                    this.dropTarget.unreg();
-                                    this.dropTarget = null;
-                                }
-                                this.callParent();
                             }
                         }
                     }]

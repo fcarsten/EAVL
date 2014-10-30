@@ -141,7 +141,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                                             'font-size' : '170%',
                                             'font-style' : emptyString ? 'italic' : 'normal'
                                         },
-                                        html : emptyString ? '(Missing)' : value
+                                        html : emptyString ? '(No sample)' : value
                                     },{tag : 'br'},{tag : 'br'},{
                                         tag : 'span',
                                         style : {
@@ -212,7 +212,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     _handleTextValueClick : function(grid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
         Ext.MessageBox.show({
             title: 'Find and Replace',
-            msg: Ext.util.Format.format('Replace <b>{0}</b> with what:', record.get('name') === '' ? '<i>(Missing)</i>' : record.get('name')),
+            msg: Ext.util.Format.format('Replace <b>{0}</b> with what:', record.get('name') === '' ? '<i>(No sample)</i>' : record.get('name')),
             animateTarget: grid.getEl(),
             icon: Ext.window.MessageBox.QUESTION,
             prompt: true,
@@ -261,7 +261,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         var data = [];
 
         if (parameterDetails.get('totalMissing') > 0) {
-            data.push({name : 'Missing', total : parameterDetails.get('totalMissing')});
+            data.push({name : 'No sample', total : parameterDetails.get('totalMissing')});
         } else {
             data.push({name : '', total : 0});
         }
