@@ -347,7 +347,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this._loadTextValueStore(parameterDetails);
         this._loadNumericValuesStore(parameterDetails);
 
-        this.setTitle(Ext.util.Format.format('Inspecting parameter "{0}"', parameterDetails.get('name')));
+        this.setTitle(Ext.util.Format.format('Comparing numeric and text values for "{0}"', parameterDetails.get('name')));
 
         if (this.getLayout().getActiveItem().getItemId() !== 'card-inspect') {
             this.getLayout().setActiveItem('card-inspect');
