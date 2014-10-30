@@ -34,7 +34,7 @@ Ext.define('eavl.widgets.CSVGrid', {
 
             fields.push(name);
             columns.push({itemId: name, dataIndex: name, renderer : Ext.bind(this._handleCellRender, this),
-                header : this._parameterDetailsToColHeader(pd)});
+                header : this._parameterDetailsToColHeader(pd), sortable: false});
         }
 
         var csvStore = Ext.create('Ext.data.Store', {
