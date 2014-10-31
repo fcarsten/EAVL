@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -465,5 +466,61 @@ public class CSVService {
      */
     public int findReplace(InputStream csvData, OutputStream replacedCsvData, int columnIndex, String find, String replace) throws PortalServiceException {
         return findReplace(csvData, replacedCsvData, columnIndex, find, replace, false);
+    }
+
+    /**
+     * Streams CSV data from csvData and deletes the column indexes defined by "columnIndexes"
+     *
+     * Any empty lines will be removed as part of this copying
+     *
+     * Closes InputStream and OutputStream before returning.
+     *
+     * Returns the number of lines written (including header, if any)
+     *
+     * @param csvData
+     * @param deletedCsvData
+     * @param columnIndexes
+     */
+    public int deleteColumns(InputStream csvData, OutputStream deletedCsvData, Set<Integer> columnIndexes) throws PortalServiceException {
+        CSVReader reader = null;
+        CSVWriter writer = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            writer = new CSVWriter(new OutputStreamWriter(deletedCsvData), ',', '\'');
+
+            int colsToDelete = columnIndexes.size();
+
+            String[] dataLine;
+            String[] outputLine = null;
+            int linesWritten = 0;
+            while((dataLine = getNextNonEmptyRow(reader)) != null) {
+
+                if (outputLine == null) {
+                    outputLine = new String[dataLine.length - colsToDelete];
+                }
+
+                int j = 0;
+                for (int i = 0; i < dataLine.length; i++) {
+                    if (!columnIndexes.contains(i)) {
+                        outputLine[j++] = dataLine[i];
+                    }
+                }
+
+                writer.writeNext(outputLine);
+                linesWritten++;
+            }
+
+            return linesWritten;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to find/replace", ex);
+        } finally {
+            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
+            //Ensure the writers close BEFORE we close the underlying streams
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(deletedCsvData);
+            IOUtils.closeQuietly(csvData);
+        }
     }
 }

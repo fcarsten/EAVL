@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -352,6 +353,62 @@ public class TestCSVService extends PortalTestClass{
         "'5',' 48',' 100',' 32',' '\n" +
         "'6',' 41',' D/L',' 72',' 14'\n" +
         "'7',' 11',' 101',' 69',' '\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testDeleteColumns() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        HashSet<Integer> indexes = new HashSet<Integer>();
+
+        indexes.add(0);
+        indexes.add(2);
+        indexes.add(4);
+
+        Assert.assertEquals(8, service.deleteColumns(is, os, indexes));
+        String expected = "' 40',' '\n" +
+                "' 42',' 52'\n" +
+                "' 16',' 6'\n" +
+                "' 13',' 43'\n" +
+                "' 16',' 74'\n" +
+                "' 48',' 32'\n" +
+                "' 41',' 72'\n" +
+                "' 11',' 69'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testDeleteColumnsClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            allowing(mockOutputStream).flush();
+
+            atLeast(1).of(mockStream).close();
+            atLeast(1).of(mockOutputStream).close();
+        }});
+
+        service.deleteColumns(mockStream, mockOutputStream, new HashSet<Integer>());
+    }
+
+    @Test
+    public void testDeleteAllColumns() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        HashSet<Integer> indexes = new HashSet<Integer>();
+
+        indexes.add(0);
+        indexes.add(1);
+        indexes.add(2);
+        indexes.add(3);
+        indexes.add(4);
+
+        Assert.assertEquals(8, service.deleteColumns(is, os, indexes));
+        String expected = "\n\n\n\n\n\n\n\n";
 
         Assert.assertEquals(expected, os.toString());
     }
