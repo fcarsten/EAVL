@@ -33,23 +33,22 @@ Ext.define('eavl.widgets.CSVGrid', {
             var name = pd.get('name');
 
             fields.push(name);
-            columns.push({itemId: name, dataIndex: name, renderer : Ext.bind(this._handleCellRender, this),
-                header : this._parameterDetailsToColHeader(pd), sortable: false});
+            columns.push(this.generateColumnForParameterDetails(pd));
         }
 
         //Sort our columns so that "bad" columns are first
         columns = Ext.Array.sort(columns, function(a, b) {
             var aVal = 2;
             var bVal = 2;
-            if (a.header.contains('error.png')) {
+            if (a.text.contains('error.png')) {
                 aVal = 1;
-            } else if (a.header.contains('exclamation.png')) {
+            } else if (a.text.contains('exclamation.png')) {
                 aVal = 0;
             }
 
-            if (b.header.contains('error.png')) {
+            if (b.text.contains('error.png')) {
                 bVal = 1;
-            } else if (b.header.contains('exclamation.png')) {
+            } else if (b.text.contains('exclamation.png')) {
                 bVal = 0;
             }
 
@@ -167,6 +166,21 @@ Ext.define('eavl.widgets.CSVGrid', {
         }
 
         return Ext.util.Format.format('<img data-qtip="{2}" class="csv-grid-header-icon" style="vertical-align:middle;margin-bottom:4px;" src="{0}"/>{1}', img, pd.get('name'), tip);
+    },
+
+    /**
+     * Generates a grid column for the specified parameterDetails (does not add the column to this grid)
+     *
+     * @param parameterDetails a eavl.models.ParameterDetails object
+     */
+    generateColumnForParameterDetails : function(parameterDetails) {
+        var name = parameterDetails.get('name');
+        return Ext.create('Ext.grid.column.Column', {
+            itemId: name,
+            dataIndex: name,
+            renderer : Ext.bind(this._handleCellRender, this),
+            header : this._parameterDetailsToColHeader(parameterDetails), sortable: false
+        });
     },
 
     /**

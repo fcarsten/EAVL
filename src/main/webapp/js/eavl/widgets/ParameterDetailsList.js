@@ -50,18 +50,24 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
                     return Ext.DomHelper.markup({
                         tag : 'div',
                         style : {
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            display: 'table'
                         },
                         children : [{
                             tag: 'img',
                             'data-qtip' : tip,
                             src : img,
                             width : 32,
-                            height : 32
+                            height : 32,
+                            style : {
+                                'margin-right' : 10
+                            }
                         },{
                             tag : 'b',
                             style : {
-                                'font-size' : '170%'
+                                'font-size' : '150%',
+                                display: 'table-cell',
+                                'vertical-align' : 'middle'
                             },
                             html : value
                         }]});

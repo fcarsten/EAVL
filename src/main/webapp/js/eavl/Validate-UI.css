@@ -1,0 +1,18 @@
+.trash-empty-container {
+    width: 90%;
+    position:absolute;
+    height: 90%;
+}
+
+.trash-empty-container-inner {
+    text-align: center;
+    height : 160px;
+    position:absolute;
+    top:50%;
+    margin-top:-50px;
+}
+
+.trash-empty-image {
+	background-image:url(../../img/trash.svg) !important;
+	width : 100px;
+}

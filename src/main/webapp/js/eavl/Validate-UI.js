@@ -74,7 +74,8 @@ Ext.application({
                         width : 200,
                         margin : '0 10 0 0',
                         viewConfig : {
-                            emptyText : '<h1>TESTING</h1><br><p>HTML</p>'
+                            deferEmptyText : false,
+                            emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/trash.svg" width="100"/><br>Drag a column header here to delete</div></div>'
                         },
                         plugins : [{
                             ptype : 'headerdraglink',
@@ -84,6 +85,10 @@ Ext.application({
                             dropFn : function(pdlist, columnId) {
                                 var paramDetails = pdStore.getById(columnId)
                                 pdlist.getStore().add(paramDetails);
+                            },
+                            dragDropNewColFn : function(pdlist, csvGrid, parameterDetails) {
+                                pdlist.getStore().remove(parameterDetails);
+                                return csvGrid.generateColumnForParameterDetails(parameterDetails);
                             }
                         }]
                     },{

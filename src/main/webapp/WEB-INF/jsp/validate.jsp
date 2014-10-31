@@ -8,6 +8,7 @@
         <jsp:include page="../../jsimports.htm"/>
         
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/CSVGrid.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/Validate-UI.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderDragLink.js"></script>
