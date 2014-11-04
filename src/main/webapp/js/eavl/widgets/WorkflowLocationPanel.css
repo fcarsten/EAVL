@@ -1,0 +1,109 @@
+/*
+#workflow-container
+    #arrows-container
+        #arrows-internal
+            #back
+            #next
+            
+        #titles
+            <li>
+            
+    #text-container
+        #text-internal
+            <h1>
+            <p>        
+*/
+
+#worfklow-container {
+	width: 100%;
+}
+
+#arrows-container {
+	background: url(../../../img/line.png) repeat-x scroll 0 0 rgba(0, 0, 0, 0);
+	height: 90px;
+	left: 50%;
+	width: 800px;
+	margin: 0 0 0 -400px;
+	padding: 0 100px 0 100px;
+	position: absolute;
+}
+
+
+#text-container {
+	position: absolute;
+	left: 0;
+	right: 0;
+	text-align: center;
+}
+
+#text-internal h1 {
+	background: none repeat scroll 0 0 #ffffff;
+	display: inline-block;
+	font-size: 55px;
+	letter-spacing: -3px;
+	padding: 0 10px;
+}
+
+#text-internal p {
+    font-size: 14px;
+    margin: 0 0 0 0;
+    padding: 0 10px 26px;
+    text-align: center;
+}
+
+#titles li {
+	display: none;
+	font-size: 20px;
+	right: -5px;
+	
+}
+
+#back, #next {
+	width: 70px;
+	height: 70px;
+	background-image: url(../../../img/arrow.png); 
+	background-repeat: repeat;
+	
+	background-size: auto auto;
+	background-clip: border-box;
+	background-origin: padding-box;
+	background-color: rgba(255, 255, 255 ,1);
+	padding-top: 58px;
+	overflow: visible;
+	position: absolute;
+	top: 16px;
+	z-index: 20;
+	
+	/*-webkit-transition: all 1s ease;
+     -moz-transition: all 1s ease;
+       -o-transition: all 1s ease;
+      -ms-transition: all 1s ease;
+          transition: all 1s ease;*/
+}
+
+
+#back {
+	left: -70px;
+    background-position: 0px 0px;
+}
+
+#next {
+	right: -70px;
+    background-position: 0px 70px;
+}
+
+/*#back:HOVER {
+    background-position: 70px 0px;
+}
+
+#next:HOVER {
+    background-position: 70px 70px;
+}*/
+
+#back.disabled {
+    background-position: 140px 0px;
+}
+
+#next.disabled {
+    background-position: 140px 70px;
+}

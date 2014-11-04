@@ -19,18 +19,9 @@ Ext.application({
         var viewport = Ext.create('Ext.container.Viewport', {
             layout: 'border',
             items : [{
-                xtype: 'panel',
+                xtype: 'workflowpanel',
                 region: 'north',
-                height: 100,
-                layout: {
-                    type: 'hbox',
-                    pack: 'start'
-                },
-                items: [{
-                    xtype: 'image',
-                    src: 'img/eavl-banner.png',
-                    height: 100
-                }]
+                height: 200
             },{
                 xtype: 'container',
                 region: 'center',

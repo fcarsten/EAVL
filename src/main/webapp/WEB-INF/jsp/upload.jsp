@@ -7,7 +7,10 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
+        
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/Upload-UI.js"></script>
     </head>
     <body>
