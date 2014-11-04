@@ -8,7 +8,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
 
 
     steps : [{url:'upload.html', title:'Upload', help: 'Upload a CSV file for processing.'},
-             {url:'validate.html', title:'Validate (WOW THIS IS A REALLY LONG TITLE)', help: 'The conditional probability algorithm requires numeric values.'},
+             {url:'validate.html', title:'Validate', help: 'The conditional probability algorithm requires numeric values.'},
              {url:'setprediction.html', title:'Imputation', help: 'Select a parameter to be predicted. It\'s missing values will be imputed.'},
              {url:'setproxies.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
              {url:'results.html', title:'Results', help: 'Browse the results of existing jobs.'}],
@@ -71,16 +71,6 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
                             html : nextStep == null ? '' : nextStep.title
                         }]
                     }]
-                },{
-                    tag: 'ud',
-                    id: 'titles',
-                    children: [{
-                        tag: 'li',
-                        html : previousStep == null ? '' : previousStep.title
-                    },{
-                        tag: 'li',
-                        html : nextStep == null ? '' : nextStep.title
-                    }]
                 }]
             },{
                 tag: 'div',
@@ -92,7 +82,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
                         tag: 'h1',
                         html: currentStep.title
                     },{
-                        tag: 'p',
+                        tag: 'h2',
                         html: currentStep.help
                     }]
                 }]

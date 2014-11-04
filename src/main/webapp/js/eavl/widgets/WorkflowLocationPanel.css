@@ -14,8 +14,8 @@
             <p>        
 */
 
-#worfklow-container {
-	width: 100%;
+#workflow-container {
+	text-align: center;
 }
 
 #arrows-container {
@@ -26,6 +26,7 @@
 	margin: 0 0 0 -400px;
 	/*padding: 0 100px 0 100px;*/
 	position: absolute;
+	z-index: 10;
 }
 
 #arrows-internal {
@@ -34,21 +35,27 @@
 }
 
 #text-container {
-	position: absolute;
-	left: 0;
-	right: 0;
+    position: relative;
 	text-align: center;
+	display: inline-block;
+	z-index: 20;
 }
+
+#text-internal {
+	margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+}
+
 
 #text-internal h1 {
 	background: none repeat scroll 0 0 #ffffff;
-	display: inline-block;
 	font-size: 55px;
 	letter-spacing: -3px;
 	padding: 0 10px;
 }
 
-#text-internal p {
+#text-internal h2 {
     font-size: 14px;
     margin: 0 0 0 0;
     padding: 0 10px 26px;
@@ -72,7 +79,6 @@
 	overflow: visible;
 	position: absolute;
 	top: 16px;
-	z-index: 20;
 }
 
 
@@ -102,17 +108,15 @@
 
 #back div, #next div {
 	color: rgba(0, 0, 0, 0);
-	right: 0px;
     position: absolute;
     padding: 0 10px;
     overflow: visible;
-    border-style: solid;
-    border-color: black;
     font-size: 18px;
-    top: 15px;
+    top: 20px;
     display: inline-block;
     white-space: nowrap;
     width: auto;
+    z-index: -1;
     
     -webkit-transition: all 0.5s ease;
      -moz-transition: all 0.5s ease;
@@ -123,18 +127,20 @@
 
 #back div {
 	float: left;
+	left: 0px;
 	text-align: left;
 }
 
 #next div {
     float: right;
+    right: 0px;
     text-align: right;
 }
 
 #back:HOVER:not(.disabled) div {
     color: rgba(0, 175, 220, 1);
     background-color: rgba(255, 255, 255, 1);
-    right: -70px;
+    left: 70px;
 }
 
 #next:HOVER:not(.disabled) div {
