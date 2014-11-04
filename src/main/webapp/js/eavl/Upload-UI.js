@@ -21,7 +21,10 @@ Ext.application({
             items : [{
                 xtype: 'workflowpanel',
                 region: 'north',
-                height: 200
+                height: 200,
+                allowNext : function() {
+                    return Ext.getCmp('upload-form').getForm().isValid();
+                }
             },{
                 xtype: 'container',
                 region: 'center',
@@ -35,7 +38,7 @@ Ext.application({
                 },
                 items: [{
                     xtype: 'form',
-                    itemId: 'upload-form',
+                    id: 'upload-form',
                     title: 'Choose CSV file to upload for processing',
                     width: 300,
                     bodyPadding : '30 10 10 10',

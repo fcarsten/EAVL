@@ -9,6 +9,7 @@
         
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/CSVGrid.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/Validate-UI.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderDragLink.js"></script>
@@ -16,6 +17,7 @@
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/Validate-UI.js"></script>
     </head>
     <body>

@@ -6,19 +6,35 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
 
     alias: 'widget.workflowpanel',
 
+    statics : {
+        handleAllowNext : function(url) {
+            console.log(url);
+            if (Ext.getCmp('workflow-location-panel').allowNext()) {
+                window.location.href = url;
+            }
+        },
+        handleAllowPrevious : function(url) {
+            if (Ext.get('workflow-location-panel').allowPrevious()) {
+                window.location.href = url;
+            }
+        }
+    },
 
     steps : [{url:'upload.html', title:'Upload', help: 'Upload a CSV file for processing.'},
-             {url:'validate.html', title:'Validate', help: 'The conditional probability algorithm requires numeric values.'},
+             {url:'validate.html', title:'Validate', help: 'Remove any non numeric values (or trash the parameter entirely)'},
              {url:'setprediction.html', title:'Imputation', help: 'Select a parameter to be predicted. It\'s missing values will be imputed.'},
              {url:'setproxies.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
              {url:'results.html', title:'Results', help: 'Browse the results of existing jobs.'}],
 
+    allowNext : function() { return true; },
+    allowPrevious : function() { return true; },
 
 
     /**
      * Adds the following config to Ext.panel.Panel
      * {
-     *
+     *  allowNext : function() - A function that should return a boolean if the user is allowed to proceed (defaults to always true)
+     *  allowPrevious : function() - A function that should return a boolean if the user is allowed to proceed (defaults to always true)
      * }
      *
      * Adds the following events
@@ -27,6 +43,14 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
      * }
      */
     constructor : function(config) {
+
+        if (config.allowNext) {
+            this.allowNext = config.allowNext;
+        }
+
+        if (config.allowPrevious) {
+            this.allowPrevious = config.allowPrevious;
+        }
 
         var currentIndex = this.getActiveStepIndex();
 
@@ -42,11 +66,33 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             nextStep = this.steps[currentIndex + 1];
         }
 
+        var menuItems = [];
+        for (var i = 0; i < this.steps.length; i++) {
+            menuItems.push({
+                tag : 'li',
+                cls : i === currentIndex ? 'selected' : '',
+                children: [{
+                    tag: 'a',
+                    href: this.steps[i].url,
+                    html: this.steps[i].title
+                }]
+            });
+        }
 
         var markup = Ext.DomHelper.markup({
             tag: 'div',
             id : 'workflow-container',
             children : [{
+                tag : 'div',
+                id : 'top-bar-container',
+                children: [{
+                    tag : 'div',
+                    id: 'top-bar-logo'
+                },{
+                    tag: 'ul',
+                    children : menuItems
+                }]
+            },{
                 tag : 'div',
                 id : 'arrows-container',
                 children : [{
@@ -56,7 +102,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
                         tag : 'a',
                         id : 'back',
                         cls : previousStep == null ? 'disabled' : '',
-                        href : previousStep == null ? '' : previousStep.url,
+                        href : previousStep == null ? '' : Ext.util.Format.format('javascript:eavl.widgets.WorkflowLocationPanel.handleAllowPrevious(\'{0}\')', previousStep.url),
                         children : [{
                             tag: 'div',
                             html : previousStep == null ? '' : previousStep.title
@@ -65,7 +111,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
                         tag : 'a',
                         id : 'next',
                         cls : nextStep == null ? 'disabled' : '',
-                        href : nextStep == null ? '' : nextStep.url,
+                        href : nextStep == null ? '' : Ext.util.Format.format('javascript:eavl.widgets.WorkflowLocationPanel.handleAllowNext(\'{0}\')', nextStep.url),
                         children : [{
                             tag: 'div',
                             html : nextStep == null ? '' : nextStep.title
@@ -90,6 +136,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
         });
 
         Ext.apply(config, {
+            id: 'workflow-location-panel',
             html : markup
         });
 

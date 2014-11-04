@@ -46,18 +46,8 @@ Ext.application({
             Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
                 layout: 'border',
                 items: [{
-                    xtype: 'panel',
-                    region: 'north',
-                    height: 100,
-                    layout: {
-                        type: 'hbox',
-                        pack: 'start'
-                    },
-                    items: [{
-                        xtype: 'image',
-                        src: 'img/eavl-banner.png',
-                        height: 100
-                    }]
+                    xtype: 'workflowpanel',
+                    region: 'north'
                 },{
                     xtype: 'panel',
                     region: 'center',
@@ -66,7 +56,7 @@ Ext.application({
                         align : 'stretch',
                         pack : 'center'
                     },
-                    bodyPadding : '50 100 50 100',
+                    bodyPadding : '10 100 50 100',
                     items: [{
                         itemId : 'trashpanel',
                         xtype : 'pdlist',
