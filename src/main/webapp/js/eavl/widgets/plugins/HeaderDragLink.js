@@ -109,29 +109,12 @@ Ext.define('eavl.widgets.plugins.HeaderDragLink', {
             });
 
             //Create a drop zone on the target grid (
-            var gridBody = this.grid.getEl();
+            var grid = this.grid;
+            var gridBody = grid.getEl();
             this.gridDropZone = new Ext.dd.DropTarget(gridBody, {
                 ddGroup : bodyDDGroup,
                 notifyEnter: function(ddSource, e, data) {
-
-                    //We can't use the standard el.highlight as it doesn't play nice with grid view
-                    //So instead we make a "mask" and make it behave like a highlight
-                    Ext.DomHelper.append(gridBody.dom, [{
-                        cls : Ext.baseCSSPrefix + "mask" + ' mask-highlight',
-                        style : {
-                            'background-color' : 'ffff9c'
-                        }
-                    }]);
-
-                    maskEl = Ext.get(gridBody.dom.lastChild);
-                    maskEl.setDisplayed(true);
-                    maskEl.fadeOut({
-                        opacity : 0,
-                        easing : 'ease-in',
-                        duration : 1000,
-                        remove: true
-                    });
-
+                    eavl.widgets.util.HighlightUtil.highlight(grid);
                 },
                 notifyDrop: function(ddSource, e, data) {
                     var newColumn = me.dragDropNewColFn(me.container, me.grid, data.draggedRecord);

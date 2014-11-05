@@ -9,6 +9,7 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
     /**
      * Adds the following config to Ext.grid.Panel
      * {
+     *  parameterDetails : eavl.model.ParameterDetails[] [Optional] The set of parameter details to initialise this list with
      * }
      *
      * Adds the following events
@@ -21,7 +22,8 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
 
 
         var store = Ext.create('Ext.data.Store', {
-            model : 'eavl.models.ParameterDetails'
+            model : 'eavl.models.ParameterDetails',
+            data : config.parameterDetails ? config.parameterDetails : []
         });
 
         Ext.apply(config, {
@@ -57,18 +59,10 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
                             tag: 'img',
                             'data-qtip' : tip,
                             src : img,
-                            width : 32,
-                            height : 32,
-                            style : {
-                                'margin-right' : 10
-                            }
+                            cls: 'pdl-row-img'
                         },{
-                            tag : 'b',
-                            style : {
-                                'font-size' : '150%',
-                                display: 'table-cell',
-                                'vertical-align' : 'middle'
-                            },
+                            tag : 'span',
+                            cls : 'pdl-row-text',
                             html : value
                         }]});
                 }

@@ -9,12 +9,12 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
     statics : {
         handleAllowNext : function(url) {
             console.log(url);
-            if (Ext.getCmp('workflow-location-panel').allowNext()) {
+            if (!Ext.getCmp('workflow-location-panel').allowNext || Ext.getCmp('workflow-location-panel').allowNext()) {
                 window.location.href = url;
             }
         },
         handleAllowPrevious : function(url) {
-            if (Ext.get('workflow-location-panel').allowPrevious()) {
+            if (!Ext.get('workflow-location-panel').allowPrevious || Ext.get('workflow-location-panel').allowPrevious()) {
                 window.location.href = url;
             }
         }
@@ -22,7 +22,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
 
     steps : [{url:'upload.html', title:'Upload', help: 'Upload a CSV file for processing.'},
              {url:'validate.html', title:'Validate', help: 'Remove any non numeric values (or trash the parameter entirely)'},
-             {url:'setprediction.html', title:'Imputation', help: 'Select a parameter to be predicted. It\'s missing values will be imputed.'},
+             {url:'setprediction.html', title:'Imputation', help: 'Select a parameter to be predicted. Its missing values will be imputed.'},
              {url:'setproxies.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
              {url:'results.html', title:'Results', help: 'Browse the results of existing jobs.'}],
 
