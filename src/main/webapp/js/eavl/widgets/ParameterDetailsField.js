@@ -11,10 +11,14 @@ Ext.define('eavl.widgets.ParameterDetailsField', {
 
     alias: 'widget.pdfield',
 
+    allowBlank : null,
+
     /**
      * Adds the following config to Ext.form.field.Base
      * {
-     *  emptyText - Text to show if this field is empty
+     *  emptyText - Text to show if this field is empty,
+     *  allowBlank - Whether this can be empty or not, defaults true
+     *  preventMark - Boolean - Whether this can be marked invalid or not
      * }
      *
      * Adds the following events
@@ -23,6 +27,10 @@ Ext.define('eavl.widgets.ParameterDetailsField', {
      * }
      */
     constructor : function(config) {
+
+        this.allowBlank = config.allowBlank === undefined ? true : config.allowBlank;
+        this.preventMark = config.preventMark ? true : false;
+
         Ext.apply(config, {
             viewConfig : {
                 deferEmptyText : false,
@@ -56,5 +64,49 @@ Ext.define('eavl.widgets.ParameterDetailsField', {
         }
 
         return this.getStore().getAt(0);
-    }
+    },
+
+    getErrors : function(value) {
+        var errors = [];
+
+        if (!this.allowBlank) {
+            if (!this.getValue()) {
+                errors.push('This field cannot be blank');
+            }
+        }
+
+        return errors;
+    },
+
+    markInvalid: function(errors) {
+        eavl.widgets.util.HighlightUtil.highlight(this, '#ff6961');
+    },
+
+    clearInvalid: function() {
+        this.getView().getEl().removeCls('pdl-row-error');
+    },
+
+    validateValue: function(value) {
+        var me = this,
+            errors = me.getErrors(value),
+            isValid = Ext.isEmpty(errors);
+        if (!me.preventMark) {
+            if (isValid) {
+                me.clearInvalid();
+            } else {
+                me.markInvalid(errors);
+            }
+        }
+
+        return isValid;
+    },
+
+    isValid : function() {
+        var me = this,
+            disabled = me.disabled,
+            validate = me.forceValidation || !disabled;
+
+
+        return validate ? me.validateValue(me.getValue()) : disabled;
+    },
 });

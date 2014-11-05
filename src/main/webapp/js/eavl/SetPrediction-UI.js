@@ -29,7 +29,10 @@ Ext.application({
                 layout: 'border',
                 items: [{
                     xtype: 'workflowpanel',
-                    region: 'north'
+                    region: 'north',
+                    allowNext: function() {
+                        return Ext.getCmp('predictor-field').isValid();
+                    }
                 },{
                     xtype: 'container',
                     region: 'center',
@@ -97,11 +100,13 @@ Ext.application({
                         margins: '0 10 0 0',
                         items : [{
                             xtype : 'pdfield',
+                            id : 'predictor-field',
                             width: '100%',
                             title: 'Predictor',
                             height: 80,
                             emptyText : 'Drag a parameter here to select it.',
                             margins: '0 0 10 0',
+                            allowBlank: false,
                             plugins: [{
                                 ptype : 'modeldnd',
                                 ddGroup : 'set-prediction-pd',

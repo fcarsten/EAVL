@@ -8,7 +8,6 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
 
     statics : {
         handleAllowNext : function(url) {
-            console.log(url);
             if (!Ext.getCmp('workflow-location-panel').allowNext || Ext.getCmp('workflow-location-panel').allowNext()) {
                 window.location.href = url;
             }

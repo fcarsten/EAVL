@@ -10,8 +10,9 @@ Ext.define('eavl.widgets.util.HighlightUtil', {
      * body is partially obscured by a view or other components.
      *
      * @param component Ext.Component which will be highlighted via a temporary mask.
+     * @param color (Optional)
      */
-    eavl.widgets.util.HighlightUtil.highlight = function(component) {
+    eavl.widgets.util.HighlightUtil.highlight = function(component, color) {
         var body = component.getEl();
 
         //We can't use the standard el.highlight as it doesn't play nice with grid view
@@ -19,7 +20,7 @@ Ext.define('eavl.widgets.util.HighlightUtil', {
         Ext.DomHelper.append(body.dom, [{
             cls : Ext.baseCSSPrefix + "mask" + ' mask-highlight',
             style : {
-                'background-color' : 'ffff9c'
+                'background-color' : color ? color : '#ffff9c'
             }
         }]);
 
