@@ -224,6 +224,7 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
         var container = d3.select("#" + this.innerId);
         this.d3svg = container.append("svg")
             .attr("preserveAspectRatio", this.preserveAspectRatio ? "xMidYMid" : "none")
+            .attr("class", "pdf-chart-svg")
             .attr("viewBox",  Ext.util.Format.format("0 0 {0} {1}", this.targetWidth, this.targetHeight));
 
         //Force a resize
