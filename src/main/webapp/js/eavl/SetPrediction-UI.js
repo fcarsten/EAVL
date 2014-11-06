@@ -118,16 +118,31 @@ Ext.application({
                                         source.getStore().add(currentValue);
                                     }
                                     pdfield.setValue(pd);
+
+                                    pdfield.ownerCt.down('#predictor-pdf-chart').plotParameterDetails(pd);
                                 },
                                 handleDrag : function(pdfield, pd) {
                                     pdfield.reset();
+
+                                    pdfield.ownerCt.down('#predictor-pdf-chart').clearPlot();
                                 }
                             }]
                         },{
                             xtype: 'panel',
-                            title : 'PDF Graph goes in here',
+                            title: 'Drag to select cutoff for predictor',
                             width: '100%',
-                            flex : 1
+                            flex: 1,
+                            layout: 'fit',
+                            items : [{
+                                xtype: 'pdfchart',
+                                itemId: 'predictor-pdf-chart',
+                                allowCutoffSelection : true,
+                                listeners : {
+                                    cutoffchanged : function(pdfchart, newCutoff) {
+                                        //console.log(newCutoff);
+                                    }
+                                }
+                            }]
                         }]
                     }]
                 }]

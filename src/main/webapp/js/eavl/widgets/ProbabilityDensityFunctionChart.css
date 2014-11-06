@@ -1,16 +1,23 @@
 .axis path,
 .axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
 }
 
 .x.axis path {
-  display: none;
+    display: none;
 }
 
 .line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 1.5px;
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.brush .extent {
+    stroke-width: 0px;
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
 }

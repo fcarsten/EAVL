@@ -7,9 +7,12 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
+        <script type="text/javascript" src="js/d3/d3.min.js"></script>
+        
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/SetPrediction-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ProbabilityDensityFunctionChart.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/utils/HighlightUtil.js"></script>
@@ -18,6 +21,7 @@
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsField.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/ProbabilityDensityFunctionChart.js"></script>
         <script type="text/javascript" src="js/eavl/SetPrediction-UI.js"></script>
     </head>
     <body>

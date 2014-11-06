@@ -9,8 +9,9 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
     parameterDetails : null,
     d3svg : null, //D3 SVG element. Will always be set after render
     d3 : null, //D3 elements (graphs, lines etc). Can be null
-    targetWidth: 800,
-    targetHeight : 400,
+    targetWidth: null,
+    targetHeight : null,
+    allowCutoffSelection : false,
 
 
     /**
@@ -20,11 +21,12 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
      *  preserveAspectRatio - boolean - Should the graph preserve a 4x2 aspect ratio or should it stretch. Default false
      *  targetWidth - Number - (Only useful if preserveAspectRatio is set) - The target width to use in aspect ratio
      *  targetHeight - Number - (Only useful if preserveAspectRatio is set)  - The target height to use in aspect ratio
+     *  allowCutoffSelection - Boolean (- If true, the chart will have a draggable cutoff slider added. Defaults to false
      * }
      *
      * Adds the following events
      * {
-     *
+     *  cutoffchanged : function(this, cutoffXValue)
      * }
      */
     constructor : function(config) {
@@ -35,6 +37,7 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
         this.preserveAspectRatio = config.preserveAspectRatio ? true : false;
         this.targetWidth = config.targetWidth ? config.targetWidth : 800;
         this.targetHeight = config.targetHeight ? config.targetHeight : 400;
+        this.allowCutoffSelection = config.allowCutoffSelection ? true : false;
 
         this.innerId = Ext.id();
 
@@ -43,6 +46,8 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
         });
 
         this.callParent(arguments);
+
+        this.addEvents(['cutoffchanged']);
 
         this.on('render', this._afterRender, this);
         this.on('resize', this._onResize, this);
@@ -54,6 +59,7 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
     clearPlot : function(message) {
         this.parameterDetails = null;
         this.d3svg.select('*').remove();
+        this.d3svg.select('.title').remove();
         this.d3 = null;
 
         if (message) {
@@ -66,6 +72,36 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
             .text(message)
         }
 
+    },
+
+    /**
+     * Gets the selected cutoff value (if enabled) otherwise returns null.
+     */
+    getCutoffValue : function() {
+        if (this.d3.brush.empty()) {
+            return null;
+        }
+
+        return this.d3.brush.extent()[0];
+    },
+
+    _handleBrush : function(fireEvent) {
+        if (this.d3.brush.empty()) {
+            this.fireEvent('cutoffchanged', this, null);
+            return;
+        }
+
+        var value = this.d3.brush.extent()[0];
+        if (d3.event.sourceEvent) { // not a programmatic event
+            this.d3.brush.extent([value, this.d3.x.domain()[1]]);
+        }
+
+        this.d3.brushgroup.selectAll(".extent").attr("width", 9999);
+        this.d3.brushgroup.selectAll('.resize.w rect').attr("width", 9999);
+
+        if (fireEvent) {
+            this.fireEvent('cutoffchanged', this, value);
+        }
     },
 
     /**
@@ -104,6 +140,12 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
 
             var xAxis = me.d3.xAxis ? me.d3.xAxis : me.d3.xAxis = d3.svg.axis().scale(x).orient("bottom");
             var yAxis = me.d3.yAxis ? me.d3.yAxis : me.d3.yAxis = d3.svg.axis().scale(y).orient("left");
+
+            if (me.allowCutoffSelection) {
+                var brush = me.d3.brush ? me.d3.brush : me.d3.brush = d3.svg.brush()
+                        .x(x)
+                        .on("brush", Ext.bind(me._handleBrush, me, [true], false));
+            }
 
             var valueline = me.d3.valueLine ? me.d3.valueLine : me.d3.valueLine = d3.svg.line()
                     .x(function(d) { return x(d[0]); })
@@ -152,6 +194,17 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
                     .attr("class", "line")
                     .attr("d", valueline(data));
 
+                if (me.d3.brush) {
+                    me.d3.brushgroup = g.append("g")
+                        .attr("class", "x brush")
+                        .call(me.d3.brush)
+                    me.d3.brushgroup.selectAll("rect")
+                        //.attr("width", 9999)
+                        .attr("height", height);
+
+
+                }
+
                 me.d3svg.append("text")
                     .attr("x", margin.left + (width / 2))
                     .attr("y", 0 + (margin.top / 2) +  8)
@@ -186,8 +239,6 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
         this.d3svg
             .attr("width", width)
             .attr("height", height);
-
-        //this.d3group.attr("width", width).attr("height", height);
     }
 
 
