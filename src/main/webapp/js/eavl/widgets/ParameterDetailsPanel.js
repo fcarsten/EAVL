@@ -34,10 +34,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
             fields : ['name', 'total']
         });
 
-        this.numericValuesStore = Ext.create('Ext.data.Store', {
-            fields : ['data', 'index']
-        });
-
         var me = this;
         Ext.apply(config, {
             layout : {
@@ -157,41 +153,9 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                         }]
                     }]
                 },{
-                    itemId : 'values',
+                    itemId : 'prob-density-chart',
                     region: 'center',
-                    xtype : 'chart',
-                    store : this.numericValuesStore,
-                    animate: true,
-                    style: {
-                        background : 'white'
-                    },
-                    axes: [{
-                        type : 'Numeric',
-                        fields : ['data'],
-                        title : 'Data Value',
-                        position: 'left',
-                        grid: {
-                            odd: {
-                                opacity: 1,
-                                fill: '#ddd',
-                                stroke: '#bbb',
-                                'stroke-width': 0.5
-                            }
-                        }
-                    },{
-                        type : 'Numeric',
-                        title : 'Row Index (in lieu of not having PDF)',
-                        position: 'bottom',
-                        fields: ['index']
-                    }],
-                    series: [{
-                        type: 'line',
-                        highlight: false,
-                        axis: 'left',
-                        xField: 'index',
-                        yField: 'data',
-                        showMarkers:false
-                    }]
+                    xtype : 'pdfchart'
                 }]
             }]
         });
@@ -299,36 +263,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this.textValuesStore.loadData(data);
     },
 
-    _loadNumericValuesStore : function(parameterDetails) {
-        Ext.Ajax.request({
-            url : 'validation/getParameterValues.do',
-            params : {
-                columnIndex : parameterDetails.get('columnIndex')
-            },
-            scope : this,
-            callback : function(options, success, response) {
-                if (!success) {
-                    this.numericValuesStore.removeAll();
-                    return;
-                }
-
-                var responseObj = Ext.JSON.decode(response.responseText);
-                if (!responseObj.success) {
-                    this.numericValuesStore.removeAll();
-                    return;
-                }
-
-                var data = [];
-                for (var i = 0; i < responseObj.data.length; i+=100) {
-                    if (responseObj.data[i] !== null) {
-                        data.push({index : i, data : responseObj.data[i]});
-                    }
-                }
-                this.numericValuesStore.loadData(data);
-            }
-        });
-    },
-
     /**
      * Inspects the specified parameter details. Removes any parameter details that is current being inspected
      *
@@ -345,7 +279,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
 
         this._loadPieStore(parameterDetails);
         this._loadTextValueStore(parameterDetails);
-        this._loadNumericValuesStore(parameterDetails);
+        this.down('#prob-density-chart').plotParameterDetails(parameterDetails);
 
         this.setTitle(Ext.util.Format.format('Comparing numeric and text values for "{0}"', parameterDetails.get('name')));
 

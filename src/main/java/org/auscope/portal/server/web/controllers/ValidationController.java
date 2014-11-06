@@ -14,6 +14,7 @@ import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,9 +32,6 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping("validation")
 public class ValidationController extends BasePortalController {
-
-    private static final String FILE_DATA_CSV = "data.csv";
-    private static final String FILE_TEMP_DATA_CSV = "data-tmp.csv";
 
     private FileStagingService fss;
     private CSVService csvService;
@@ -73,12 +71,12 @@ public class ValidationController extends BasePortalController {
             file = fss.handleFileUpload(job, (MultipartHttpServletRequest) request);
 
             //Rename it to a temp file, remove missing lines and put it into the correct file
-            if (!fss.renameStageInFile(job, file.getName(), FILE_TEMP_DATA_CSV)) {
+            if (!fss.renameStageInFile(job, file.getName(), EAVLJobConstants.FILE_TEMP_DATA_CSV)) {
                 throw new IOException("Unable to operate on files in staging area - rename file failed");
             }
 
-            inputCsv = fss.readFile(job, FILE_TEMP_DATA_CSV);
-            outputCsv = fss.writeFile(job, FILE_DATA_CSV);
+            inputCsv = fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            outputCsv = fss.writeFile(job, EAVLJobConstants.FILE_DATA_CSV);
             csvService.findReplace(inputCsv, outputCsv, 0, null, null, true); //This just culls empty lines and autogenerates a header (if missing)
         } catch (Exception ex) {
             log.error("Error uploading file", ex);
@@ -100,7 +98,7 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            InputStream csvData = fss.readFile(job, FILE_DATA_CSV);
+            InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
         } catch (Exception ex) {
             log.warn("Unable to get parameter details: ", ex);
@@ -116,7 +114,7 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            InputStream csvData = fss.readFile(job, FILE_DATA_CSV);
+            InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             return generateJSONResponseMAV(true, csvService.getParameterValues(csvData, columnIndex), "");
         } catch (Exception ex) {
             log.warn("Unable to get parameter values: ", ex);
@@ -135,8 +133,8 @@ public class ValidationController extends BasePortalController {
         EAVLJob job = new EAVLJob(1);
 
         try {
-            List<String[]> data = csvService.readLines(fss.readFile(job, FILE_DATA_CSV), start + 1, limit); //we add 1 to start to skip header
-            int totalData = csvService.countLines(fss.readFile(job, FILE_DATA_CSV)) - 1; //we skip 1 for the header too (This could be cached)
+            List<String[]> data = csvService.readLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV), start + 1, limit); //we add 1 to start to skip header
+            int totalData = csvService.countLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV)) - 1; //we skip 1 for the header too (This could be cached)
 
             ModelMap response = new ModelMap();
             response.put("totalCount", totalData);
@@ -166,12 +164,12 @@ public class ValidationController extends BasePortalController {
         }
 
         try {
-            os = fss.writeFile(job, FILE_TEMP_DATA_CSV);
-            is = fss.readFile(job, FILE_DATA_CSV);
+            os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
 
             csvService.findReplace(is, os, columnIndex, find, replace);
 
-            fss.renameStageInFile(job, FILE_TEMP_DATA_CSV, FILE_DATA_CSV);
+            fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
         } catch (Exception ex) {
             log.error("Error replacing within file: ", ex);
             return generateJSONResponseMAV(false, null, "Unable to find/replace");
