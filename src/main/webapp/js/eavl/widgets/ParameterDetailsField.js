@@ -79,7 +79,7 @@ Ext.define('eavl.widgets.ParameterDetailsField', {
     },
 
     markInvalid: function(errors) {
-        eavl.widgets.util.HighlightUtil.highlight(this, '#ff6961');
+        eavl.widgets.util.HighlightUtil.highlight(this, eavl.widgets.util.HighlightUtil.ERROR_COLOR);
     },
 
     clearInvalid: function() {

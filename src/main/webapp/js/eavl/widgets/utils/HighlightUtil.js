@@ -5,6 +5,10 @@
 Ext.define('eavl.widgets.util.HighlightUtil', {
     singleton: true
 }, function() {
+
+    eavl.widgets.util.HighlightUtil.ERROR_COLOR = '#ff6961';
+    eavl.widgets.util.HighlightUtil.NORMAL_COLOR = '#ffff9c';
+
     /**
      * Similar to Ext.Dom.highlight but can be applied to a component whose
      * body is partially obscured by a view or other components.
@@ -20,7 +24,7 @@ Ext.define('eavl.widgets.util.HighlightUtil', {
         Ext.DomHelper.append(body.dom, [{
             cls : Ext.baseCSSPrefix + "mask" + ' mask-highlight',
             style : {
-                'background-color' : color ? color : '#ffff9c'
+                'background-color' : color ? color : eavl.widgets.util.HighlightUtil.NORMAL_COLOR
             }
         }]);
 

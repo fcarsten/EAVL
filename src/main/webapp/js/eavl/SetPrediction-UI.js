@@ -31,7 +31,17 @@ Ext.application({
                     xtype: 'workflowpanel',
                     region: 'north',
                     allowNext: function() {
-                        return Ext.getCmp('predictor-field').isValid();
+                        if (!Ext.getCmp('predictor-field').isValid()) {
+                            return false;
+                        }
+
+                        var pdfChart = Ext.getCmp('predictor-pdf-chart');
+                        if (pdfChart.getCutoffValue() === null) {
+                            eavl.widgets.util.HighlightUtil.highlight(pdfChart, eavl.widgets.util.HighlightUtil.ERROR_COLOR);
+                            return false;
+                        }
+
+                        return true;
                     }
                 },{
                     xtype: 'container',
@@ -135,13 +145,8 @@ Ext.application({
                             layout: 'fit',
                             items : [{
                                 xtype: 'pdfchart',
-                                itemId: 'predictor-pdf-chart',
-                                allowCutoffSelection : true,
-                                listeners : {
-                                    cutoffchanged : function(pdfchart, newCutoff) {
-                                        //console.log(newCutoff);
-                                    }
-                                }
+                                id: 'predictor-pdf-chart',
+                                allowCutoffSelection : true
                             }]
                         }]
                     }]

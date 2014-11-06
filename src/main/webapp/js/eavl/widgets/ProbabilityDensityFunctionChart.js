@@ -78,7 +78,7 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
      * Gets the selected cutoff value (if enabled) otherwise returns null.
      */
     getCutoffValue : function() {
-        if (this.d3.brush.empty()) {
+        if (!this.d3 || !this.d3.brush || this.d3.brush.empty()) {
             return null;
         }
 
