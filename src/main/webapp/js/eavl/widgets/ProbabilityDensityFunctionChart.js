@@ -62,16 +62,23 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
         this.d3svg.select('.title').remove();
         this.d3 = null;
 
+        this._maskClear();
+
         if (message) {
             this.d3svg.append("text")
             .attr('x', this.targetWidth/2)
             .attr('y', (this.targetHeight / 2) - 20)
             .attr("width", this.targetWidth)
+            .attr("class", "error-text")
             .style("text-anchor", "middle")
             .style("font-size", "32px")
             .text(message)
         }
 
+    },
+
+    _clearMessage : function() {
+        this.d3svg.select('.error-text').remove();
     },
 
     /**
@@ -104,6 +111,22 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
         }
     },
 
+    _mask : function(message) {
+        if (this._loadMask) {
+            this._maskClear();
+        }
+
+        this._loadMask = new Ext.LoadMask(this, {msg:message});
+        this._loadMask.show();
+    },
+
+    _maskClear : function() {
+        if (this._loadMask) {
+            this._loadMask.hide();
+            this._loadMask = null;
+        }
+    },
+
     /**
      * Requests PDF data for the specified parameter details.
      * The resulting data will be displayed
@@ -116,9 +139,11 @@ Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
         }
         this.parameterDetails = parameterDetails;
 
+        this._mask(Ext.util.Format.format("Loading data for '{0}'", parameterDetails.get('name')));
         d3.json(Ext.String.urlAppend("wps/getPDFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex')})),
                 function(error, data) {
-
+            me._maskClear();
+            me._clearMessage();
             if (error) {
                 me.clearPlot("There was an error accessing PDF data");
                 return;
