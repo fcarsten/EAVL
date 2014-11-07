@@ -1,0 +1,14 @@
+.text-empty-container {
+    width: 99%;
+    position:absolute;
+    height: 99%;
+}
+
+.text-empty-container-inner {
+    text-align: center;
+    height : 160px;
+    position:absolute;
+    top:50%;
+    margin-left: 40px;
+    margin-top:-80px;
+}

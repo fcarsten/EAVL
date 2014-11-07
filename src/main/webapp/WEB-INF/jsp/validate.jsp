@@ -13,6 +13,7 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/Validate-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ProbabilityDensityFunctionChart.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>

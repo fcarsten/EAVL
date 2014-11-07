@@ -115,7 +115,8 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                         hideHeaders : true,
                         disableSelection : true,
                         viewConfig : {
-                            emptyText : '<b>This parameter doesn\'t have any non numeric values</b>'
+                            deferEmptyText : false,
+                            emptyText : '<div class="text-empty-container"><div class="text-empty-container-inner"><img src="img/check.svg" width="100"/><br>No missing or invalid values!</div></div>'
                         },
                         listeners : {
                             cellclick : Ext.bind(this._handleTextValueClick, this)
