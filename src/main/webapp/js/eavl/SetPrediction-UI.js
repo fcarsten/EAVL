@@ -48,17 +48,17 @@ Ext.application({
                         }
 
                         var ds = Ext.getCmp('saved-params').getStore();
-                        var savedIndexes = [];
+                        var savedNames = [];
                         for (var i = 0; i < ds.getCount(); i++) {
-                            savedIndexes.push(ds.getAt(i).get('columnIndex'));
+                            savedNames.push(ds.getAt(i).get('name'));
                         }
                         eavl.widget.SplashScren.showLoadingSplash("Saving predictor...");
                         Ext.Ajax.request({
                             url: 'imputation/saveImputationConfig.do',
                             params : {
-                                savedColIndex : savedIndexes,
+                                savedColName : savedNames,
                                 predictorCutoff : pdfCutoff,
-                                predictorColIndex : predictorPd.get('columnIndex')
+                                predictorName : predictorPd.get('name')
                             },
                             callback : function(options, success, response) {
                                 eavl.widget.SplashScren.hideLoadingScreen();
