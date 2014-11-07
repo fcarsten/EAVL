@@ -47,7 +47,43 @@ Ext.application({
                 layout: 'border',
                 items: [{
                     xtype: 'workflowpanel',
-                    region: 'north'
+                    region: 'north',
+                    allowNext: function(callback) {
+                        //Delete trashed parameters before proceeding
+                        var ds = Ext.getCmp('trashpanel').getStore();
+                        if (ds.getCount() == 0) {
+                            callback(true);
+                            return;
+                        }
+
+                        var indexes = [];
+                        for (var i = 0; i < ds.getCount(); i++) {
+                            indexes.push(ds.getAt(i).get('columnIndex'));
+                        }
+                        eavl.widget.SplashScren.showLoadingSplash("Trashing parameters...");
+                        Ext.Ajax.request({
+                            url: 'validation/deleteParameters.do',
+                            params : {
+                                columnIndex : indexes
+                            },
+                            callback : function(options, success, response) {
+                                eavl.widget.SplashScren.hideLoadingScreen();
+
+                                if (!success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                var responseObj = Ext.JSON.decode(response.responseText);
+                                if (!responseObj.success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                callback(true);
+                            }
+                        });
+                    }
                 },{
                     xtype: 'panel',
                     region: 'center',
@@ -58,7 +94,7 @@ Ext.application({
                     },
                     bodyPadding : '10 100 50 100',
                     items: [{
-                        itemId : 'trashpanel',
+                        id : 'trashpanel',
                         xtype : 'pdlist',
                         title : 'Trashed Parameters',
                         width : 200,

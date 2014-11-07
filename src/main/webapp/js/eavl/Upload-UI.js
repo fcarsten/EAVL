@@ -22,8 +22,8 @@ Ext.application({
                 xtype: 'workflowpanel',
                 region: 'north',
                 height: 200,
-                allowNext : function() {
-                    return Ext.getCmp('upload-form').getForm().isValid();
+                allowNext : function(callback) {
+                    callback(Ext.getCmp('upload-form').getForm().isValid());
                 }
             },{
                 xtype: 'container',

@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.google.common.collect.Sets;
+import com.hp.hpl.jena.util.iterator.ArrayIterator;
+
 /**
  * Controller for supporting validation of a new data upload
  * @author Josh Vote
@@ -172,6 +175,34 @@ public class ValidationController extends BasePortalController {
             fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
         } catch (Exception ex) {
             log.error("Error replacing within file: ", ex);
+            return generateJSONResponseMAV(false, null, "Unable to find/replace");
+        } finally {
+            IOUtils.closeQuietly(os);
+            IOUtils.closeQuietly(is);
+        }
+
+        return generateJSONResponseMAV(true, null, "");
+    }
+
+    @RequestMapping("/deleteParameters.do")
+    public ModelAndView deleteParameters(HttpServletRequest request,
+            @RequestParam("columnIndex") Integer[] columnIndexes) {
+
+        //Lookup our job - TODO - use temp job at the moment
+        EAVLJob job = new EAVLJob(1);
+
+        OutputStream os = null;
+        InputStream is = null;
+
+        try {
+            os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+
+            csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(columnIndexes)));
+
+            fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+        } catch (Exception ex) {
+            log.error("Error deleting columns: ", ex);
             return generateJSONResponseMAV(false, null, "Unable to find/replace");
         } finally {
             IOUtils.closeQuietly(os);

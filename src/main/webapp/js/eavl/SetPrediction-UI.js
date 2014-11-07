@@ -30,18 +30,53 @@ Ext.application({
                 items: [{
                     xtype: 'workflowpanel',
                     region: 'north',
-                    allowNext: function() {
-                        if (!Ext.getCmp('predictor-field').isValid()) {
-                            return false;
+                    allowNext: function(callback) {
+                        //Check our fields are all set, highlight what the user needs to do it they haven't finished it
+                        var predictorField = Ext.getCmp('predictor-field');
+                        if (!predictorField.isValid()) {
+                            callback(false);
+                            return;
                         }
+                        var predictorPd = predictorField.getValue();
 
                         var pdfChart = Ext.getCmp('predictor-pdf-chart');
-                        if (pdfChart.getCutoffValue() === null) {
+                        var pdfCutoff = pdfChart.getCutoffValue();
+                        if (pdfCutoff === null) {
                             eavl.widgets.util.HighlightUtil.highlight(pdfChart, eavl.widgets.util.HighlightUtil.ERROR_COLOR);
-                            return false;
+                            callback(false);
+                            return;
                         }
 
-                        return true;
+                        var ds = Ext.getCmp('saved-params').getStore();
+                        var savedIndexes = [];
+                        for (var i = 0; i < ds.getCount(); i++) {
+                            savedIndexes.push(ds.getAt(i).get('columnIndex'));
+                        }
+                        eavl.widget.SplashScren.showLoadingSplash("Saving predictor...");
+                        Ext.Ajax.request({
+                            url: 'imputation/saveImputationConfig.do',
+                            params : {
+                                savedColIndex : savedIndexes,
+                                predictorCutoff : pdfCutoff,
+                                predictorColIndex : predictorPd.get('columnIndex')
+                            },
+                            callback : function(options, success, response) {
+                                eavl.widget.SplashScren.hideLoadingScreen();
+
+                                if (!success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                var responseObj = Ext.JSON.decode(response.responseText);
+                                if (!responseObj.success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                callback(true);
+                            }
+                        });
                     }
                 },{
                     xtype: 'container',
@@ -82,6 +117,7 @@ Ext.application({
                         },{
                             xtype : 'pdlist',
                             title : 'Saved Parameters',
+                            id : 'saved-params',
                             width: '100%',
                             height : 250,
                             margins: '10 0 0 0',

@@ -8,13 +8,25 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
 
     statics : {
         handleAllowNext : function(url) {
-            if (!Ext.getCmp('workflow-location-panel').allowNext || Ext.getCmp('workflow-location-panel').allowNext()) {
+            if (!Ext.getCmp('workflow-location-panel').allowNext) {
                 window.location.href = url;
+            } else {
+                Ext.getCmp('workflow-location-panel').allowNext(function(proceed) {
+                    if (proceed) {
+                        window.location.href = url;
+                    }
+                });
             }
         },
         handleAllowPrevious : function(url) {
-            if (!Ext.get('workflow-location-panel').allowPrevious || Ext.get('workflow-location-panel').allowPrevious()) {
+            if (!Ext.getCmp('workflow-location-panel').allowPrevious) {
                 window.location.href = url;
+            } else {
+                Ext.getCmp('workflow-location-panel').allowPrevious(function(proceed) {
+                    if (proceed) {
+                        window.location.href = url;
+                    }
+                });
             }
         }
     },
@@ -25,15 +37,15 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
              {url:'setproxies.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
              {url:'results.html', title:'Results', help: 'Browse the results of existing jobs.'}],
 
-    allowNext : function() { return true; },
-    allowPrevious : function() { return true; },
+    allowNext : null,
+    allowPrevious : null,
 
 
     /**
      * Adds the following config to Ext.panel.Panel
      * {
-     *  allowNext : function() - A function that should return a boolean if the user is allowed to proceed (defaults to always true)
-     *  allowPrevious : function() - A function that should return a boolean if the user is allowed to proceed (defaults to always true)
+     *  allowNext : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true)
+     *  allowPrevious : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true)
      * }
      *
      * Adds the following events
