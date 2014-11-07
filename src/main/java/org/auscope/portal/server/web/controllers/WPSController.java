@@ -14,6 +14,7 @@ import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,21 +28,22 @@ public class WPSController extends BasePortalController {
     private FileStagingService fss;
     private CSVService csvService;
     private ConditionalProbabilityWpsClient wpsClient;
+    private EAVLJobService jobService;
 
     @Autowired
-    public WPSController(FileStagingService fss, CSVService csvService, ConditionalProbabilityWpsClient wpsClient) {
+    public WPSController(FileStagingService fss, CSVService csvService, ConditionalProbabilityWpsClient wpsClient, EAVLJobService jobService) {
         this.fss = fss;
         this.csvService = csvService;
         this.wpsClient = wpsClient;
+        this.jobService = jobService;
     }
 
     @RequestMapping("/getPDFData.do")
     public ModelAndView getPDFData(HttpServletRequest request,
             @RequestParam("columnIndex") int columnIndex) {
-        //Lookup our job - TODO - use temp job at the moment
-        EAVLJob job = new EAVLJob(1);
 
         try {
+            EAVLJob job = jobService.getJobForSession(request);
             InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             List<Double> columnData = csvService.getParameterValues(csvData, columnIndex, false);
 

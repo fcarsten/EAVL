@@ -11,11 +11,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
+import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -38,11 +40,13 @@ public class ValidationController extends BasePortalController {
 
     private FileStagingService fss;
     private CSVService csvService;
+    private EAVLJobService jobService;
 
     @Autowired
-    public ValidationController(FileStagingService fss, CSVService csvService) {
+    public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService) {
         this.fss = fss;
         this.csvService = csvService;
+        this.jobService = jobService;
     }
 
     /**
@@ -59,8 +63,14 @@ public class ValidationController extends BasePortalController {
     public ModelAndView uploadFile(HttpServletRequest request,
             HttpServletResponse response) {
 
-        //Lookup our job - TODO - use temp job at the moment
-        EAVLJob job = new EAVLJob(1);
+
+        EAVLJob job;
+        try {
+            job = jobService.createJobForSession(request);
+        } catch (PortalServiceException ex) {
+            log.error("Error creating new job during upload file", ex);
+            return generateJSONResponseMAV(false);
+        }
 
         InputStream inputCsv = null;
         OutputStream outputCsv = null;
@@ -97,10 +107,8 @@ public class ValidationController extends BasePortalController {
 
     @RequestMapping("/getParameterDetails.do")
     public ModelAndView getParameterDetails(HttpServletRequest request) {
-        //Lookup our job - TODO - use temp job at the moment
-        EAVLJob job = new EAVLJob(1);
-
         try {
+            EAVLJob job = jobService.getJobForSession(request);
             InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
         } catch (Exception ex) {
@@ -112,11 +120,8 @@ public class ValidationController extends BasePortalController {
     @RequestMapping("/getParameterValues.do")
     public ModelAndView getParameterValues(HttpServletRequest request,
             @RequestParam("columnIndex") int columnIndex) {
-
-        //Lookup our job - TODO - use temp job at the moment
-        EAVLJob job = new EAVLJob(1);
-
         try {
+            EAVLJob job = jobService.getJobForSession(request);
             InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             return generateJSONResponseMAV(true, csvService.getParameterValues(csvData, columnIndex), "");
         } catch (Exception ex) {
@@ -131,11 +136,8 @@ public class ValidationController extends BasePortalController {
             @RequestParam("limit") Integer limit,
             @RequestParam("page") Integer page,
             @RequestParam("start") Integer start) {
-
-        //Lookup our job - TODO - use temp job at the moment
-        EAVLJob job = new EAVLJob(1);
-
         try {
+            EAVLJob job = jobService.getJobForSession(request);
             List<String[]> data = csvService.readLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV), start + 1, limit); //we add 1 to start to skip header
             int totalData = csvService.countLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV)) - 1; //we skip 1 for the header too (This could be cached)
 
@@ -155,9 +157,6 @@ public class ValidationController extends BasePortalController {
             @RequestParam("replace") String replace,
             @RequestParam("columnIndex") int columnIndex) {
 
-        //Lookup our job - TODO - use temp job at the moment
-        EAVLJob job = new EAVLJob(1);
-
         OutputStream os = null;
         InputStream is = null;
 
@@ -167,6 +166,7 @@ public class ValidationController extends BasePortalController {
         }
 
         try {
+            EAVLJob job = jobService.getJobForSession(request);
             os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
 
@@ -188,13 +188,11 @@ public class ValidationController extends BasePortalController {
     public ModelAndView deleteParameters(HttpServletRequest request,
             @RequestParam("columnIndex") Integer[] columnIndexes) {
 
-        //Lookup our job - TODO - use temp job at the moment
-        EAVLJob job = new EAVLJob(1);
-
         OutputStream os = null;
         InputStream is = null;
 
         try {
+            EAVLJob job = jobService.getJobForSession(request);
             os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
 
