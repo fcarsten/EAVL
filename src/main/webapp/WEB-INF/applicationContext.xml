@@ -27,4 +27,8 @@
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
     </bean>
+    
+    <bean id="wpsClient" class="org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient">
+        <constructor-arg name="serviceUrl" value="${wps.endpoint}"/>
+    </bean>
 </beans>

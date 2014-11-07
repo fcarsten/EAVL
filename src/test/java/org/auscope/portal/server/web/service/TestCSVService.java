@@ -208,7 +208,7 @@ public class TestCSVService extends PortalTestClass{
     public void testGetParameterValuesParsing() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
 
-        List<Double> data = service.getParameterValues(is, 2);
+        List<Double> data = service.getParameterValues(is, 2, true);
 
         Assert.assertNotNull(data);
         Assert.assertEquals(8, data.size());
@@ -221,6 +221,23 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(100, data.get(5), 0.01);
         Assert.assertNull(data.get(6));
         Assert.assertEquals(101, data.get(7), 0.01);
+    }
+
+    @Test
+    public void testGetParameterValuesNoNulls() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+
+        List<Double> data = service.getParameterValues(is, 2, false);
+
+        Assert.assertNotNull(data);
+        Assert.assertEquals(6, data.size());
+
+        Assert.assertEquals(100, data.get(0), 0.01);
+        Assert.assertEquals(103, data.get(1), 0.01);
+        Assert.assertEquals(101, data.get(2), 0.01);
+        Assert.assertEquals(103, data.get(3), 0.01);
+        Assert.assertEquals(100, data.get(4), 0.01);
+        Assert.assertEquals(101, data.get(5), 0.01);
     }
 
     @Test

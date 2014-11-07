@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import net.sf.json.JSONArray;
 
+import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
@@ -25,11 +26,13 @@ public class WPSController extends BasePortalController {
 
     private FileStagingService fss;
     private CSVService csvService;
+    private ConditionalProbabilityWpsClient wpsClient;
 
     @Autowired
-    public WPSController(FileStagingService fss, CSVService csvService) {
+    public WPSController(FileStagingService fss, CSVService csvService, ConditionalProbabilityWpsClient wpsClient) {
         this.fss = fss;
         this.csvService = csvService;
+        this.wpsClient = wpsClient;
     }
 
     @RequestMapping("/getPDFData.do")
@@ -40,16 +43,18 @@ public class WPSController extends BasePortalController {
 
         try {
             InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-            List<Double> columnData = csvService.getParameterValues(csvData, columnIndex);
+            List<Double> columnData = csvService.getParameterValues(csvData, columnIndex, false);
+
+            double[][] response = wpsClient.logDensity(columnData.toArray(new Double[columnData.size()]));
 
             //TODO - Send this off to WPS
             // Let's just fake it for now.
             JSONArray xyPairs = new JSONArray();
-            double[] scales =  new double[] {Math.random() * 0.1, Math.random() * 5, Math.random() * 4};
-            for (double x = 0; x < 1000.0; x+=1.1) {
-                double y = scales[0] * Math.pow(x, 3) - scales[1] * Math.pow(x, 2) + scales[2] * x + 1000; //fancy looking graph
-
-                xyPairs.add(new Double[] {x, y});
+            for (int i = 0; i < response[0].length; i++) {
+                JSONArray xy = new JSONArray();
+                xy.add(response[0][i]);
+                xy.add(response[1][i]);
+                xyPairs.add(xy);
             }
 
             return new ModelAndView(new JSONView(xyPairs), null);

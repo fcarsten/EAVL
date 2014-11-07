@@ -305,17 +305,22 @@ public class CSVService {
     }
 
     /**
-     * Converts and appends a data value to a list of numeric values. Appends null if the value is non numeric
+     * Converts and appends a data value to a list of numeric values. Appends null if the value is non numeric and includeNulls is set
      * @param data
      * @param data
      * @param index
      * @return
      */
-    private void appendValueToList(List<Double> values, String[] data, int index) {
+    private Double appendValueToList(List<Double> values, String[] data, int index, boolean includeNulls) {
         try {
-            values.add(new Double(Double.parseDouble(data[index])));
+            Double d = new Double(Double.parseDouble(data[index]));
+            values.add(d);
+            return d;
         } catch (NumberFormatException ex) {
-            values.add(null);
+            if (includeNulls) {
+                values.add(null);
+            }
+            return null;
         }
     }
 
@@ -330,6 +335,21 @@ public class CSVService {
      * @throws PortalServiceException
      */
     public List<Double> getParameterValues(InputStream csvData, int columnIndex) throws PortalServiceException {
+        return this.getParameterValues(csvData, columnIndex, true);
+    }
+
+    /**
+     * Streams through the CSV data, pulling out every numeric value as a floating point value. Null values can be optionally inserted
+     * for any value that does not parse into a double.
+     * Closes InputStream before returning.
+     *
+     * @param csvData InputStream containing CSV data. Will be closed by this method
+     * @param columnIndex The column index to pull numbers from
+     * @param includeMissing If true, missing values will be included as nulls. They will be skipped otherwise
+     * @return
+     * @throws PortalServiceException
+     */
+    public List<Double> getParameterValues(InputStream csvData, int columnIndex, boolean includeMissing) throws PortalServiceException {
         CSVReader reader = null;
         List<Double> values = new ArrayList<Double>();
 
@@ -343,12 +363,12 @@ public class CSVService {
 
             //Initialize the parameters (one for each column)
             if (!isHeaderLine(headerLine)) {
-                appendValueToList(values, headerLine, columnIndex);
+                appendValueToList(values, headerLine, columnIndex, includeMissing);
             }
 
             String[] dataLine;
             while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                appendValueToList(values, dataLine, columnIndex);
+                appendValueToList(values, dataLine, columnIndex, includeMissing);
             }
 
             return values;
