@@ -100,8 +100,6 @@ Ext.application({
                             plugins: [{
                                 ptype : 'modeldnd',
                                 ddGroup : 'set-prediction-pd',
-                                drag : true,
-                                drop : false,
                                 highlightBody : false,
                                 handleDrop : function(pdlist, pd) {
                                     pdlist.getStore().add(pd);
@@ -124,8 +122,6 @@ Ext.application({
                             plugins: [{
                                 ptype : 'modeldnd',
                                 ddGroup : 'set-prediction-pd',
-                                drag : false,
-                                drop : true,
                                 highlightBody : false,
                                 handleDrop : function(pdlist, pd) {
                                     pdlist.getStore().add(pd);
