@@ -60,8 +60,9 @@ Ext.define('eavl.widgets.plugins.HeaderDragLink', {
         this.dropTarget = new Ext.dd.DropTarget(body, {
             ddGroup : headerDDGroup,
             notifyEnter: function(ddSource, e, data) {
-                body.stopAnimation();
-                body.highlight();
+                eavl.widgets.util.HighlightUtil.highlight(container);
+                //body.stopAnimation();
+                //body.highlight();
             },
             notifyDrop: function(ddSource, e, data) {
                 if (me.removeOnDrop) {
