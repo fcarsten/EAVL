@@ -429,4 +429,111 @@ public class TestCSVService extends PortalTestClass{
 
         Assert.assertEquals(expected, os.toString());
     }
+
+    private void assertRawEquals(Double[][] expected, Double[][] actual) {
+        if (expected == null || actual == null) {
+            Assert.assertNull(actual);
+            Assert.assertNull(expected);
+            return;
+        }
+
+        Assert.assertEquals(expected.length, actual.length);
+
+        for (int i = 0; i < expected.length; i++) {
+            Assert.assertEquals(expected[i].length, actual[i].length);
+            for (int j = 0; j < expected[i].length; j++) {
+                if (expected[i][j] == null || actual[i][j] == null) {
+                    Assert.assertNull(actual[i][j]);
+                    Assert.assertNull(expected[i][j]);
+
+                } else {
+                    Assert.assertEquals(expected[i][j], actual[i][j], 0.001);
+                }
+
+
+            }
+        }
+    }
+
+    @Test
+    public void testGetRawData() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Double[][] expected = new Double[][] {
+                {0.0, 40.0, 100.0, 59.0, 12.0},
+                {1.0, 42.0, null, 52.0, 12.0},
+                {2.0, 16.0, 103.0, 6.0, 15.0},
+                {3.0, 13.0, 101.0, 43.0, null},
+                {4.0, 16.0, 103.0, 74.0, 16.0},
+                {5.0, 48.0, 100.0, 32.0, null},
+                {6.0, 41.0, null, 72.0, 14.0},
+                {7.0, 11.0, 101.0, 69.0, null}
+        };
+
+        Double[][] actual = service.getRawData(is);
+        assertRawEquals(expected, actual);
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testGetRawDataClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            atLeast(1).of(mockStream).close();
+        }});
+
+
+        service.getRawData(mockStream);
+    }
+
+    @Test
+    public void testWriteRawData() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        double[][] newData = new double[][] {
+                {0.4, 0.2, 0.5, 0.1, 0.8},
+                {440.4, 230.2, 40.2, 13.45, 88.8}
+        };
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+
+        service.writeRawData(is, os, newData);
+
+        String expected = "'sample',' gold (au) ppm','something-else','',' data'\n" +
+                "'0.4','0.2','0.5','0.1','0.8'\n" +
+                "'440.4','230.2','40.2','13.45','88.8'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testWriteRawDataNoHeader() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        double[][] newData = new double[][] {
+                {0.4, 0.2, 0.5, 0.1, 0.8},
+                {440.4, 230.2, 40.2, 13.45, 88.8}
+        };
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        service.writeRawData(is, os, newData);
+
+        String expected = "'0.4','0.2','0.5','0.1','0.8'\n" +
+                "'440.4','230.2','40.2','13.45','88.8'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testWriteRawDataClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            allowing(mockOutputStream).flush();
+
+            atLeast(1).of(mockStream).close();
+            atLeast(1).of(mockOutputStream).close();
+        }});
+
+        service.writeRawData(mockStream, mockOutputStream, new double[][] {{0.4, 0.2, 0.5, 0.1, 0.8}});
+    }
 }

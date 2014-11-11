@@ -226,6 +226,10 @@ public class CSVService {
      * @return
      */
     private boolean isHeaderLine(String[] data) {
+        if (data == null) {
+            return false;
+        }
+
         //If our first line has non numeric values (and at least 1 one text value) assume it's a header
         //Otherwise assume it's data. This isn't a perfect test but it should catch all but the most ugly edge cases
         int missingCount = 0, textCount = 0, numericCount = 0;
@@ -322,6 +326,25 @@ public class CSVService {
             }
             return null;
         }
+    }
+
+    /**
+     * Converts and appends an entire row of data to a list of rows. Appends nulls for doubles that don't parse
+     * @return
+     */
+    private Double[] appendValuesToList(List<Double[]> rows, String[] data) {
+
+        Double[] row = new Double[data.length];
+
+        for (int i = 0; i < data.length; i++) {
+            try {
+                Double d = new Double(Double.parseDouble(data[i]));
+                row[i] = d;
+            } catch (NumberFormatException ex) { }
+        }
+
+        rows.add(row);
+        return row;
     }
 
     /**
@@ -543,4 +566,99 @@ public class CSVService {
             IOUtils.closeQuietly(csvData);
         }
     }
+
+
+    /**
+     * Reads an entire CSV file into memory (in the form of a 2D double array). Missing/Invalid values will read
+     * null.
+     *
+     * Closes InputStream before returning.
+     *
+     * @param csvData
+     * @return
+     * @throws PortalServiceException
+     */
+    public Double[][] getRawData(InputStream csvData) throws PortalServiceException {
+        CSVReader reader = null;
+        List<Double[]> rows = new ArrayList<Double[]>();
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (headerLine == null) {
+                return new Double[][] {};
+            }
+            int nCols = headerLine.length;
+
+            //Initialize the parameters (one for each column)
+            if (!isHeaderLine(headerLine)) {
+                appendValuesToList(rows, headerLine);
+            }
+
+            String[] dataLine;
+            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
+                appendValuesToList(rows, dataLine);
+            }
+
+            return rows.toArray(new Double[nCols][rows.size()]);
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to parse parameter values", ex);
+        } finally {
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
+
+    /**
+     * Reads the headers of csvData into replacedCsvData and then follows it up by writing the entirety of
+     * data into replacedCsvData
+     *
+     * Closes InputStream and OutputStream before returning.
+     *
+     * @param csvData
+     * @return
+     * @throws PortalServiceException
+     */
+    public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data) throws PortalServiceException {
+        CSVReader reader = null;
+        CSVWriter writer = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            writer = new CSVWriter(new OutputStreamWriter(replacedCsvData), ',', '\'');
+
+            //Copy the header line (if it exists)
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (isHeaderLine(headerLine)) {
+                writer.writeNext(headerLine);
+            }
+
+            if (data == null || data.length == 0 || data[0].length == 0) {
+                return;
+            }
+
+            //Now write the body
+            int ncols = data[0].length;
+            for (int i = 0; i < data.length; i++) {
+                String[] row = new String[ncols];
+                for (int j = 0; j < ncols; j++) {
+                    row[j] = Double.toString(data[i][j]);
+                }
+                writer.writeNext(row);
+            }
+
+            return;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to writeRawData", ex);
+        } finally {
+            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
+            //Ensure the writers close BEFORE we close the underlying streams
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(replacedCsvData);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
+
 }
