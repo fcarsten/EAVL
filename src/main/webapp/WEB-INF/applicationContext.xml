@@ -31,4 +31,40 @@
     <bean id="wpsClient" class="org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient">
         <constructor-arg name="serviceUrl" value="${wps.endpoint}"/>
     </bean>
+    
+    <bean name="emailListener" class="org.auscope.portal.server.web.service.jobtask.EmailListener">
+        <constructor-arg name="mailSender">
+            <bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		        <property name="host" value="${HOST.smtp.server}" />
+		    </bean>
+        </constructor-arg>
+        <constructor-arg name="velocityEngine">
+            <bean class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+		        <property name="velocityProperties">
+		            <value>
+		                resource.loader=class
+		                class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+		            </value>
+		        </property>
+		    </bean>
+        </constructor-arg>
+        <constructor-arg name="templateFilePath" value="org/auscope/portal/server/web/service/jobtask/task-completion.tpl"/>
+        <constructor-arg name="templateFileEncoding" value="UTF-8"/>
+        <constructor-arg name="emailSender"><value><![CDATA[EAVL Admin <noreply-cg-admin@csiro.au>]]></value></constructor-arg>
+    </bean>
+    
+    <!-- This is the core threadpool shared by object instances throughout the portal -->
+    <!-- <bean id="executorFactory" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="5" />
+        <property name="queueCapacity" value="25" />
+    </bean>
+    <bean id="executor" factory-bean="executorFactory" factory-method="getObject">
+    </bean>  -->
+    
+    <bean id="executor" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="5" />
+        <property name="queueCapacity" value="25" />
+    </bean>
 </beans>

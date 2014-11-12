@@ -36,7 +36,6 @@ public class JobTaskService {
     private JobTaskPersistor persistor;
     private ConcurrentHashMap<String, ExecutingTask> activeTasks = new ConcurrentHashMap<String, ExecutingTask>();
 
-    @Autowired
     public JobTaskService(ExecutorService executor, JobTaskListener listener) {
         this(executor, listener, null);
     }
