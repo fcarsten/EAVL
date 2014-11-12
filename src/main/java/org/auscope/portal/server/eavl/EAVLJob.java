@@ -14,6 +14,7 @@ public class EAVLJob extends CloudJob {
     private Double predictionCutoff;
     private String predictionParameter;
     private Set<String> savedParameters;
+    private String imputationTaskId;
 
     public EAVLJob(Integer id) {
         super(id);
@@ -82,8 +83,19 @@ public class EAVLJob extends CloudJob {
         this.savedParameters = savedParameters;
     }
 
+    /**
+     * Gets the ID of the last run imputation task (or null if it hasn't been run yet)
+     * @return
+     */
+    public String getImputationTaskId() {
+        return imputationTaskId;
+    }
 
-
-
-
+    /**
+     * Sets the ID of the last run imputation task (or null if it hasn't been run yet)
+     * @param imputationTaskId
+     */
+    public void setImputationTaskId(String imputationTaskId) {
+        this.imputationTaskId = imputationTaskId;
+    }
 }

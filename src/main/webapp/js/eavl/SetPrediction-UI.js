@@ -54,7 +54,7 @@ Ext.application({
                         }
                         eavl.widget.SplashScren.showLoadingSplash("Saving predictor...");
                         Ext.Ajax.request({
-                            url: 'imputation/saveImputationConfig.do',
+                            url: 'imputation/saveAndSubmitImputation.do',
                             params : {
                                 savedColName : savedNames,
                                 predictorCutoff : pdfCutoff,
