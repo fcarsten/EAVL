@@ -49,7 +49,7 @@ public class JobTaskService {
 
         if (this.persistor != null) {
             for (JobTaskId jt : this.persistor.getPersistedJobs()) {
-                this.submit(jt.getJobTask(), jt.getId());
+                this.submit(jt.getJobTask(), jt.getId(), false);
             }
         }
     }
@@ -66,7 +66,7 @@ public class JobTaskService {
      * @return
      */
     public String submit(JobTask task)  {
-        return submit(task, null);
+        return submit(task, null, true);
     }
 
     /**
@@ -101,12 +101,12 @@ public class JobTaskService {
         return et.jobTask;
     }
 
-    private String submit(JobTask task, String guid)  {
+    private String submit(JobTask task, String guid, boolean persist)  {
         if (guid == null) {
             guid = UUID.randomUUID().toString();
         }
 
-        if (persistor != null) {
+        if (persistor != null && persist) {
             persistor.persist(guid, task);
         }
 

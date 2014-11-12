@@ -36,9 +36,9 @@ public class ImputationCallable implements Callable<Object> {
             Double[][] rawData = csvService.getRawData(in);
             double[][] imputedData = wpsClient.imputationNA(rawData);
 
-
+            IOUtils.closeQuietly(in);
             in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV); //need to reopen this because it gets shut above
-            os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
 
             this.csvService.writeRawData(in, os, imputedData);
             return imputedData;

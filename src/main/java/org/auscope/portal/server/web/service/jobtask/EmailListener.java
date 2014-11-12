@@ -34,7 +34,7 @@ public class EmailListener implements JobTaskListener {
         this.emailSender = emailSender;
     }
 
-    protected void sendNotificationEmail(String email, String id, JobTask task) {
+    protected void sendNotificationEmail(String email, String id, JobTask task, boolean isErrorMail) {
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("name", task.getJob().getName());
         String content = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, templateFilePath, templateFileEncoding, model);
@@ -42,7 +42,11 @@ public class EmailListener implements JobTaskListener {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(this.emailSender);
         msg.setTo(email);
-        msg.setSubject(String.format("EAVL job %1$s has finished", task.getJob().getName()));
+        if (isErrorMail) {
+            msg.setSubject(String.format("EAVL task %1$s has errored", task.getJob().getName()));
+        } else {
+            msg.setSubject(String.format("EAVL task %1$s has finished", task.getJob().getName()));
+        }
         msg.setText(content);
 
         try {
@@ -56,8 +60,17 @@ public class EmailListener implements JobTaskListener {
 
     @Override
     public void handleTaskFinish(String id, JobTask task) {
+        boolean isError = false;
+        try {
+            task.get(); //Force any exceptions to be rethrown
+        } catch (Exception ex) {
+            log.error(String.format("JobTask %1$s threw an exception during computation. Sending error email instead", task));
+            isError = true;
+        }
+
+
         if (task.getEmail() != null) {
-            this.sendNotificationEmail(task.getEmail(), id, task);
+            this.sendNotificationEmail(task.getEmail(), id, task, isError);
         }
     }
 
