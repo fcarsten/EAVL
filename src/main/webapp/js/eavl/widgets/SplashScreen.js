@@ -56,20 +56,44 @@ Ext.define('eavl.widget.SplashScren', {
             });
         }
 
-        viewport.removeAll(true);
-        viewport.add({
-            xtype : 'panel',
-            region : 'center',
-            layout : 'fit',
-            items : [{
-                title : message,
-                xtype : 'panel',
-                layout : 'fit',
+        //Update everything after a short delay to ensure we catch everything
+        new Ext.util.DelayedTask(function(){
+            viewport.removeAll(true);
+            viewport.add({
+                xtype: 'workflowpanel',
+                region: 'north',
+                height: 200,
+                hideNavigator : true,
+                allowNext : function(callback) {
+                    callback(false);
+                }
+            },{
+                xtype : 'container',
+                region : 'center',
+                layout : {
+                    type: 'vbox',
+                    align: 'center',
+                    pack: 'start'
+                },
+                style: {
+                    'background-color': 'white'
+                },
                 items : [{
                     xtype : 'image',
+                    width: 500,
+                    height: 500,
                     src : 'img/alert.svg',
+                },{
+                    xtype: 'panel',
+                    width: '100%',
+                    bodyStyle: {
+                        'text-align': 'center',
+                        'font-size': 24
+                    },
+                    html: message
                 }]
-            }]
-        });
+            });
+        }).delay(500);
+
     };
 });
