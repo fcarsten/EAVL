@@ -85,28 +85,6 @@ Ext.application({
                 window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.msg, next: 'setproxy.html'});
             }
         });
-
-        var pdStore = Ext.create('Ext.data.Store', {
-            model : 'eavl.models.ParameterDetails',
-            autoLoad : true,
-            proxy : {
-                type : 'ajax',
-                url : 'validation/getParameterDetails.do',
-                reader : {
-                    type : 'json',
-                    root : 'data'
-                }
-            },
-            listeners: {
-                load : function(pdStore, records, successful, eOpts) {
-                    if (successful) {
-                        initSuccess(records)
-                    } else {
-                        initError();
-                    }
-                }
-            }
-        });
     }
 
 });
