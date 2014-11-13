@@ -6,7 +6,7 @@
         <title>EAVL - Waiting...</title>
         
         <jsp:include page="../../jsimports.htm"/>
-        
+                
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/TaskWait-UI.css">
         

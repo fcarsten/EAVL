@@ -45,13 +45,14 @@ Ext.application({
                 },
                 layout : {
                     type: 'vbox',
-                    pack: 'center',
+                    pack: 'start',
                     align: 'center'
                 },
                 items : [{
                     xtype: 'container',
                     height : 200,
-                    width : 500,
+                    margin: '100 0 0 0',
+                    width : '100%',
                     html : Ext.DomHelper.markup({
                         tag : 'div',
                         cls : 'loading-box',
@@ -59,19 +60,91 @@ Ext.application({
                             tag : 'img',
                             src : 'img/loading-bars.svg'
                         },{
+                            tag : 'h1',
+                            html : 'Performing ' + taskName + "..."
+                        },{
                             tag : 'div',
-                            html : 'Performing ' + taskName
+                            html : 'This page will refresh when complete.'
                         }]
                     })
                 },{
                     xtype: 'container',
-                    height : 200,
+                    margins: '20 0 0 0',
+                    height: 200,
+                    layout : {
+                        type: 'vbox',
+                        pack: 'center',
+                        align: 'center'
+                    },
                     items : [{
                         xtype: 'checkboxfield',
-                        boxLabel: 'Email me when this is done'
+                        itemId: 'check',
+                        boxLabel: 'Email me when this is done',
+                        cls: 'cb-email',
+                        listeners : {
+                            change: function(cb, newValue, oldValue) {
+                                cb.ownerCt.down('#loadingimg').show();
+                                cb.ownerCt.down('#statuslabel').hide();
+                                Ext.Ajax.request({
+                                    url: 'taskwait/setEmailNotification.do',
+                                    params: {
+                                        notify: newValue ? 'true' : 'false',
+                                        taskId: taskId
+                                    },
+                                    callback: function(options, success, response) {
+                                        var statusMsg = "";
+                                        if (!success || !Ext.JSON.decode(response.responseText).success) {
+                                            statusMsg = "Oops, there was a problem changing your email notification settings.";
+                                        } else if (newValue) {
+                                            statusMsg = "We'll email you when this task finishes.";
+                                        } else {
+                                            statusMsg = "You've been unsubscribed.";
+                                        }
+
+                                        cb.ownerCt.down('#loadingimg').hide();
+                                        cb.ownerCt.down('#statuslabel').setText(statusMsg);
+                                        cb.ownerCt.down('#statuslabel').show();
+                                    }
+                                });
+                            }
+                        }
+                    },{
+                        xtype: 'image',
+                        itemId: 'loadingimg',
+                        src: 'img/loading.gif',
+                        width: 16,
+                        height: 16,
+                        hidden: true
+                    },{
+                        xtype: 'label',
+                        cls: 'lbl-status',
+                        itemId: 'statuslabel',
+                        hidden: true,
                     }]
                 }]
             }]
         });
+
+        //We poll for requests
+        Ext.TaskManager.start({
+            interval: 1000 * 10, //every 10 seconds
+            run: function() {
+                Ext.Ajax.request({
+                    url: 'taskwait/isExecuting.do',
+                    params: {
+                        taskId: taskId
+                    },
+                    callback: function(options, success, response) {
+                        if (success) {
+                            var responseObj = Ext.JSON.decode(response.responseText);
+                            if (responseObj.success && !responseObj.data) {
+                                window.location.href = next;
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
     }
 });

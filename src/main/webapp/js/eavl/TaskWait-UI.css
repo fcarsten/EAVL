@@ -1,13 +1,45 @@
 .loading-box {
-	
+	height : 100%;
+    width : 100%;
+    text-align: center;
 }
 
 .loading-box img {
-    width : 80px;
-    height : 80px;
+	top: 50%;
+	margin-top: -60px;
+    width : 120px;
+    height : 120px;
+}
+
+.loading-box h1 {
+    
+    font-size: 96px;
+    font-family: "Helvetica Neue",Helvetica,sans-serif;
+    font-weight: 700;
+    line-height: 128px;
+    
+    width: 100%;
+}
+
+.loading-box div {
+    
+    font-size: 16px;
+    font-family: "Helvetica Neue",Helvetica,sans-serif;
+    font-weight: 400;
+    
+    width: 100%;
 }
 
 
 .email-box {
 	
+}
+
+.cb-email {
+    font-size: 16px;
+    font-family: "Helvetica Neue",Helvetica,sans-serif;	
+}
+
+.lbl-status {
+	font-style: italic;
 }
