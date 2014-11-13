@@ -34,7 +34,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
     steps : [{url:'upload.html', title:'Upload', help: 'Upload a CSV file for processing.'},
              {url:'validate.html', title:'Validate', help: 'Remove any non numeric values (or trash the parameter entirely)'},
              {url:'setprediction.html', title:'Imputation', help: 'Select a parameter to be predicted. Its missing values will be imputed.'},
-             {url:'setproxies.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
+             {url:'setproxy.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
              {url:'results.html', title:'Results', help: 'Browse the results of existing jobs.'}],
 
     allowNext : null,
@@ -46,6 +46,8 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
      * {
      *  allowNext : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true)
      *  allowPrevious : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true)
+     *  hideNavigator : boolean - If true, the Navigator panel (big left/right arrows) will be omitted
+     *  urlOverride : String - if set, highlight location based on this string rather than window.location
      * }
      *
      * Adds the following events
@@ -63,17 +65,19 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             this.allowPrevious = config.allowPrevious;
         }
 
-        var currentIndex = this.getActiveStepIndex();
+        this.hideNavigator = config.hideNavigator ? true : false;
 
-        var currentStep = this.steps[currentIndex];
+        var currentIndex = this.getActiveStepIndex(config.urlOverride ? config.urlOverride : undefined);
+
+        var currentStep = currentIndex >= 0 ? this.steps[currentIndex] : null;
         var previousStep = null;
         var nextStep = null;
 
-        if (currentIndex > 0) {
+        if (currentIndex !== -1 && currentIndex > 0) {
             previousStep = this.steps[currentIndex - 1];
         }
 
-        if (currentIndex < (this.steps.length - 1)) {
+        if (currentIndex !== -1 && currentIndex < (this.steps.length - 1)) {
             nextStep = this.steps[currentIndex + 1];
         }
 
@@ -83,7 +87,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             var href = '';
             if (i < currentIndex) {
                 href = Ext.util.Format.format('javascript:eavl.widgets.WorkflowLocationPanel.handleAllowPrevious(\'{0}\')', this.steps[i].url);
-            } else if (i === currentIndex) {
+            } else if (i === currentIndex || currentIndex === -1) {
                 href = 'javascript:void()';
             } else {
                 href = Ext.util.Format.format('javascript:eavl.widgets.WorkflowLocationPanel.handleAllowNext(\'{0}\')', this.steps[i].url);
@@ -116,6 +120,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             },{
                 tag : 'div',
                 id : 'arrows-container',
+                style : this.hideNavigator ? 'display:none;' : '',
                 children : [{
                     tag: 'div',
                     id : 'arrows-internal',
@@ -142,15 +147,16 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             },{
                 tag: 'div',
                 id: 'text-container',
+                style : this.hideNavigator ? 'display:none;' : '',
                 children: [{
                     tag: 'div',
                     id: 'text-internal',
                     children: [{
                         tag: 'h1',
-                        html: currentStep.title
+                        html: currentStep ? currentStep.title : ''
                     },{
                         tag: 'h2',
-                        html: currentStep.help
+                        html: currentStep ? currentStep.help : ''
                     }]
                 }]
             }]
@@ -165,9 +171,13 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
     },
 
 
-    getActiveStepIndex : function() {
+    getActiveStepIndex : function(url) {
+        if (!url) {
+            url = window.location.pathname;
+        }
+
         for (var i = 0; i < this.steps.length; i++) {
-            if (window.location.pathname.endsWith(this.steps[i].url)) {
+            if (url.endsWith(this.steps[i].url)) {
                 return i;
             }
         }
