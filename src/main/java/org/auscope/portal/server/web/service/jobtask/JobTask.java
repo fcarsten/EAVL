@@ -3,6 +3,8 @@ package org.auscope.portal.server.web.service.jobtask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.server.eavl.EAVLJob;
 
 /**
@@ -14,6 +16,8 @@ import org.auscope.portal.server.eavl.EAVLJob;
  *
  */
 public class JobTask extends FutureTask<Object> {
+
+    protected final Log log = LogFactory.getLog(getClass());
 
     protected EAVLJob job;
     protected String email;
@@ -43,5 +47,12 @@ public class JobTask extends FutureTask<Object> {
 
     public EAVLJob getJob() {
         return job;
+    }
+
+    @Override
+    public void run() {
+        log.warn("Starting job run");
+
+        super.run();
     }
 }

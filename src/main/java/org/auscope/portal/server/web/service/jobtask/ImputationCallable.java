@@ -5,13 +5,18 @@ import java.io.OutputStream;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
+import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
 
 public class ImputationCallable implements Callable<Object> {
+
+    protected final Log log = LogFactory.getLog(getClass());
 
     private EAVLJob job;
     private ConditionalProbabilityWpsClient wpsClient;
@@ -42,6 +47,9 @@ public class ImputationCallable implements Callable<Object> {
 
             this.csvService.writeRawData(in, os, imputedData);
             return imputedData;
+        } catch (Exception ex) {
+            log.error("Imputation Error: ", ex);
+            throw new PortalServiceException("", ex);
         } finally {
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(os);

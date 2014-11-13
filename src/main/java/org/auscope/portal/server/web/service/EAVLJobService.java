@@ -2,7 +2,6 @@ package org.auscope.portal.server.web.service;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.core.services.PortalServiceException;
@@ -19,8 +18,10 @@ public class EAVLJobService {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    public EAVLJobService() {
+    private EAVLJob debugJobSingleton;
 
+    public EAVLJobService() {
+        debugJobSingleton = new EAVLJob(1);
     }
 
     /**
@@ -31,7 +32,7 @@ public class EAVLJobService {
      */
     public EAVLJob createJobForSession(HttpServletRequest request) throws PortalServiceException {
         log.warn("TODO - createJobForSession");
-        return new EAVLJob(1);
+        return debugJobSingleton;
     }
 
     /**
@@ -42,7 +43,7 @@ public class EAVLJobService {
      */
     public EAVLJob getJobForSession(HttpServletRequest request) throws PortalServiceException {
         log.warn("TODO - getJobForSession");
-        return new EAVLJob(1);
+        return debugJobSingleton;
     }
 
     /**
@@ -51,7 +52,7 @@ public class EAVLJobService {
      * @return
      */
     public EAVLJob getJobById(Integer id) throws PortalServiceException {
-        throw new NotImplementedException();
+        return debugJobSingleton;
     }
 
     /**
@@ -59,8 +60,10 @@ public class EAVLJobService {
      * @param job Job to delete
      * @throws PortalServiceException
      */
-    public void delete(EAVLJob job) throws PortalServiceException{
-        throw new NotImplementedException();
+    public void delete(EAVLJob job) throws PortalServiceException {
+        //TODO - save job
+        log.warn("TODO - delete job");
+        debugJobSingleton = null;
     }
 
     /**
@@ -70,6 +73,8 @@ public class EAVLJobService {
      * @throws PortalServiceException
      */
     public void save(EAVLJob job) throws PortalServiceException {
-        throw new NotImplementedException();
+        //TODO - save job
+        log.warn("TODO - save job");
+        debugJobSingleton = job;
     }
 }

@@ -57,6 +57,10 @@ public class ImputationController extends BasePortalController {
             @RequestParam("predictorName") String predictorName,
             @RequestParam("predictorCutoff") Double predictorCutoff) {
 
+        if (savedNames == null) {
+            savedNames = new String[] {};
+        }
+
         try {
             EAVLJob job = jobService.getJobForSession(request);
 
