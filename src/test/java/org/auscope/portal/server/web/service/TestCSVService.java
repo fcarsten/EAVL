@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -260,6 +261,64 @@ public class TestCSVService extends PortalTestClass{
     }
 
     @Test
+    public void testGetParameterValuesColIndexes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+
+        List<Double[]> data = service.getParameterValues(is, Arrays.asList(1, 3));
+
+        Assert.assertNotNull(data);
+        Assert.assertEquals(8, data.size());
+
+        Double[][] expected = new Double[][] {
+                {40.0, 59.0},
+                {42.0, 52.0},
+                {16.0, 6.0},
+                {13.0, 43.0},
+                {16.0, 74.0},
+                {48.0, 32.0},
+                {41.0, 72.0},
+                {11.0, 69.0}
+        };
+
+        assertRawEquals(expected, data.toArray(new Double[data.size()][]));
+    }
+
+    @Test
+    public void testGetParameterValuesColIndexesNoHeaders() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+
+        List<Double[]> data = service.getParameterValues(is, Arrays.asList(1, 3));
+
+        Assert.assertNotNull(data);
+        Assert.assertEquals(8, data.size());
+
+        Double[][] expected = new Double[][] {
+                {40.0, null},
+                {42.0, 52.0},
+                {16.0, 6.0},
+                {13.0, 43.0},
+                {16.0, 74.0},
+                {48.0, 32.0},
+                {41.0, 72.0},
+                {11.0, 69.0}
+        };
+
+        assertRawEquals(expected, data.toArray(new Double[data.size()][]));
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testParameterValuesColIndexesClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            atLeast(1).of(mockStream).close();
+        }});
+
+        service.getParameterValues(mockStream, Arrays.asList(1));
+    }
+
+    @Test
     public void testFindReplace() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -473,6 +532,24 @@ public class TestCSVService extends PortalTestClass{
         assertRawEquals(expected, actual);
     }
 
+    @Test
+    public void testGetRawDataColIndexes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Double[][] expected = new Double[][] {
+                {12.0, 59.0},
+                {12.0, 52.0},
+                {15.0, 6.0},
+                {null, 43.0},
+                {16.0, 74.0},
+                {null, 32.0},
+                {14.0, 72.0},
+                {null, 69.0}
+        };
+
+        Double[][] actual = service.getRawData(is, Arrays.asList(4, 3));
+        assertRawEquals(expected, actual);
+    }
+
     @Test(expected=PortalServiceException.class)
     public void testGetRawDataClosesStream() throws Exception {
         context.checking(new Expectations() {{
@@ -535,5 +612,89 @@ public class TestCSVService extends PortalTestClass{
         }});
 
         service.writeRawData(mockStream, mockOutputStream, new double[][] {{0.4, 0.2, 0.5, 0.1, 0.8}});
+    }
+
+    @Test
+    public void testColNameToIndex() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        Assert.assertNull(service.columnNameToIndex(is, null));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        Assert.assertNull(service.columnNameToIndex(is, "DNE"));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/empty-data.csv");
+        Assert.assertNull(service.columnNameToIndex(is, "DNE"));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Assert.assertNull(service.columnNameToIndex(is, "DNE"));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Assert.assertEquals((Integer) 1, service.columnNameToIndex(is, " gold (au) ppm"));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Assert.assertEquals((Integer) 4, service.columnNameToIndex(is, " data"));
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testColNameToIndexClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            atLeast(1).of(mockStream).close();
+        }});
+
+        service.columnNameToIndex(mockStream, " data");
+    }
+
+    @Test
+    public void testSwapColumn() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Assert.assertEquals(8, service.swapColumns(is, os, 0, 2));
+        String expected = "' D/L',' 40','0',' ',' 12'\n" +
+        "' 102',' 42','1',' 52',' 12'\n" +
+        "' 103',' 16','2',' 6',' 15'\n" +
+        "' 101',' 13','3',' 43',' '\n" +
+        "' 103',' 16','4',' 74',' 16'\n" +
+        "' 100',' 48','5',' 32',' '\n" +
+        "' D/L',' 41','6',' 72',' 14'\n" +
+        "' 101',' 11','7',' 69',' '\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testSwapColumnEqualIndex() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        Assert.assertEquals(8, service.swapColumns(is, os, 2, 2));
+        String expected = "'0',' 40',' D/L',' ',' 12'\n" +
+        "'1',' 42',' 102',' 52',' 12'\n" +
+        "'2',' 16',' 103',' 6',' 15'\n" +
+        "'3',' 13',' 101',' 43',' '\n" +
+        "'4',' 16',' 103',' 74',' 16'\n" +
+        "'5',' 48',' 100',' 32',' '\n" +
+        "'6',' 41',' D/L',' 72',' 14'\n" +
+        "'7',' 11',' 101',' 69',' '\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testSwapColumnsClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            allowing(mockOutputStream).flush();
+
+            atLeast(1).of(mockStream).close();
+            atLeast(1).of(mockOutputStream).close();
+        }});
+
+        service.swapColumns(mockStream, mockOutputStream, 0, 2);
     }
 }

@@ -1,12 +1,14 @@
 package org.auscope.portal.server.web.controllers;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import net.sf.json.JSONArray;
 
+import org.apache.commons.io.IOUtils;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.cloud.FileStagingService;
@@ -49,8 +51,6 @@ public class WPSController extends BasePortalController {
 
             double[][] response = wpsClient.logDensity(columnData.toArray(new Double[columnData.size()]));
 
-            //TODO - Send this off to WPS
-            // Let's just fake it for now.
             JSONArray xyPairs = new JSONArray();
             for (int i = 0; i < response[0].length; i++) {
                 JSONArray xy = new JSONArray();
@@ -63,6 +63,52 @@ public class WPSController extends BasePortalController {
         } catch (Exception ex) {
             log.warn("Unable to get pdf values: ", ex);
             return generateJSONResponseMAV(false, null, "Error fetching pdf data");
+        }
+    }
+
+    @RequestMapping("/getDoublePDFData.do")
+    public ModelAndView getDoublePDFData(HttpServletRequest request,
+            @RequestParam("columnIndex") int columnIndex) {
+
+        try {
+            EAVLJob job = jobService.getJobForSession(request);
+            if (job == null) {
+                return generateJSONResponseMAV(false, null, "No job");
+            }
+
+            String predictionColumnName = job.getPredictionParameter();
+            if (predictionColumnName == null) {
+                return generateJSONResponseMAV(false, null, "No prediction set");
+            }
+
+            Double predictionCutoff = job.getPredictionCutoff();
+            if (predictionCutoff == null) {
+                return generateJSONResponseMAV(false, null, "No prediction cutoff set");
+            }
+
+            InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            Integer predictionColumnIndex = csvService.columnNameToIndex(csvData, predictionColumnName);
+            if (predictionColumnIndex == null) {
+                return generateJSONResponseMAV(false, null, "Prediction column DNE");
+            }
+
+            IOUtils.closeQuietly(csvData);
+            csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            Double[][] data = csvService.getRawData(csvData, Arrays.asList(predictionColumnIndex, columnIndex));
+
+            double[][] response = wpsClient.doubleLogDensity(data, predictionCutoff);
+            JSONArray xyPairs = new JSONArray();
+            for (int i = 0; i < response[0].length; i++) {
+                JSONArray xy = new JSONArray();
+                xy.add(response[0][i]);
+                xy.add(response[1][i]);
+                xyPairs.add(xy);
+            }
+
+            return new ModelAndView(new JSONView(xyPairs), null);
+        } catch (Exception ex) {
+            log.warn("Unable to get pdf values: ", ex);
+            return generateJSONResponseMAV(false, null, "Error fetching double pdf data");
         }
     }
 }

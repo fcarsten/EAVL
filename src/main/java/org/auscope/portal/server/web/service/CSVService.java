@@ -348,6 +348,24 @@ public class CSVService {
     }
 
     /**
+     * Converts and appends a subset of a row of data to a list of rows. Appends nulls for doubles that don't parse
+     * @return
+     */
+    private Double[] appendValuesToList(List<Double[]> rows, String[] data, List<Integer> columnIndexes) {
+        Double[] row = new Double[columnIndexes.size()];
+
+        for (int i = 0; i < row.length; i++) {
+            try {
+                Double d = new Double(Double.parseDouble(data[columnIndexes.get(i)]));
+                row[i] = d;
+            } catch (NumberFormatException ex) { }
+        }
+
+        rows.add(row);
+        return row;
+    }
+
+    /**
      * Streams through the CSV data, pulling out every numeric value as a floating point value. Null values will be inserted
      * for any value that does not parse into a double.
      * Closes InputStream before returning.
@@ -403,6 +421,46 @@ public class CSVService {
         }
     }
 
+    /**
+     * Streams through the CSV data, pulling out every numeric value as a floating point value. Null values can be optionally inserted
+     * for any value that does not parse into a double.
+     * Closes InputStream before returning.
+     *
+     * @param csvData InputStream containing CSV data. Will be closed by this method
+     * @param columnIndexes The column indexes to pull numbers from. Item 0 will output as column 0 etc.
+     * @return
+     * @throws PortalServiceException
+     */
+    public List<Double[]> getParameterValues(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
+        CSVReader reader = null;
+        List<Double[]> values = new ArrayList<Double[]>();
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (headerLine == null) {
+                return values;
+            }
+
+            //Initialize the parameters (one for each column)
+            if (!isHeaderLine(headerLine)) {
+                appendValuesToList(values, headerLine, columnIndexes);
+            }
+
+            String[] dataLine;
+            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
+                appendValuesToList(values, dataLine, columnIndexes);
+            }
+
+            return values;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to parse parameter values", ex);
+        } finally {
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
 
     /**
      * Internal utility for performing the actual find/replace operation on dataLine. Returns dataLine
@@ -570,7 +628,7 @@ public class CSVService {
 
     /**
      * Reads an entire CSV file into memory (in the form of a 2D double array). Missing/Invalid values will read
-     * null.
+     * null. Header line (if it exists) will be skipped
      *
      * Closes InputStream before returning.
      *
@@ -579,6 +637,21 @@ public class CSVService {
      * @throws PortalServiceException
      */
     public Double[][] getRawData(InputStream csvData) throws PortalServiceException {
+        return getRawData(csvData, null);
+    }
+
+    /**
+     * Reads a subset of entire CSV file into memory (in the form of a 2D double array). Missing/Invalid values will read
+     * null. Header line (if it exists) will be skipped
+     *
+     * Closes InputStream before returning.
+     *
+     * @param csvData
+     * @param columnIndexes What column indexes to read. If null, all will be read. columnIndex[x] will output as column x
+     * @return
+     * @throws PortalServiceException
+     */
+    public Double[][] getRawData(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
         CSVReader reader = null;
         List<Double[]> rows = new ArrayList<Double[]>();
 
@@ -589,16 +662,25 @@ public class CSVService {
             if (headerLine == null) {
                 return new Double[][] {};
             }
-            int nCols = headerLine.length;
+            int nCols = columnIndexes == null ? headerLine.length : columnIndexes.size();
 
             //Initialize the parameters (one for each column)
             if (!isHeaderLine(headerLine)) {
-                appendValuesToList(rows, headerLine);
+                if (columnIndexes == null) {
+                    appendValuesToList(rows, headerLine);
+                } else {
+                    appendValuesToList(rows, headerLine, columnIndexes);
+                }
+
             }
 
             String[] dataLine;
             while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                appendValuesToList(rows, dataLine);
+                if (columnIndexes == null) {
+                    appendValuesToList(rows, dataLine);
+                } else {
+                    appendValuesToList(rows, dataLine, columnIndexes);
+                }
             }
 
             return rows.toArray(new Double[nCols][rows.size()]);
@@ -661,4 +743,89 @@ public class CSVService {
         }
     }
 
+    /**
+     * Attempts to take a column header name to find out what the
+     * numerical (0 based) index is. Returns null if the name DNE or
+     * this dataset doesn't have a header row
+     *
+     * Closes InputStream before returning.
+     *
+     * @param csvData input CSV data
+     * @param name The column header name
+     * @return
+     */
+    public Integer columnNameToIndex(InputStream csvData, String name) throws PortalServiceException {
+        CSVReader reader = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+
+            //Copy the header line (if it exists)
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (!isHeaderLine(headerLine)) {
+                return null;
+            }
+
+            for (int i = 0; i < headerLine.length; i++) {
+                if (headerLine[i].equals(name)) {
+                    return i;
+                }
+            }
+
+            return null;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to nameToIndex for name:" + name, ex);
+        } finally {
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
+
+
+    /**
+     * Streams CSV data from csvData and swaps the columns at index1 and index2.
+     *
+     * Any empty lines will be removed as part of this copying.
+     *
+     * Closes InputStream and OutputStream before returning.
+     *
+     * Returns the number of lines written (including header, if any)
+     *
+     * @param csvData
+     * @param deletedCsvData
+     * @param index1 Will be replaced with column data at index2
+     * @param index2 Will be replaced with column data at index1
+     */
+    public int swapColumns(InputStream csvData, OutputStream deletedCsvData, int index1, int index2) throws PortalServiceException {
+        CSVReader reader = null;
+        CSVWriter writer = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            writer = new CSVWriter(new OutputStreamWriter(deletedCsvData), ',', '\'');
+
+            String[] dataLine;
+            int linesWritten = 0;
+            while((dataLine = getNextNonEmptyRow(reader)) != null) {
+
+                String swap = dataLine[index1];
+                dataLine[index1] = dataLine[index2];
+                dataLine[index2] = swap;
+
+                writer.writeNext(dataLine);
+                linesWritten++;
+            }
+
+            return linesWritten;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to swap columns", ex);
+        } finally {
+            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
+            //Ensure the writers close BEFORE we close the underlying streams
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(deletedCsvData);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
 }
