@@ -99,11 +99,13 @@ public class WPSController extends BasePortalController {
 
             double[][] response = wpsClient.doubleLogDensity(data, predictionCutoff);
             JSONArray xyPairs = new JSONArray();
-            for (int i = 0; i < response[0].length; i++) {
-                JSONArray xy = new JSONArray();
-                xy.add(response[0][i]);
-                xy.add(response[1][i]);
-                xyPairs.add(xy);
+            for (int i = 0; i < response.length; i++) {
+                JSONArray xyxy = new JSONArray();
+                xyxy.add(response[i][0]);
+                xyxy.add(response[i][1]);
+                xyxy.add(response[i][2]);
+                xyxy.add(response[i][3]);
+                xyPairs.add(xyxy);
             }
 
             return new ModelAndView(new JSONView(xyPairs), null);

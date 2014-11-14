@@ -25,7 +25,7 @@ Ext.application({
             eavl.widget.SplashScren.showErrorSplash(message + Ext.util.Format.format('<br><a href="{0}">Continue</a>', url));
         };
 
-        var initSuccess = function() {
+        var initSuccess = function(records) {
             eavl.widget.SplashScren.hideLoadingScreen();
 
             Ext.tip.QuickTipManager.init();
@@ -41,11 +41,113 @@ Ext.application({
                 },{
                     xtype: 'container',
                     region: 'center',
-                    html : 'TODO - this content'
+                    layout: {
+                        type: 'hbox',
+                        align : 'stretch',
+                        pack : 'center'
+                    },
+                    items: [{
+                        xtype : 'pdlist',
+                        title : 'Available Parameters',
+                        width: 300,
+                        parameterDetails : records,
+                        plugins: [{
+                            ptype : 'modeldnd',
+                            ddGroup : 'set-proxy-pd',
+                            highlightBody : false,
+                            handleDrop : function(pdlist, pd) {
+                                pdlist.getStore().add(pd);
+                            },
+                            handleDrag : function(pdlist, pd) {
+                                pdlist.getStore().remove(pd);
+                            }
+                        }],
+                        viewConfig : {
+                            deferEmptyText : false,
+                            emptyText : '<div class="pdlist-empty-container"><div class="pdlist-empty-container-inner">No parameters available.</div></div>'
+                        }
+                    },{
+                        xtype: 'container',
+                        flex: 1,
+                        layout: {
+                            type: 'hbox',
+                            align : 'stretch',
+                            pack : 'center'
+                        },
+                        items: [{
+                            xtype: 'container',
+                            flex: 1,
+                            layout: {
+                                type: 'vbox',
+                                align : 'center',
+                                pack : 'center'
+                            },
+                            items : [{
+                                xtype : 'pdfield',
+                                id : 'proxy1-field',
+                                width: '100%',
+                                title: 'Proxy 1',
+                                height: 80,
+                                emptyText : 'Drag a parameter here to select it.',
+                                margins: '0 0 10 0',
+                                allowBlank: false,
+                                plugins: [{
+                                    ptype : 'modeldnd',
+                                    ddGroup : 'set-proxy-pd',
+                                    highlightBody : false,
+                                    handleDrop : function(pdfield, pd, source) {
+                                        //Swap if we already have a value
+                                        if (pdfield.getValue()) {
+                                            var currentValue = pdfield.getValue();
+                                            source.getStore().add(currentValue);
+                                        }
+                                        pdfield.setValue(pd);
 
+                                        pdfield.ownerCt.down('#p1-dpdfchart').plotParameterDetails(pd);
+                                    },
+                                    handleDrag : function(pdfield, pd) {
+                                        pdfield.reset();
+                                        pdfield.ownerCt.down('#p1-dpdfchart').clearPlot();
+                                    }
+                                }]
+                            },{
+                                xtype: 'panel',
+                                title: 'Double PDF',
+                                width: '100%',
+                                flex: 1,
+                                layout: 'fit',
+                                items : [{
+                                    xtype: 'doublepdfchart',
+                                    itemId: 'p1-dpdfchart'
+                                }]
+                            }]
+                        }]
+                    }]
                 }]
             });
         };
+
+        var pdStore = Ext.create('Ext.data.Store', {
+            model : 'eavl.models.ParameterDetails',
+            autoLoad : true,
+            proxy : {
+                type : 'ajax',
+                url : 'validation/getParameterDetails.do',
+                reader : {
+                    type : 'json',
+                    root : 'data'
+                }
+            },
+            listeners: {
+                load : function(pdStore, records, successful, eOpts) {
+                    if (successful) {
+                        initSuccess(records)
+                    } else {
+                        initError();
+                    }
+                }
+            }
+        });
 
         //Before loading
         Ext.Ajax.request({
@@ -63,7 +165,7 @@ Ext.application({
                 }
 
                 if (responseObj.data == true) {
-                    initSuccess();
+                    pdStore.load();
                     return;
                 }
 
