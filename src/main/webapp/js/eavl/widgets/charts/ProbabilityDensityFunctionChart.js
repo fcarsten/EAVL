@@ -1,7 +1,7 @@
 /**
  * Panel extension for graphing a Probability Density Function
  */
-Ext.define('eavl.widgets.ProbabilityDensityFunctionChart', {
+Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
     extend: 'Ext.panel.Panel',
 
     alias: 'widget.pdfchart',
