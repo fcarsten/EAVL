@@ -39,6 +39,13 @@ Ext.application({
                         }
                         var predictorPd = predictorField.getValue();
 
+                        var holeIdField = Ext.getCmp('holeid-field');
+                        if (!holeIdField.isValid()) {
+                            callback(false);
+                            return;
+                        }
+                        var holeIdPd = holeIdField.getValue();
+
                         var pdfChart = Ext.getCmp('predictor-pdf-chart');
                         var pdfCutoff = pdfChart.getCutoffValue();
                         if (pdfCutoff === null) {
@@ -58,7 +65,8 @@ Ext.application({
                             params : {
                                 savedColName : savedNames,
                                 predictorCutoff : pdfCutoff,
-                                predictorName : predictorPd.get('name')
+                                predictorName : predictorPd.get('name'),
+                                holeIdName : holeIdPd.get('name')
                             },
                             callback : function(options, success, response) {
                                 eavl.widget.SplashScren.hideLoadingScreen();
@@ -141,6 +149,33 @@ Ext.application({
                         layout: 'vbox',
                         margins: '0 10 0 0',
                         items : [{
+                            xtype : 'pdfield',
+                            id : 'holeid-field',
+                            width: '100%',
+                            title: 'Hole Identifier',
+                            height: 80,
+                            emptyText : 'Drag a parameter here to select it.',
+                            margins: '0 0 10 0',
+                            allowBlank: false,
+                            plugins: [{
+                                ptype : 'modeldnd',
+                                ddGroup : 'set-prediction-pd',
+                                highlightBody : false,
+                                handleDrop : function(pdfield, pd, source) {
+                                    //Swap if we already have a value
+                                    if (pdfield.getValue()) {
+                                        var currentValue = pdfield.getValue();
+                                        source.getStore().add(currentValue);
+                                    }
+                                    pdfield.setValue(pd);
+                                },
+                                handleDrag : function(pdfield, pd) {
+                                    pdfield.reset();
+
+                                    pdfield.ownerCt.down('#predictor-pdf-chart').clearPlot();
+                                }
+                            }]
+                        },{
                             xtype : 'pdfield',
                             id : 'predictor-field',
                             width: '100%',

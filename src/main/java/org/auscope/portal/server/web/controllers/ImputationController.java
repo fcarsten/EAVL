@@ -54,6 +54,7 @@ public class ImputationController extends BasePortalController {
     @RequestMapping("saveAndSubmitImputation.do")
     public ModelAndView saveImputationConfig(HttpServletRequest request,
             @RequestParam(required=false, value="savedColName") String[] savedNames,
+            @RequestParam("holeIdName") String holeIdName,
             @RequestParam("predictorName") String predictorName,
             @RequestParam("predictorCutoff") Double predictorCutoff) {
 
@@ -67,6 +68,7 @@ public class ImputationController extends BasePortalController {
             job.setSavedParameters(Sets.newHashSet(new ArrayIterator<String>(savedNames)));
             job.setPredictionCutoff(predictorCutoff);
             job.setPredictionParameter(predictorName);
+            job.setHoleIdParameter(holeIdName);
 
             JobTask newTask = new JobTask(new ImputationCallable(job, wpsClient, csvService, fss), job);
             String taskId = jobTaskService.submit(newTask);

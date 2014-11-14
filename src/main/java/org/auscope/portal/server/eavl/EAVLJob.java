@@ -15,6 +15,7 @@ public class EAVLJob extends CloudJob {
     private String predictionParameter;
     private Set<String> savedParameters;
     private String imputationTaskId;
+    private String holeIdParameter;
 
     public EAVLJob(Integer id) {
         super(id);
@@ -97,5 +98,29 @@ public class EAVLJob extends CloudJob {
      */
     public void setImputationTaskId(String imputationTaskId) {
         this.imputationTaskId = imputationTaskId;
+    }
+
+    /**
+     * Gets the name of the parameter saved for hole identification. The name corresponds to
+     * the column header of the CSV file. This column will work like a "group by" clause
+     * for some operations
+     *
+     * Can be null if not yet set
+     * @return
+     */
+    public String getHoleIdParameter() {
+        return holeIdParameter;
+    }
+
+    /**
+     * Sets the name of the parameter saved for hole identification. The name corresponds to
+     * the column header of the CSV file. This column will work like a "group by" clause
+     * for some operations
+     *
+     * Can be null if not yet set
+     * @return
+     */
+    public void setHoleIdParameter(String holeIdParameter) {
+        this.holeIdParameter = holeIdParameter;
     }
 }
