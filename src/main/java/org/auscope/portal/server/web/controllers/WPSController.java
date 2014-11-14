@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import net.sf.json.JSONArray;
 
 import org.apache.commons.io.IOUtils;
+import org.auscope.eavl.wpsclient.ACF;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.cloud.FileStagingService;
@@ -107,7 +108,35 @@ public class WPSController extends BasePortalController {
 
             return new ModelAndView(new JSONView(xyPairs), null);
         } catch (Exception ex) {
-            log.warn("Unable to get pdf values: ", ex);
+            log.warn("Unable to get double pdf values: ", ex);
+            return generateJSONResponseMAV(false, null, "Error fetching double pdf data");
+        }
+    }
+
+    @RequestMapping("/getMeanACFData.do")
+    public ModelAndView getMeanACFData(HttpServletRequest request,
+            @RequestParam("columnIndex") int columnIndex) {
+        try {
+            EAVLJob job = jobService.getJobForSession(request);
+            if (job == null) {
+                return generateJSONResponseMAV(false, null, "No job");
+            }
+
+            String holeIdParam = job.getHoleIdParameter();
+            if (holeIdParam == null) {
+                return generateJSONResponseMAV(false, null, "Hole ID column DNE");
+            }
+            InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            int holeIdIndex = csvService.columnNameToIndex(csvData, holeIdParam);
+            IOUtils.closeQuietly(csvData);
+
+            csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            String[][] data = csvService.getRawStringData(csvData, Arrays.asList(holeIdIndex, columnIndex));
+
+            ACF response = wpsClient.meanACF(data);
+            return generateJSONResponseMAV(true, response, "");
+        } catch (Exception ex) {
+            log.warn("Unable to get mean ACF values: ", ex);
             return generateJSONResponseMAV(false, null, "Error fetching double pdf data");
         }
     }

@@ -514,6 +514,31 @@ public class TestCSVService extends PortalTestClass{
         }
     }
 
+    private void assertRawEquals(String[][] expected, String[][] actual) {
+        if (expected == null || actual == null) {
+            Assert.assertNull(actual);
+            Assert.assertNull(expected);
+            return;
+        }
+
+        Assert.assertEquals(expected.length, actual.length);
+
+        for (int i = 0; i < expected.length; i++) {
+            Assert.assertEquals(expected[i].length, actual[i].length);
+            for (int j = 0; j < expected[i].length; j++) {
+                if (expected[i][j] == null || actual[i][j] == null) {
+                    Assert.assertNull(actual[i][j]);
+                    Assert.assertNull(expected[i][j]);
+
+                } else {
+                    Assert.assertEquals(expected[i][j], actual[i][j]);
+                }
+
+
+            }
+        }
+    }
+
     @Test
     public void testGetRawData() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
@@ -561,6 +586,37 @@ public class TestCSVService extends PortalTestClass{
 
 
         service.getRawData(mockStream);
+    }
+
+    @Test
+    public void testGetRawStringDataColIndexes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        String[][] expected = new String[][] {
+                {" 12", " 59"},
+                {" 12", " 52"},
+                {" 15", " 6"},
+                {" ", " 43"},
+                {" 16", " 74"},
+                {" ", " 32"},
+                {" 14", " 72"},
+                {" ", " 69"}
+        };
+
+        String[][] actual = service.getRawStringData(is, Arrays.asList(4, 3));
+        assertRawEquals(expected, actual);
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testGetRawStringDataClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            atLeast(1).of(mockStream).close();
+        }});
+
+
+        service.getRawStringData(mockStream, Arrays.asList(1));
     }
 
     @Test

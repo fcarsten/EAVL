@@ -315,7 +315,7 @@ public class CSVService {
      * @param index
      * @return
      */
-    private Double appendValueToList(List<Double> values, String[] data, int index, boolean includeNulls) {
+    private Double appendNumericValueToList(List<Double> values, String[] data, int index, boolean includeNulls) {
         try {
             Double d = new Double(Double.parseDouble(data[index]));
             values.add(d);
@@ -332,7 +332,7 @@ public class CSVService {
      * Converts and appends an entire row of data to a list of rows. Appends nulls for doubles that don't parse
      * @return
      */
-    private Double[] appendValuesToList(List<Double[]> rows, String[] data) {
+    private Double[] appendNumericValuesToList(List<Double[]> rows, String[] data) {
 
         Double[] row = new Double[data.length];
 
@@ -351,7 +351,7 @@ public class CSVService {
      * Converts and appends a subset of a row of data to a list of rows. Appends nulls for doubles that don't parse
      * @return
      */
-    private Double[] appendValuesToList(List<Double[]> rows, String[] data, List<Integer> columnIndexes) {
+    private Double[] appendNumericValuesToList(List<Double[]> rows, String[] data, List<Integer> columnIndexes) {
         Double[] row = new Double[columnIndexes.size()];
 
         for (int i = 0; i < row.length; i++) {
@@ -359,6 +359,31 @@ public class CSVService {
                 Double d = new Double(Double.parseDouble(data[columnIndexes.get(i)]));
                 row[i] = d;
             } catch (NumberFormatException ex) { }
+        }
+
+        rows.add(row);
+        return row;
+    }
+
+    /**
+     * Converts and appends an entire row of data to a list of rows.
+     * @return
+     */
+    private String[] appendValuesToList(List<String[]> rows, String[] data) {
+        String[] row = new String[data.length];
+        rows.add(data);
+        return row;
+    }
+
+    /**
+     * Converts and appends a subset of a row of data to a list of rows.
+     * @return
+     */
+    private String[] appendValuesToList(List<String[]> rows, String[] data, List<Integer> columnIndexes) {
+        String[] row = new String[columnIndexes.size()];
+
+        for (int i = 0; i < row.length; i++) {
+            row[i] = data[columnIndexes.get(i)];
         }
 
         rows.add(row);
@@ -404,12 +429,12 @@ public class CSVService {
 
             //Initialize the parameters (one for each column)
             if (!isHeaderLine(headerLine)) {
-                appendValueToList(values, headerLine, columnIndex, includeMissing);
+                appendNumericValueToList(values, headerLine, columnIndex, includeMissing);
             }
 
             String[] dataLine;
             while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                appendValueToList(values, dataLine, columnIndex, includeMissing);
+                appendNumericValueToList(values, dataLine, columnIndex, includeMissing);
             }
 
             return values;
@@ -445,12 +470,12 @@ public class CSVService {
 
             //Initialize the parameters (one for each column)
             if (!isHeaderLine(headerLine)) {
-                appendValuesToList(values, headerLine, columnIndexes);
+                appendNumericValuesToList(values, headerLine, columnIndexes);
             }
 
             String[] dataLine;
             while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                appendValuesToList(values, dataLine, columnIndexes);
+                appendNumericValuesToList(values, dataLine, columnIndexes);
             }
 
             return values;
@@ -667,6 +692,57 @@ public class CSVService {
             //Initialize the parameters (one for each column)
             if (!isHeaderLine(headerLine)) {
                 if (columnIndexes == null) {
+                    appendNumericValuesToList(rows, headerLine);
+                } else {
+                    appendNumericValuesToList(rows, headerLine, columnIndexes);
+                }
+
+            }
+
+            String[] dataLine;
+            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
+                if (columnIndexes == null) {
+                    appendNumericValuesToList(rows, dataLine);
+                } else {
+                    appendNumericValuesToList(rows, dataLine, columnIndexes);
+                }
+            }
+
+            return rows.toArray(new Double[nCols][rows.size()]);
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to parse parameter values", ex);
+        } finally {
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
+
+    /**
+     * Reads a subset of entire CSV file into memory (in the form of a 2D double array). Header line (if it exists) will be skipped
+     *
+     * Closes InputStream before returning.
+     *
+     * @param csvData
+     * @param columnIndexes What column indexes to read. If null, all will be read. columnIndex[x] will output as column x
+     * @return
+     * @throws PortalServiceException
+     */
+    public String[][] getRawStringData(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
+        CSVReader reader = null;
+        List<String[]> rows = new ArrayList<String[]>();
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (headerLine == null) {
+                return new String[][] {};
+            }
+            int nCols = columnIndexes == null ? headerLine.length : columnIndexes.size();
+
+            //Initialize the parameters (one for each column)
+            if (!isHeaderLine(headerLine)) {
+                if (columnIndexes == null) {
                     appendValuesToList(rows, headerLine);
                 } else {
                     appendValuesToList(rows, headerLine, columnIndexes);
@@ -683,7 +759,7 @@ public class CSVService {
                 }
             }
 
-            return rows.toArray(new Double[nCols][rows.size()]);
+            return rows.toArray(new String[nCols][rows.size()]);
         } catch (Exception ex) {
             throw new PortalServiceException("Unable to parse parameter values", ex);
         } finally {
