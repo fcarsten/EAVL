@@ -2,6 +2,8 @@ package org.auscope.portal.server.web.service.jobtask;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.IOUtils;
@@ -31,14 +33,36 @@ public class ImputationCallable implements Callable<Object> {
         this.fss = fss;
     }
 
+    protected List<Integer> getExcludedColumns() throws PortalServiceException {
+        List<Integer> exclusions = new ArrayList<Integer>();
+
+        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        Integer index = csvService.columnNameToIndex(in, job.getHoleIdParameter());
+        if (index != null) {
+            exclusions.add(index);
+        }
+
+        //Not the most efficient method - should't really be run that often or over many items so I doubt it will matter
+        for (String name : job.getSavedParameters()) {
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            index = csvService.columnNameToIndex(in, name);
+            if (index != null && !exclusions.contains(index)) {
+                exclusions.add(index);
+            }
+        }
+
+        return exclusions;
+    }
+
     @Override
     public Object call() throws Exception {
         InputStream in = null;
         OutputStream os = null;
 
         try {
+            List<Integer> excludedCols = getExcludedColumns();
             in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-            Double[][] rawData = csvService.getRawData(in);
+            Double[][] rawData = csvService.getRawData(in, excludedCols, false);
             double[][] imputedData = wpsClient.imputationNA(rawData);
 
             IOUtils.closeQuietly(in);

@@ -351,18 +351,37 @@ public class CSVService {
      * Converts and appends a subset of a row of data to a list of rows. Appends nulls for doubles that don't parse
      * @return
      */
-    private Double[] appendNumericValuesToList(List<Double[]> rows, String[] data, List<Integer> columnIndexes) {
-        Double[] row = new Double[columnIndexes.size()];
+    private Double[] appendNumericValuesToList(List<Double[]> rows, String[] data, List<Integer> columnIndexes, boolean includeColumnIndexes) {
+        if (includeColumnIndexes) {
+            Double[] row = new Double[columnIndexes.size()];
 
-        for (int i = 0; i < row.length; i++) {
-            try {
-                Double d = new Double(Double.parseDouble(data[columnIndexes.get(i)]));
-                row[i] = d;
-            } catch (NumberFormatException ex) { }
+            for (int i = 0; i < row.length; i++) {
+                try {
+                    Double d = new Double(Double.parseDouble(data[columnIndexes.get(i)]));
+                    row[i] = d;
+                } catch (NumberFormatException ex) { }
+            }
+
+            rows.add(row);
+            return row;
+        } else {
+            Double[] row = new Double[data.length - columnIndexes.size()];
+            int idx = 0;
+
+            for (int i = 0; i < data.length; i++) {
+                if (columnIndexes.contains(i)) {
+                    continue;
+                }
+
+                try {
+                    Double d = new Double(Double.parseDouble(data[i]));
+                    row[idx++] = d;
+                } catch (NumberFormatException ex) { }
+            }
+
+            rows.add(row);
+            return row;
         }
-
-        rows.add(row);
-        return row;
     }
 
     /**
@@ -379,15 +398,31 @@ public class CSVService {
      * Converts and appends a subset of a row of data to a list of rows.
      * @return
      */
-    private String[] appendValuesToList(List<String[]> rows, String[] data, List<Integer> columnIndexes) {
-        String[] row = new String[columnIndexes.size()];
+    private String[] appendValuesToList(List<String[]> rows, String[] data, List<Integer> columnIndexes, boolean includeColumnIndexes) {
+        if (includeColumnIndexes) {
+            String[] row = new String[columnIndexes.size()];
 
-        for (int i = 0; i < row.length; i++) {
-            row[i] = data[columnIndexes.get(i)];
+            for (int i = 0; i < row.length; i++) {
+                row[i] = data[columnIndexes.get(i)];
+            }
+
+            rows.add(row);
+            return row;
+        } else {
+            String[] row = new String[data.length - columnIndexes.size()];
+            int idx = 0;
+
+            for (int i = 0; i < data.length; i++) {
+                if (columnIndexes.contains(i)) {
+                    continue;
+                }
+
+                row[idx++] = data[i];
+            }
+
+            rows.add(row);
+            return row;
         }
-
-        rows.add(row);
-        return row;
     }
 
     /**
@@ -435,47 +470,6 @@ public class CSVService {
             String[] dataLine;
             while ((dataLine = getNextNonEmptyRow(reader)) != null) {
                 appendNumericValueToList(values, dataLine, columnIndex, includeMissing);
-            }
-
-            return values;
-        } catch (Exception ex) {
-            throw new PortalServiceException("Unable to parse parameter values", ex);
-        } finally {
-            IOUtils.closeQuietly(reader);
-            IOUtils.closeQuietly(csvData);
-        }
-    }
-
-    /**
-     * Streams through the CSV data, pulling out every numeric value as a floating point value. Null values can be optionally inserted
-     * for any value that does not parse into a double.
-     * Closes InputStream before returning.
-     *
-     * @param csvData InputStream containing CSV data. Will be closed by this method
-     * @param columnIndexes The column indexes to pull numbers from. Item 0 will output as column 0 etc.
-     * @return
-     * @throws PortalServiceException
-     */
-    public List<Double[]> getParameterValues(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
-        CSVReader reader = null;
-        List<Double[]> values = new ArrayList<Double[]>();
-
-        try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
-
-            String[] headerLine = getNextNonEmptyRow(reader);
-            if (headerLine == null) {
-                return values;
-            }
-
-            //Initialize the parameters (one for each column)
-            if (!isHeaderLine(headerLine)) {
-                appendNumericValuesToList(values, headerLine, columnIndexes);
-            }
-
-            String[] dataLine;
-            while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                appendNumericValuesToList(values, dataLine, columnIndexes);
             }
 
             return values;
@@ -662,7 +656,21 @@ public class CSVService {
      * @throws PortalServiceException
      */
     public Double[][] getRawData(InputStream csvData) throws PortalServiceException {
-        return getRawData(csvData, null);
+        return getRawData(csvData, null, true);
+    }
+
+    /**
+     * Reads an entire CSV file into memory (in the form of a 2D double array). Missing/Invalid values will read
+     * null. Header line (if it exists) will be skipped
+     *
+     * Closes InputStream before returning.
+     *
+     * @param columnIndexes What column indexes to read
+     * @return
+     * @throws PortalServiceException
+     */
+    public Double[][] getRawData(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
+        return getRawData(csvData, columnIndexes, true);
     }
 
     /**
@@ -672,11 +680,12 @@ public class CSVService {
      * Closes InputStream before returning.
      *
      * @param csvData
-     * @param columnIndexes What column indexes to read. If null, all will be read. columnIndex[x] will output as column x
+     * @param columnIndexes What column indexes to read (columnIndex[x] will output as column x) if includeColumnIndexes is true. What columns to exclude otherwise.. If null, all will be read.
+     * @param includeColumnIndexes If true, columnIndexes will refer to columns to extract. If false, columnIndexes will refer to columns to exclude
      * @return
      * @throws PortalServiceException
      */
-    public Double[][] getRawData(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
+    public Double[][] getRawData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes) throws PortalServiceException {
         CSVReader reader = null;
         List<Double[]> rows = new ArrayList<Double[]>();
 
@@ -694,7 +703,7 @@ public class CSVService {
                 if (columnIndexes == null) {
                     appendNumericValuesToList(rows, headerLine);
                 } else {
-                    appendNumericValuesToList(rows, headerLine, columnIndexes);
+                    appendNumericValuesToList(rows, headerLine, columnIndexes, includeColumnIndexes);
                 }
 
             }
@@ -704,7 +713,7 @@ public class CSVService {
                 if (columnIndexes == null) {
                     appendNumericValuesToList(rows, dataLine);
                 } else {
-                    appendNumericValuesToList(rows, dataLine, columnIndexes);
+                    appendNumericValuesToList(rows, dataLine, columnIndexes, includeColumnIndexes);
                 }
             }
 
@@ -723,11 +732,12 @@ public class CSVService {
      * Closes InputStream before returning.
      *
      * @param csvData
-     * @param columnIndexes What column indexes to read. If null, all will be read. columnIndex[x] will output as column x
+     * @param columnIndexes What column indexes to read (columnIndex[x] will output as column x) if includeColumnIndexes is true. What columns to exclude otherwise.. If null, all will be read.
+     * @param includeColumnIndexes If true, columnIndexes will refer to columns to extract. If false, columnIndexes will refer to columns to exclude
      * @return
      * @throws PortalServiceException
      */
-    public String[][] getRawStringData(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
+    public String[][] getRawStringData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes) throws PortalServiceException {
         CSVReader reader = null;
         List<String[]> rows = new ArrayList<String[]>();
 
@@ -745,7 +755,7 @@ public class CSVService {
                 if (columnIndexes == null) {
                     appendValuesToList(rows, headerLine);
                 } else {
-                    appendValuesToList(rows, headerLine, columnIndexes);
+                    appendValuesToList(rows, headerLine, columnIndexes, includeColumnIndexes);
                 }
 
             }
@@ -755,7 +765,7 @@ public class CSVService {
                 if (columnIndexes == null) {
                     appendValuesToList(rows, dataLine);
                 } else {
-                    appendValuesToList(rows, dataLine, columnIndexes);
+                    appendValuesToList(rows, dataLine, columnIndexes, includeColumnIndexes);
                 }
             }
 

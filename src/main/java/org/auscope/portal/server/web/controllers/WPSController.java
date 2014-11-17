@@ -133,7 +133,7 @@ public class WPSController extends BasePortalController {
             IOUtils.closeQuietly(csvData);
 
             csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            String[][] data = csvService.getRawStringData(csvData, Arrays.asList(holeIdIndex, columnIndex));
+            String[][] data = csvService.getRawStringData(csvData, Arrays.asList(holeIdIndex, columnIndex), true);
 
             ACF response = wpsClient.meanACF(data);
             return generateJSONResponseMAV(true, response, "");

@@ -260,63 +260,6 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(101, data.get(7), 0.01);
     }
 
-    @Test
-    public void testGetParameterValuesColIndexes() throws Exception {
-        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
-
-        List<Double[]> data = service.getParameterValues(is, Arrays.asList(1, 3));
-
-        Assert.assertNotNull(data);
-        Assert.assertEquals(8, data.size());
-
-        Double[][] expected = new Double[][] {
-                {40.0, 59.0},
-                {42.0, 52.0},
-                {16.0, 6.0},
-                {13.0, 43.0},
-                {16.0, 74.0},
-                {48.0, 32.0},
-                {41.0, 72.0},
-                {11.0, 69.0}
-        };
-
-        assertRawEquals(expected, data.toArray(new Double[data.size()][]));
-    }
-
-    @Test
-    public void testGetParameterValuesColIndexesNoHeaders() throws Exception {
-        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
-
-        List<Double[]> data = service.getParameterValues(is, Arrays.asList(1, 3));
-
-        Assert.assertNotNull(data);
-        Assert.assertEquals(8, data.size());
-
-        Double[][] expected = new Double[][] {
-                {40.0, null},
-                {42.0, 52.0},
-                {16.0, 6.0},
-                {13.0, 43.0},
-                {16.0, 74.0},
-                {48.0, 32.0},
-                {41.0, 72.0},
-                {11.0, 69.0}
-        };
-
-        assertRawEquals(expected, data.toArray(new Double[data.size()][]));
-    }
-
-    @Test(expected=PortalServiceException.class)
-    public void testParameterValuesColIndexesClosesStream() throws Exception {
-        context.checking(new Expectations() {{
-            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
-            will(throwException(new IOException()));
-
-            atLeast(1).of(mockStream).close();
-        }});
-
-        service.getParameterValues(mockStream, Arrays.asList(1));
-    }
 
     @Test
     public void testFindReplace() throws Exception {
@@ -575,6 +518,24 @@ public class TestCSVService extends PortalTestClass{
         assertRawEquals(expected, actual);
     }
 
+    @Test
+    public void testGetRawDataColIndexesExclusion() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Double[][] expected = new Double[][] {
+                {59.0, 12.0},
+                {52.0, 12.0},
+                {6.0, 15.0},
+                {43.0, null},
+                {74.0, 16.0},
+                {32.0, null},
+                {72.0, 14.0},
+                {69.0, null}
+        };
+
+        Double[][] actual = service.getRawData(is, Arrays.asList(0, 2, 1), false);
+        assertRawEquals(expected, actual);
+    }
+
     @Test(expected=PortalServiceException.class)
     public void testGetRawDataClosesStream() throws Exception {
         context.checking(new Expectations() {{
@@ -602,7 +563,25 @@ public class TestCSVService extends PortalTestClass{
                 {" ", " 69"}
         };
 
-        String[][] actual = service.getRawStringData(is, Arrays.asList(4, 3));
+        String[][] actual = service.getRawStringData(is, Arrays.asList(4, 3), true);
+        assertRawEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetRawStringDataColIndexesExclusion() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        String[][] expected = new String[][] {
+                {" 59", " 12"},
+                {" 52", " 12"},
+                {" 6", " 15"},
+                {" 43", " "},
+                {" 74", " 16",},
+                {" 32", " ",},
+                {" 72", " 14"},
+                {" 69", " "}
+        };
+
+        String[][] actual = service.getRawStringData(is, Arrays.asList(2, 1, 0), false);
         assertRawEquals(expected, actual);
     }
 
@@ -616,7 +595,7 @@ public class TestCSVService extends PortalTestClass{
         }});
 
 
-        service.getRawStringData(mockStream, Arrays.asList(1));
+        service.getRawStringData(mockStream, Arrays.asList(1), true);
     }
 
     @Test
