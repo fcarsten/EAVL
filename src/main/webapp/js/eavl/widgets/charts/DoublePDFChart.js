@@ -90,7 +90,7 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
                 svg.select(".line-main")
                     .duration(750)
                     .attr("d", lineMain(data));
-                svg.select("..line-secondary")
+                svg.select(".line-secondary")
                     .duration(750)
                     .attr("d", lineSecondary(data));
                 svg.select(".x.axis") // change the x axis
@@ -123,12 +123,13 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
 
                 g.append("path")
                     .datum(data)
-                    .attr("class", "line-main")
+                    .attr("class", "line-main line")
                     .attr("d", lineMain(data));
 
                 g.append("path")
                     .datum(data)
-                    .attr("class", "line-secondary")
+                    .attr("class", "line-secondary line")
+                    .attr("stroke-dasharray", "5, 5")
                     .attr("d", lineSecondary(data));
 
                 if (me.d3.brush) {

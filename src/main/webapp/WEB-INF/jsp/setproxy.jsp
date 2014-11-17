@@ -13,7 +13,6 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/SetProxy-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
-        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/DoublePDFChart.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/utils/HighlightUtil.js"></script>

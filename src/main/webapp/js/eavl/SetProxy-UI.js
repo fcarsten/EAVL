@@ -129,7 +129,6 @@ Ext.application({
 
         var pdStore = Ext.create('Ext.data.Store', {
             model : 'eavl.models.ParameterDetails',
-            autoLoad : true,
             proxy : {
                 type : 'ajax',
                 url : 'validation/getParameterDetails.do',
