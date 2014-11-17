@@ -2,10 +2,10 @@
  * Controls the Validate page
  */
 Ext.application({
-    name : 'eavl-setprediction',
+    name : 'eavl-imputation',
 
     init: function() {
-        eavl.widget.SplashScren.showLoadingSplash('Loading Prediction Selection, please stand by ...');
+        eavl.widget.SplashScren.showLoadingSplash('Loading Imputation setup, please stand by ...');
     },
 
     viewport : null,
