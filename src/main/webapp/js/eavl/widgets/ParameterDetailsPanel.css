@@ -12,3 +12,23 @@
     margin-left: 40px;
     margin-top:-80px;
 }
+
+
+.pdp-empty-container {
+    width: 90%;
+    position:absolute;
+    height: 90%;
+    text-align: center;
+}
+
+.pdp-empty-container-inner {
+    text-align: center;
+    height : 160px;
+    position:relative;
+    top:50%;
+    margin-top:-50px;
+}
+
+.pdp-empty-container-inner img {
+	margin-bottom: 5px;
+}

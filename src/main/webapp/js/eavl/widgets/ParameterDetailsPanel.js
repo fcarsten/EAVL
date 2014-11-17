@@ -43,20 +43,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
             items: [{
                 itemId : 'card-empty',
                 xtype : 'container',
-                layout : {
-                    type : 'vbox',
-                    pack : 'center',
-                    align : 'center'
-                },
-                padding: '50 25 50 25',
-                items : [{
-                    xtype : 'image',
-                    maxWidth: 200,
-                    src : 'img/inspect.svg',
-                },{
-                    margin : '20 0 0 0',
-                    html : this.emptyText
-                }]
+                html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
             },{
                 itemId : 'card-inspect',
                 layout : {
