@@ -1,6 +1,7 @@
 package org.auscope.portal.server.web.controllers;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
@@ -115,6 +117,16 @@ public class WPSController extends BasePortalController {
         }
     }
 
+    private Double parseDouble(double d) {
+        Double parsed = new Double(d);
+
+        if (parsed.isInfinite() || parsed.isNaN()) {
+            return null;
+        }
+
+        return parsed;
+    }
+
     @RequestMapping("/getMeanACFData.do")
     public ModelAndView getMeanACFData(HttpServletRequest request,
             @RequestParam("columnIndex") int columnIndex) {
@@ -136,7 +148,17 @@ public class WPSController extends BasePortalController {
             String[][] data = csvService.getRawStringData(csvData, Arrays.asList(holeIdIndex, columnIndex), true);
 
             ACF response = wpsClient.meanACF(data);
-            return generateJSONResponseMAV(true, response, "");
+
+            ModelMap responseModel = new ModelMap();
+
+            responseModel.put("ci", parseDouble(response.getCi()));
+            List<Double> acf = new ArrayList<Double>();
+            for (double d : response.getAcf()) {
+                acf.add(parseDouble(d));
+            }
+            responseModel.put("acf", acf);
+
+            return generateJSONResponseMAV(true, responseModel, "");
         } catch (Exception ex) {
             log.warn("Unable to get mean ACF values: ", ex);
             return generateJSONResponseMAV(false, null, "Error fetching double pdf data");
