@@ -1,0 +1,18 @@
+.proxydp-empty-container {
+    width: 90%;
+    position:absolute;
+    height: 90%;
+    text-align: center;
+}
+
+.proxydp-empty-container-inner {
+    text-align: center;
+    height : 160px;
+    position:relative;
+    top:50%;
+    margin-top:-50px;
+}
+
+.proxydp-empty-container-inner img {
+    margin-bottom: 5px;
+}

@@ -58,6 +58,10 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
      */
     clearPlot : function(message) {
         this.parameterDetails = null;
+        if (!this.d3svg) {
+            return;
+        }
+
         this.d3svg.select('*').remove();
         this.d3svg.select('.title').remove();
         this.d3 = null;

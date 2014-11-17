@@ -103,23 +103,19 @@ Ext.application({
                                         }
                                         pdfield.setValue(pd);
 
-                                        pdfield.ownerCt.down('#p1-dpdfchart').plotParameterDetails(pd);
+                                        pdfield.ownerCt.down('#proxy-panel-1').showParameterDetails(pd);
                                     },
                                     handleDrag : function(pdfield, pd) {
                                         pdfield.reset();
-                                        pdfield.ownerCt.down('#p1-dpdfchart').clearPlot();
+                                        pdfield.ownerCt.down('#proxy-panel-1').hideParameterDetails();
                                     }
                                 }]
                             },{
-                                xtype: 'panel',
-                                title: 'Double PDF',
+                                xtype: 'proxypanel',
+                                itemId: 'proxy-panel-1',
                                 width: '100%',
-                                flex: 1,
-                                layout: 'fit',
-                                items : [{
-                                    xtype: 'doublepdfchart',
-                                    itemId: 'p1-dpdfchart'
-                                }]
+                                emptyText: 'Drag a parameter above to select it as a proxy',
+                                flex: 1
                             }]
                         }]
                     }]
