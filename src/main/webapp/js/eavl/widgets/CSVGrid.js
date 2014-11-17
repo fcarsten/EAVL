@@ -40,15 +40,15 @@ Ext.define('eavl.widgets.CSVGrid', {
         columns = Ext.Array.sort(columns, function(a, b) {
             var aVal = 2;
             var bVal = 2;
-            if (a.text.contains('error.png')) {
+            if (a.text.indexOf('error.png') >= 0) {
                 aVal = 1;
-            } else if (a.text.contains('exclamation.png')) {
+            } else if (a.text.indexOf('exclamation.png') >= 0) {
                 aVal = 0;
             }
 
-            if (b.text.contains('error.png')) {
+            if (b.text.indexOf('error.png') >= 0) {
                 bVal = 1;
-            } else if (b.text.contains('exclamation.png')) {
+            } else if (b.text.indexOf('exclamation.png') >= 0) {
                 bVal = 0;
             }
 
