@@ -9,6 +9,8 @@
         
         <script type="text/javascript" src="js/d3/d3.min.js"></script>
         
+        <script src="portal-core/js/portal/util/UnimplementedFunction.js" type="text/javascript"></script>
+        
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/SetProxy-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
@@ -23,7 +25,7 @@
         <script type="text/javascript" src="js/eavl/widgets/ProxyDetailsPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
-        <script type="text/javascript" src="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/charts/BaseParameterDetailsChart.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/DoublePDFChart.js"></script>
         <script type="text/javascript" src="js/eavl/SetProxy-UI.js"></script>
     </head>

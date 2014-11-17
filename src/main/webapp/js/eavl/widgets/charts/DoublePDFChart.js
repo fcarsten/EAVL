@@ -2,7 +2,7 @@
  * Panel extension for graphing a Doubled Probability Density Function
  */
 Ext.define('eavl.widgets.charts.DoublePDFChart', {
-    extend: 'eavl.widgets.charts.ProbabilityDensityFunctionChart',
+    extend: 'eavl.widgets.charts.BaseParameterDetailsChart',
 
     alias: 'widget.doublepdfchart',
 
@@ -11,16 +11,8 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
      * Adds the following config
      * {
      *  parameterDetails - eavl.models.ParameterDetails - Details to plot initially (can be null)
-     *  preserveAspectRatio - boolean - Should the graph preserve a 4x2 aspect ratio or should it stretch. Default false
-     *  targetWidth - Number - (Only useful if preserveAspectRatio is set) - The target width to use in aspect ratio
-     *  targetHeight - Number - (Only useful if preserveAspectRatio is set)  - The target height to use in aspect ratio
-     *  allowCutoffSelection - Boolean (- If true, the chart will have a draggable cutoff slider added. Defaults to false
      * }
      *
-     * Adds the following events
-     * {
-     *  cutoffchanged : function(this, cutoffXValue)
-     * }
      */
     constructor : function(config) {
         this.callParent(arguments);
@@ -38,11 +30,10 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
         }
         this.parameterDetails = parameterDetails;
 
-        this._mask(Ext.util.Format.format("Loading data for '{0}'", parameterDetails.get('name')));
+        this.mask(Ext.util.Format.format("Loading data for '{0}'", parameterDetails.get('name')));
         d3.json(Ext.String.urlAppend("wps/getDoublePDFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex')})),
                 function(error, data) {
-            me._maskClear();
-            me._clearMessage();
+            me.maskClear();
             if (error) {
                 me.clearPlot("There was an error accessing PDF data");
                 return;
