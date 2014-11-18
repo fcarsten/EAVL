@@ -166,7 +166,7 @@ Ext.application({
 
                 //At this point imputation hasn't been run/hasn't finished
                 if (responseObj.msg === "nodata") {
-                    initNotReady("There's no record of an imputation task running for this job. Did you complete the prediction steps?", "setprediction.html");
+                    initNotReady("There's no record of an imputation task running for this job. Did you complete the prediction steps?", "imputation.html");
                     return;
                 }
                 if (responseObj.msg === "nojob") {
@@ -174,12 +174,12 @@ Ext.application({
                     return;
                 }
                 if (responseObj.msg === "failed") {
-                    initNotReady("Imputation failed. You can try resubmitting.", "setprediction.html");
+                    initNotReady("Imputation failed. You can try resubmitting.", "imputation.html");
                     return;
                 }
 
                 //OK imputation is running - shift to loading page
-                window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.msg, next: 'imputation.html'});
+                window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.msg, next: 'setproxy.html'});
             }
         });
     }
