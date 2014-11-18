@@ -635,6 +635,44 @@ public class TestCSVService extends PortalTestClass{
 
         Assert.assertEquals(expected, os.toString());
     }
+    
+    @Test
+    public void testWriteRawDataColIncludes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        double[][] newData = new double[][] {
+                {0.8, 0.5},
+                {13.45, 40.2}
+        };
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+
+        service.writeRawData(is, os, newData, Arrays.asList(4,2), true);
+
+        String expected = "' data','something-else'\n" +
+                "'0.8','0.5'\n" +
+                "'13.45','40.2'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+    
+    @Test
+    public void testWriteRawDataExcludes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        double[][] newData = new double[][] {
+                {0.4, 0.8},
+                {440.4, 88.8}
+        };
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+
+        service.writeRawData(is, os, newData, Arrays.asList(1,3,2), false);
+
+        String expected = "'sample',' data'\n" +
+                "'0.4','0.8'\n" +
+                "'440.4','88.8'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
 
     @Test(expected=PortalServiceException.class)
     public void testWriteRawDataClosesStream() throws Exception {

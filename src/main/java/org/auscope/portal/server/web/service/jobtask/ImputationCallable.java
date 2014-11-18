@@ -67,7 +67,7 @@ public class ImputationCallable implements Callable<Object> {
 
             in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-            this.csvService.writeRawData(in, os, imputedData);
+            this.csvService.writeRawData(in, os, imputedData, excludedCols, false);
 
             //After getting the imputed data, re-insert the "excluded" columns into the imputed dataset
             in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);

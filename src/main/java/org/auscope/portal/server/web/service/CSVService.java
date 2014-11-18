@@ -785,10 +785,28 @@ public class CSVService {
      * Closes InputStream and OutputStream before returning.
      *
      * @param csvData
+     * @param headerColIndexes What column indexes to read (columnIndex[x] will output as column x) if includeColumnIndexes is true. What columns to exclude otherwise.. If null, all will be read.
+     * @param includeHeaderColIndexes If true, headerColIndexes will refer to columns to extract. If false, headerColIndexes will refer to columns to exclude
      * @return
      * @throws PortalServiceException
      */
     public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data) throws PortalServiceException {
+    	writeRawData(csvData, replacedCsvData, data, null, true);
+    }
+    
+    /**
+     * Reads the headers of csvData into replacedCsvData and then follows it up by writing the entirety of
+     * data into replacedCsvData
+     *
+     * Closes InputStream and OutputStream before returning.
+     *
+     * @param csvData
+     * @param headerColIndexes What column indexes to read (columnIndex[x] will output as column x) if includeColumnIndexes is true. What columns to exclude otherwise.. If null, all will be read.
+     * @param includeHeaderColIndexes If true, headerColIndexes will refer to columns to extract. If false, headerColIndexes will refer to columns to exclude
+     * @return
+     * @throws PortalServiceException
+     */
+    public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data, List<Integer> headerColIndexes, boolean includeHeaderColIndexes) throws PortalServiceException {
         CSVReader reader = null;
         CSVWriter writer = null;
 
@@ -799,7 +817,28 @@ public class CSVService {
             //Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
             if (isHeaderLine(headerLine)) {
-                writer.writeNext(headerLine);
+            	if (headerColIndexes == null) {
+            		writer.writeNext(headerLine);
+            	} else {
+            		if (includeHeaderColIndexes) {
+                        String[] newHeader = new String[headerColIndexes.size()];
+                        for (int i = 0; i < newHeader.length; i++) {
+                        	newHeader[i] = headerLine[headerColIndexes.get(i)];
+                        }
+                        writer.writeNext(newHeader);
+                    } else {
+                    	String[] newHeader = new String[headerLine.length - headerColIndexes.size()];
+                        int idx = 0;
+                        for (int i = 0; i < headerLine.length; i++) {
+                            if (headerColIndexes.contains(i)) {
+                                continue;
+                            }
+
+                            newHeader[idx++] = headerLine[i];
+                        }
+                        writer.writeNext(newHeader);
+                    }
+            	}
             }
 
             if (data == null || data.length == 0 || data[0].length == 0) {

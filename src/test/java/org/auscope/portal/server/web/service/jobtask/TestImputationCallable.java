@@ -50,7 +50,7 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_IMPUTED_CSV);will(returnValue(mockOs));
 
             oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1, 2))), with(false));will(returnValue(data));
-            oneOf(mockCsvService).writeRawData(mockIs1, mockOsTmp, imputedData);
+            oneOf(mockCsvService).writeRawData(with(mockIs1), with(mockOsTmp), with(imputedData), with(equal(Arrays.asList(1, 2))), with(false));
             oneOf(mockCsvService).mergeFiles(with(mockIs1), with(mockIs2), with(mockOs), with(equal(Arrays.asList(1,2))), with(((List<Integer>) null)));
 
             oneOf(mockFss).deleteStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);
