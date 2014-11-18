@@ -179,7 +179,7 @@ Ext.application({
                 }
 
                 //OK imputation is running - shift to loading page
-                window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.msg, next: 'setproxy.html'});
+                window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.msg, next: 'imputation.html'});
             }
         });
     }
