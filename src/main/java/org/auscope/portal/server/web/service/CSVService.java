@@ -914,4 +914,65 @@ public class CSVService {
             IOUtils.closeQuietly(csvData);
         }
     }
+
+    /**
+     * Streams CSV data from in1 and in2 and merges the streams column by column. That is if
+     * in1 contains columns A B and in2 contains C D the output file will read A B C D
+     *
+     * If the number of lines varies between the in1 and in2, nulls will be inserted
+     *
+     * Any empty lines will be removed as part of this copying.
+     *
+     * Closes all InputStreams and OutputStream before returning.
+     *
+     * Returns the number of lines written (including header, if any)
+     *
+     * @param in1 The first input CSV stream (will be closed)
+     * @param in2 The second input CSV stream (will be closed)
+     * @param mergedCsvData Will receive merged output CSV stream.
+     * @param in1Columns The subset of column indexes to copy from in1
+     * @param in2Columns The subset of column indexes to copy from in2
+     *
+     */
+    public int mergeFiles(InputStream in1, InputStream in2, OutputStream mergedCsvData, List<Integer> in1Columns, List<Integer> in2Columns) throws PortalServiceException {
+        CSVReader reader1 = null;
+        CSVReader reader2 = null;
+        CSVWriter writer = null;
+
+        try {
+            reader1 = new CSVReader(new InputStreamReader(in1), ',', '\'', 0);
+            reader2 = new CSVReader(new InputStreamReader(in2), ',', '\'', 0);
+            writer = new CSVWriter(new OutputStreamWriter(mergedCsvData), ',', '\'');
+
+            String[] dataLine1;
+            String[] dataLine2;
+            String[] outputLine = null;
+            int linesWritten = 0;
+            while((dataLine1 = getNextNonEmptyRow(reader1)) != null &&
+                  (dataLine2 = getNextNonEmptyRow(reader2)) != null) {
+
+                if (outputLine == null) {
+                    outputLine = new String[(in1Columns == null ? dataLine1.length : in1Columns.size()) +
+                                            (in2Columns == null ? dataLine2.length : in2Columns.size())];
+                }
+
+
+                writer.writeNext(outputLine);
+                linesWritten++;
+            }
+
+            return linesWritten;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to swap columns", ex);
+        } finally {
+            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
+            //Ensure the writers close BEFORE we close the underlying streams
+            IOUtils.closeQuietly(reader1);
+            IOUtils.closeQuietly(reader2);
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(mergedCsvData);
+            IOUtils.closeQuietly(in1);
+            IOUtils.closeQuietly(in2);
+        }
+    }
 }

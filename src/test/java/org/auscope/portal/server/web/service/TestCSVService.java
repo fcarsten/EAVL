@@ -732,4 +732,24 @@ public class TestCSVService extends PortalTestClass{
 
         service.swapColumns(mockStream, mockOutputStream, 0, 2);
     }
+
+
+    @Test
+    public void testMergeFiles() throws Exception {
+        InputStream is1 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        InputStream is2 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Assert.assertEquals(8, service.mergeFiles(is1, is2, os, Arrays.asList(0, 2, 4), Arrays.asList(1 , 3)));
+        String expected = "'0',' D/L',' 40',' 12',' '\n" +
+                "'1',' 102',' 12',' 52',' 42'\n" +
+                "'2',' 103',' 15',' 16',' 6'\n" +
+                "'3',' 101',' ',' 13',' 43'\n" +
+                "'4',' 103',' 16',' 16',' 74'\n" +
+                "'5',' 100',' ',' 48',' 32'\n" +
+                "'6',' 14',' D/L',' 41',' 72'\n" +
+                "'7',' 101',' ',' 11',' 69'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
 }
