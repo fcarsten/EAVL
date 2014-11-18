@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -34,18 +35,25 @@ public class TestImputationCallable extends PortalTestClass {
         final String savedParam = "saved-param";
 
         final InputStream mockIs1 = context.mock(InputStream.class, "mockIs1");
-        final OutputStream mockOs = context.mock(OutputStream.class);
+        final InputStream mockIs2 = context.mock(InputStream.class, "mockIs2");
+        final OutputStream mockOs = context.mock(OutputStream.class, "mockOs");
+        final OutputStream mockOsTmp = context.mock(OutputStream.class, "mockOsTmp");
 
         final Double[][] data = new Double[][] {{0.2, 0.4, null}};
         final double[][] imputedData = new double[][] {{0.2, 0.4, 0.9}};
 
         context.checking(new Expectations() {{
             allowing(mockFss).readFile(mockJob, EAVLJobConstants.FILE_DATA_CSV);will(returnValue(mockIs1));
+            allowing(mockFss).readFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);will(returnValue(mockIs2));
 
+            oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);will(returnValue(mockOsTmp));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_IMPUTED_CSV);will(returnValue(mockOs));
 
             oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1, 2))), with(false));will(returnValue(data));
-            oneOf(mockCsvService).writeRawData(mockIs1, mockOs, imputedData);
+            oneOf(mockCsvService).writeRawData(mockIs1, mockOsTmp, imputedData);
+            oneOf(mockCsvService).mergeFiles(with(mockIs1), with(mockIs2), with(mockOs), with(equal(Arrays.asList(1,2))), with(((List<Integer>) null)));
+
+            oneOf(mockFss).deleteStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);
 
             oneOf(mockWpsClient).imputationNA(data);will(returnValue(imputedData));
 
@@ -56,7 +64,8 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockCsvService).columnNameToIndex(mockIs1, holeIdParam);will(returnValue(new Integer(1)));
 
             atLeast(1).of(mockIs1).close();
-            oneOf(mockOs).close();
+            atLeast(1).of(mockIs2).close();
+            atLeast(1).of(mockOs).close();
         }});
 
         Assert.assertSame(imputedData, ic.call());

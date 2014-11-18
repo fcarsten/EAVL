@@ -944,21 +944,59 @@ public class CSVService {
             reader2 = new CSVReader(new InputStreamReader(in2), ',', '\'', 0);
             writer = new CSVWriter(new OutputStreamWriter(mergedCsvData), ',', '\'');
 
-            String[] dataLine1;
-            String[] dataLine2;
+            String[] dataLine1 = getNextNonEmptyRow(reader1);
+            String[] dataLine2 = getNextNonEmptyRow(reader2);
             String[] outputLine = null;
             int linesWritten = 0;
-            while((dataLine1 = getNextNonEmptyRow(reader1)) != null &&
-                  (dataLine2 = getNextNonEmptyRow(reader2)) != null) {
+            int in1Cols = 0, in2Cols = 0;
+            while(dataLine1 != null || dataLine2 != null) {
 
                 if (outputLine == null) {
-                    outputLine = new String[(in1Columns == null ? dataLine1.length : in1Columns.size()) +
-                                            (in2Columns == null ? dataLine2.length : in2Columns.size())];
+                    in1Cols = (in1Columns == null ? dataLine1.length : in1Columns.size());
+                    in2Cols = (in2Columns == null ? dataLine2.length : in2Columns.size());
+                    outputLine = new String[in1Cols + in2Cols];
+                }
+
+                //Copy across in1
+                int outIdx = 0;
+                if (dataLine1 != null) {
+                    if (in1Columns == null) {
+                        for (int i = 0; i < dataLine1.length; i++) {
+                            outputLine[outIdx++] = dataLine1[i];
+                        }
+                    } else {
+                        for (Integer i : in1Columns) {
+                            outputLine[outIdx++] = dataLine1[i];
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < in1Cols; i++) {
+                        outputLine[outIdx++] = "";
+                    }
                 }
 
 
+                if (dataLine2 != null) {
+                    if (in2Columns == null) {
+                        for (int i = 0; i < dataLine2.length; i++) {
+                            outputLine[outIdx++] = dataLine2[i];
+                        }
+                    } else {
+                        for (Integer i : in2Columns) {
+                            outputLine[outIdx++] = dataLine2[i];
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < in2Cols; i++) {
+                        outputLine[outIdx++] = "";
+                    }
+                }
+
                 writer.writeNext(outputLine);
                 linesWritten++;
+
+                dataLine1 = getNextNonEmptyRow(reader1);
+                dataLine2 = getNextNonEmptyRow(reader2);
             }
 
             return linesWritten;
