@@ -18,12 +18,12 @@ import org.auscope.portal.server.web.service.CSVService;
 
 public class ImputationCallable implements Callable<Object> {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    private final Log log = LogFactory.getLog(getClass());
 
-    private EAVLJob job;
-    private ConditionalProbabilityWpsClient wpsClient;
-    private CSVService csvService;
-    private FileStagingService fss;
+    protected EAVLJob job;
+    protected ConditionalProbabilityWpsClient wpsClient;
+    protected CSVService csvService;
+    protected FileStagingService fss;
 
     public ImputationCallable(EAVLJob job, ConditionalProbabilityWpsClient wpsClient, CSVService csvService, FileStagingService fss) {
         super();

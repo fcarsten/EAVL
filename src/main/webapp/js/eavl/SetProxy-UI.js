@@ -36,7 +36,48 @@ Ext.application({
                     xtype: 'workflowpanel',
                     region: 'north',
                     allowNext: function(callback) {
-                        callback(false);
+                        var pdField1 = Ext.getCmp('setproxy-1').down('#pdfield');
+                        if (!pdField1.isValid()) {
+                            callback(false);
+                            return;
+                        }
+
+                        var pdField2 = Ext.getCmp('setproxy-2').down('#pdfield');
+                        if (!pdField2.isValid()) {
+                            callback(false);
+                            return;
+                        }
+
+                        var pdField3 = Ext.getCmp('setproxy-3').down('#pdfield');
+                        if (!pdField3.isValid()) {
+                            callback(false);
+                            return;
+                        }
+
+                        Ext.Ajax.request({
+                            url: 'setproxy/saveAndSubmitProxySelection.do',
+                            params : {
+                                proxy : [pdField1.getValue().get('name'),
+                                         pdField2.getValue().get('name'),
+                                         pdField3.getValue().get('name')]
+                            },
+                            callback : function(options, success, response) {
+                                eavl.widget.SplashScren.hideLoadingScreen();
+
+                                if (!success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                var responseObj = Ext.JSON.decode(response.responseText);
+                                if (!responseObj.success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                callback(true);
+                            }
+                        });
                     }
                 },{
                     xtype: 'container',
@@ -182,6 +223,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 width: '100%',
                 height: 80,
                 title: config.title,
+                itemId : 'pdfield',
                 emptyText : 'Drag a parameter here to select it.',
                 margins: '0 0 10 0',
                 allowBlank: false,
