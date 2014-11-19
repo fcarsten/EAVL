@@ -50,7 +50,7 @@ Ext.define('eavl.widgets.charts.MeanACFChart', {
             var x = me.d3.x ? me.d3.x : me.d3.x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
             var y = me.d3.y ? me.d3.y : me.d3.y = d3.scale.linear().range([height, 0]);
 
-            var xAxis = me.d3.xAxis ? me.d3.xAxis : me.d3.xAxis = d3.svg.axis().scale(x).orient("bottom");
+            var xAxis = me.d3.xAxis ? me.d3.xAxis : me.d3.xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat("");
             var yAxis = me.d3.yAxis ? me.d3.yAxis : me.d3.yAxis = d3.svg.axis().scale(y).orient("left");
 
             x.domain(d3.range(data.data.acf.length));

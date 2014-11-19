@@ -209,7 +209,10 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 itemId: 'proxy-panel',
                 width: '100%',
                 emptyText: 'Drag a parameter above to select it as a proxy',
-                flex: 1
+                flex: 1,
+                targetChartWidth: 400,
+                targetChartHeight: 400,
+                preserveAspectRatio: true
             }]
         });
 
