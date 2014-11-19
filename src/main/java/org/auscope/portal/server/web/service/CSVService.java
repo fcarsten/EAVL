@@ -785,10 +785,28 @@ public class CSVService {
      * Closes InputStream and OutputStream before returning.
      *
      * @param csvData
+     * @param headerColIndexes What column indexes to read (columnIndex[x] will output as column x) if includeColumnIndexes is true. What columns to exclude otherwise.. If null, all will be read.
+     * @param includeHeaderColIndexes If true, headerColIndexes will refer to columns to extract. If false, headerColIndexes will refer to columns to exclude
      * @return
      * @throws PortalServiceException
      */
     public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data) throws PortalServiceException {
+    	writeRawData(csvData, replacedCsvData, data, null, true);
+    }
+    
+    /**
+     * Reads the headers of csvData into replacedCsvData and then follows it up by writing the entirety of
+     * data into replacedCsvData
+     *
+     * Closes InputStream and OutputStream before returning.
+     *
+     * @param csvData
+     * @param headerColIndexes What column indexes to read (columnIndex[x] will output as column x) if includeColumnIndexes is true. What columns to exclude otherwise.. If null, all will be read.
+     * @param includeHeaderColIndexes If true, headerColIndexes will refer to columns to extract. If false, headerColIndexes will refer to columns to exclude
+     * @return
+     * @throws PortalServiceException
+     */
+    public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data, List<Integer> headerColIndexes, boolean includeHeaderColIndexes) throws PortalServiceException {
         CSVReader reader = null;
         CSVWriter writer = null;
 
@@ -799,7 +817,28 @@ public class CSVService {
             //Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
             if (isHeaderLine(headerLine)) {
-                writer.writeNext(headerLine);
+            	if (headerColIndexes == null) {
+            		writer.writeNext(headerLine);
+            	} else {
+            		if (includeHeaderColIndexes) {
+                        String[] newHeader = new String[headerColIndexes.size()];
+                        for (int i = 0; i < newHeader.length; i++) {
+                        	newHeader[i] = headerLine[headerColIndexes.get(i)];
+                        }
+                        writer.writeNext(newHeader);
+                    } else {
+                    	String[] newHeader = new String[headerLine.length - headerColIndexes.size()];
+                        int idx = 0;
+                        for (int i = 0; i < headerLine.length; i++) {
+                            if (headerColIndexes.contains(i)) {
+                                continue;
+                            }
+
+                            newHeader[idx++] = headerLine[i];
+                        }
+                        writer.writeNext(newHeader);
+                    }
+            	}
             }
 
             if (data == null || data.length == 0 || data[0].length == 0) {
@@ -912,6 +951,105 @@ public class CSVService {
             IOUtils.closeQuietly(writer);
             IOUtils.closeQuietly(deletedCsvData);
             IOUtils.closeQuietly(csvData);
+        }
+    }
+
+    /**
+     * Streams CSV data from in1 and in2 and merges the streams column by column. That is if
+     * in1 contains columns A B and in2 contains C D the output file will read A B C D
+     *
+     * If the number of lines varies between the in1 and in2, nulls will be inserted
+     *
+     * Any empty lines will be removed as part of this copying.
+     *
+     * Closes all InputStreams and OutputStream before returning.
+     *
+     * Returns the number of lines written (including header, if any)
+     *
+     * @param in1 The first input CSV stream (will be closed)
+     * @param in2 The second input CSV stream (will be closed)
+     * @param mergedCsvData Will receive merged output CSV stream.
+     * @param in1Columns The subset of column indexes to copy from in1
+     * @param in2Columns The subset of column indexes to copy from in2
+     *
+     */
+    public int mergeFiles(InputStream in1, InputStream in2, OutputStream mergedCsvData, List<Integer> in1Columns, List<Integer> in2Columns) throws PortalServiceException {
+        CSVReader reader1 = null;
+        CSVReader reader2 = null;
+        CSVWriter writer = null;
+
+        try {
+            reader1 = new CSVReader(new InputStreamReader(in1), ',', '\'', 0);
+            reader2 = new CSVReader(new InputStreamReader(in2), ',', '\'', 0);
+            writer = new CSVWriter(new OutputStreamWriter(mergedCsvData), ',', '\'');
+
+            String[] dataLine1 = getNextNonEmptyRow(reader1);
+            String[] dataLine2 = getNextNonEmptyRow(reader2);
+            String[] outputLine = null;
+            int linesWritten = 0;
+            int in1Cols = 0, in2Cols = 0;
+            while(dataLine1 != null || dataLine2 != null) {
+
+                if (outputLine == null) {
+                    in1Cols = (in1Columns == null ? dataLine1.length : in1Columns.size());
+                    in2Cols = (in2Columns == null ? dataLine2.length : in2Columns.size());
+                    outputLine = new String[in1Cols + in2Cols];
+                }
+
+                //Copy across in1
+                int outIdx = 0;
+                if (dataLine1 != null) {
+                    if (in1Columns == null) {
+                        for (int i = 0; i < dataLine1.length; i++) {
+                            outputLine[outIdx++] = dataLine1[i];
+                        }
+                    } else {
+                        for (Integer i : in1Columns) {
+                            outputLine[outIdx++] = dataLine1[i];
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < in1Cols; i++) {
+                        outputLine[outIdx++] = "";
+                    }
+                }
+
+
+                if (dataLine2 != null) {
+                    if (in2Columns == null) {
+                        for (int i = 0; i < dataLine2.length; i++) {
+                            outputLine[outIdx++] = dataLine2[i];
+                        }
+                    } else {
+                        for (Integer i : in2Columns) {
+                            outputLine[outIdx++] = dataLine2[i];
+                        }
+                    }
+                } else {
+                    for (int i = 0; i < in2Cols; i++) {
+                        outputLine[outIdx++] = "";
+                    }
+                }
+
+                writer.writeNext(outputLine);
+                linesWritten++;
+
+                dataLine1 = getNextNonEmptyRow(reader1);
+                dataLine2 = getNextNonEmptyRow(reader2);
+            }
+
+            return linesWritten;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to swap columns", ex);
+        } finally {
+            //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
+            //Ensure the writers close BEFORE we close the underlying streams
+            IOUtils.closeQuietly(reader1);
+            IOUtils.closeQuietly(reader2);
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(mergedCsvData);
+            IOUtils.closeQuietly(in1);
+            IOUtils.closeQuietly(in2);
         }
     }
 }

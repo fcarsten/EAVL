@@ -14,7 +14,9 @@ public class EAVLJob extends CloudJob {
     private Double predictionCutoff;
     private String predictionParameter;
     private Set<String> savedParameters;
+    private Set<String> proxyParameters;
     private String imputationTaskId;
+    private String kdeTaskId;
     private String holeIdParameter;
 
     public EAVLJob(Integer id) {
@@ -101,6 +103,22 @@ public class EAVLJob extends CloudJob {
     }
 
     /**
+     * Gets the ID of the last run kernel density estimator task (or null if it hasn't been run yet)
+     * @return
+     */
+    public String getKdeTaskId() {
+        return kdeTaskId;
+    }
+
+    /**
+     * Sets the ID of the last run kernel density estimator task (or null if it hasn't been run yet)
+     * @param imputationTaskId
+     */
+    public void setKdeTaskId(String kdeTaskId) {
+        this.kdeTaskId = kdeTaskId;
+    }
+
+    /**
      * Gets the name of the parameter saved for hole identification. The name corresponds to
      * the column header of the CSV file. This column will work like a "group by" clause
      * for some operations
@@ -123,4 +141,21 @@ public class EAVLJob extends CloudJob {
     public void setHoleIdParameter(String holeIdParameter) {
         this.holeIdParameter = holeIdParameter;
     }
+
+    /**
+     * Gets the set of Proxy Parameters chosen for this job (or null if they haven't been chosen yet)
+     * @return
+     */
+    public Set<String> getProxyParameters() {
+        return proxyParameters;
+    }
+
+    /**
+     * Sets the set of Proxy Parameters chosen for this job (or null if they haven't been chosen yet)
+     * @param proxyParameters
+     */
+    public void setProxyParameters(Set<String> proxyParameters) {
+        this.proxyParameters = proxyParameters;
+    }
+
 }

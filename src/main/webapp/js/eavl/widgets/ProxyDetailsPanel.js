@@ -16,7 +16,11 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
      * Adds the following config to Ext.panel.Panel
      * {
      *  emptyText : String - text to show when nothing is selected
-     * }
+     *
+     *  preserveAspectRatio - boolean - Should the charts preserve a 4x2 aspect ratio or should it stretch. Default false
+     *  targetChartWidth - Number - (Only useful if preserveAspectRatio is set) - The target width to use in aspect ratio for each chart
+     *  targetChartHeight - Number - (Only useful if preserveAspectRatio is set)  - The target height to use in aspect ratio for each chart
+     *
      *
      * Adds the following events
      * {
@@ -47,23 +51,27 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
                 },
                 items: [{
                     xtype: 'panel',
-                    title: 'Double PDF - (GET BETTER NAME)',
                     width: '100%',
                     flex: 1,
                     layout: 'fit',
                     items : [{
                         xtype: 'doublepdfchart',
-                        itemId: 'dpdfchart'
+                        itemId: 'dpdfchart',
+                        preserveAspectRatio : config.preserveAspectRatio,
+                        targetWidth: config.targetChartWidth,
+                        targetHeight: config.targetChartHeight
                     }]
                 },{
                     xtype: 'panel',
-                    title: 'Mean ACF',
                     width: '100%',
                     flex: 1,
                     layout: 'fit',
                     items : [{
-                        xtype: 'container',
-                        html : 'todo'
+                        xtype: 'meanacfchart',
+                        itemId: 'meanacfchart',
+                        preserveAspectRatio : config.preserveAspectRatio,
+                        targetWidth: config.targetChartWidth,
+                        targetHeight: config.targetChartHeight
                     }]
                 }]
             }]
@@ -89,6 +97,7 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
 
 
         this.down('#dpdfchart').plotParameterDetails(parameterDetails);
+        this.down('#meanacfchart').plotParameterDetails(parameterDetails);
 
         if (this.getLayout().getActiveItem().getItemId() !== 'card-inspect') {
             this.getLayout().setActiveItem('card-inspect');
@@ -102,6 +111,7 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
         this.parameterDetails = null;
 
         this.down('#dpdfchart').clearPlot();
+        this.down('#meanacfchart').clearPlot();
 
         this.getLayout().setActiveItem('card-empty');
     }

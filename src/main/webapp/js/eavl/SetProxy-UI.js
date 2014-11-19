@@ -36,7 +36,48 @@ Ext.application({
                     xtype: 'workflowpanel',
                     region: 'north',
                     allowNext: function(callback) {
-                        callback(false);
+                        var pdField1 = Ext.getCmp('setproxy-1').down('#pdfield');
+                        if (!pdField1.isValid()) {
+                            callback(false);
+                            return;
+                        }
+
+                        var pdField2 = Ext.getCmp('setproxy-2').down('#pdfield');
+                        if (!pdField2.isValid()) {
+                            callback(false);
+                            return;
+                        }
+
+                        var pdField3 = Ext.getCmp('setproxy-3').down('#pdfield');
+                        if (!pdField3.isValid()) {
+                            callback(false);
+                            return;
+                        }
+
+                        Ext.Ajax.request({
+                            url: 'setproxy/saveAndSubmitProxySelection.do',
+                            params : {
+                                proxy : [pdField1.getValue().get('name'),
+                                         pdField2.getValue().get('name'),
+                                         pdField3.getValue().get('name')]
+                            },
+                            callback : function(options, success, response) {
+                                eavl.widget.SplashScren.hideLoadingScreen();
+
+                                if (!success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                var responseObj = Ext.JSON.decode(response.responseText);
+                                if (!responseObj.success) {
+                                    callback(false);
+                                    return;
+                                }
+
+                                callback(true);
+                            }
+                        });
                     }
                 },{
                     xtype: 'container',
@@ -75,48 +116,20 @@ Ext.application({
                             pack : 'center'
                         },
                         items: [{
-                            xtype: 'container',
+                            xtype: 'setproxyselection',
                             flex: 1,
-                            layout: {
-                                type: 'vbox',
-                                align : 'center',
-                                pack : 'center'
-                            },
-                            items : [{
-                                xtype : 'pdfield',
-                                id : 'proxy1-field',
-                                width: '100%',
-                                title: 'Proxy 1',
-                                height: 80,
-                                emptyText : 'Drag a parameter here to select it.',
-                                margins: '0 0 10 0',
-                                allowBlank: false,
-                                plugins: [{
-                                    ptype : 'modeldnd',
-                                    ddGroup : 'set-proxy-pd',
-                                    highlightBody : false,
-                                    handleDrop : function(pdfield, pd, source) {
-                                        //Swap if we already have a value
-                                        if (pdfield.getValue()) {
-                                            var currentValue = pdfield.getValue();
-                                            source.getStore().add(currentValue);
-                                        }
-                                        pdfield.setValue(pd);
-
-                                        pdfield.ownerCt.down('#proxy-panel-1').showParameterDetails(pd);
-                                    },
-                                    handleDrag : function(pdfield, pd) {
-                                        pdfield.reset();
-                                        pdfield.ownerCt.down('#proxy-panel-1').hideParameterDetails();
-                                    }
-                                }]
-                            },{
-                                xtype: 'proxypanel',
-                                itemId: 'proxy-panel-1',
-                                width: '100%',
-                                emptyText: 'Drag a parameter above to select it as a proxy',
-                                flex: 1
-                            }]
+                            title: 'Proxy 1',
+                            id: 'setproxy-1'
+                        },{
+                            xtype: 'setproxyselection',
+                            flex: 1,
+                            title: 'Proxy 2',
+                            id: 'setproxy-2'
+                        },{
+                            xtype: 'setproxyselection',
+                            flex: 1,
+                            title: 'Proxy 3',
+                            id: 'setproxy-3'
                         }]
                     }]
                 }]
@@ -166,7 +179,7 @@ Ext.application({
 
                 //At this point imputation hasn't been run/hasn't finished
                 if (responseObj.msg === "nodata") {
-                    initNotReady("There's no record of an imputation task running for this job. Did you complete the prediction steps?", "setprediction.html");
+                    initNotReady("There's no record of an imputation task running for this job. Did you complete the prediction steps?", "imputation.html");
                     return;
                 }
                 if (responseObj.msg === "nojob") {
@@ -174,7 +187,7 @@ Ext.application({
                     return;
                 }
                 if (responseObj.msg === "failed") {
-                    initNotReady("Imputation failed. You can try resubmitting.", "setprediction.html");
+                    initNotReady("Imputation failed. You can try resubmitting.", "imputation.html");
                     return;
                 }
 
@@ -183,5 +196,68 @@ Ext.application({
             }
         });
     }
+});
 
+
+
+/**
+ * Internal grouping of a ParameterDetails field and ProxyDetailsPanel. Not really designed for
+ * use outside of the SetProxy GUI
+ */
+Ext.define('eavl.setproxy.ProxySelectionPanel', {
+    extend: 'Ext.container.Container',
+
+    alias: 'widget.setproxyselection',
+
+    constructor : function(config) {
+        var me = this;
+        Ext.apply(config, {
+            xtype: 'container',
+            layout: {
+                type: 'vbox',
+                align : 'center',
+                pack : 'center'
+            },
+            items : [{
+                xtype : 'pdfield',
+                width: '100%',
+                height: 80,
+                title: config.title,
+                itemId : 'pdfield',
+                emptyText : 'Drag a parameter here to select it.',
+                margins: '0 0 10 0',
+                allowBlank: false,
+                plugins: [{
+                    ptype : 'modeldnd',
+                    ddGroup : 'set-proxy-pd',
+                    highlightBody : false,
+                    handleDrop : function(pdfield, pd, source) {
+                        //Swap if we already have a value
+                        if (pdfield.getValue()) {
+                            var currentValue = pdfield.getValue();
+                            source.getStore().add(currentValue);
+                        }
+                        pdfield.setValue(pd);
+
+                        pdfield.ownerCt.down('#proxy-panel').showParameterDetails(pd);
+                    },
+                    handleDrag : function(pdfield, pd) {
+                        pdfield.reset();
+                        pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
+                    }
+                }]
+            },{
+                xtype: 'proxypanel',
+                itemId: 'proxy-panel',
+                width: '100%',
+                emptyText: 'Drag a parameter above to select it as a proxy',
+                flex: 1,
+                targetChartWidth: 400,
+                targetChartHeight: 400,
+                preserveAspectRatio: true
+            }]
+        });
+
+        this.callParent(arguments);
+    }
 });

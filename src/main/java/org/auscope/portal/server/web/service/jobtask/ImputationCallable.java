@@ -18,12 +18,12 @@ import org.auscope.portal.server.web.service.CSVService;
 
 public class ImputationCallable implements Callable<Object> {
 
-    protected final Log log = LogFactory.getLog(getClass());
+    private final Log log = LogFactory.getLog(getClass());
 
-    private EAVLJob job;
-    private ConditionalProbabilityWpsClient wpsClient;
-    private CSVService csvService;
-    private FileStagingService fss;
+    protected EAVLJob job;
+    protected ConditionalProbabilityWpsClient wpsClient;
+    protected CSVService csvService;
+    protected FileStagingService fss;
 
     public ImputationCallable(EAVLJob job, ConditionalProbabilityWpsClient wpsClient, CSVService csvService, FileStagingService fss) {
         super();
@@ -56,7 +56,7 @@ public class ImputationCallable implements Callable<Object> {
 
     @Override
     public Object call() throws Exception {
-        InputStream in = null;
+        InputStream in = null, in2 = null;
         OutputStream os = null;
 
         try {
@@ -65,16 +65,24 @@ public class ImputationCallable implements Callable<Object> {
             Double[][] rawData = csvService.getRawData(in, excludedCols, false);
             double[][] imputedData = wpsClient.imputationNA(rawData);
 
-            IOUtils.closeQuietly(in);
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV); //need to reopen this because it gets shut above
-            os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            this.csvService.writeRawData(in, os, imputedData, excludedCols, false);
 
-            this.csvService.writeRawData(in, os, imputedData);
+            //After getting the imputed data, re-insert the "excluded" columns into the imputed dataset
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            in2 = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            this.csvService.mergeFiles(in, in2, os, excludedCols, null);
+
+            this.fss.deleteStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+
             return imputedData;
         } catch (Exception ex) {
             log.error("Imputation Error: ", ex);
             throw new PortalServiceException("", ex);
         } finally {
+            IOUtils.closeQuietly(in2);
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(os);
         }

@@ -15,6 +15,7 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/SetProxy-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/MeanACFChart.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ProxyDetailsPanel.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
@@ -27,6 +28,7 @@
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/BaseParameterDetailsChart.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/DoublePDFChart.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/charts/MeanACFChart.js"></script>
         <script type="text/javascript" src="js/eavl/SetProxy-UI.js"></script>
     </head>
     <body>

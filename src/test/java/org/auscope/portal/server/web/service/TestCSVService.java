@@ -30,12 +30,14 @@ import org.junit.Test;
 public class TestCSVService extends PortalTestClass{
     private CSVService service;
     private InputStream mockStream;
+    private InputStream mockStream2;
     private OutputStream mockOutputStream;
 
     @Before
     public void setup() {
         service = new CSVService();
-        mockStream = context.mock(InputStream.class);
+        mockStream = context.mock(InputStream.class, "mockStream");
+        mockStream2 = context.mock(InputStream.class, "mockStream2");
         mockOutputStream = context.mock(OutputStream.class);
     }
 
@@ -633,6 +635,44 @@ public class TestCSVService extends PortalTestClass{
 
         Assert.assertEquals(expected, os.toString());
     }
+    
+    @Test
+    public void testWriteRawDataColIncludes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        double[][] newData = new double[][] {
+                {0.8, 0.5},
+                {13.45, 40.2}
+        };
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+
+        service.writeRawData(is, os, newData, Arrays.asList(4,2), true);
+
+        String expected = "' data','something-else'\n" +
+                "'0.8','0.5'\n" +
+                "'13.45','40.2'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+    
+    @Test
+    public void testWriteRawDataExcludes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        double[][] newData = new double[][] {
+                {0.4, 0.8},
+                {440.4, 88.8}
+        };
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+
+        service.writeRawData(is, os, newData, Arrays.asList(1,3,2), false);
+
+        String expected = "'sample',' data'\n" +
+                "'0.4','0.8'\n" +
+                "'440.4','88.8'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
 
     @Test(expected=PortalServiceException.class)
     public void testWriteRawDataClosesStream() throws Exception {
@@ -732,4 +772,96 @@ public class TestCSVService extends PortalTestClass{
 
         service.swapColumns(mockStream, mockOutputStream, 0, 2);
     }
+
+
+    @Test
+    public void testMergeFiles() throws Exception {
+        InputStream is1 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        InputStream is2 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Assert.assertEquals(8, service.mergeFiles(is1, is2, os, Arrays.asList(0, 2, 4), Arrays.asList(3, 1)));
+
+        String expected = "'0',' D/L',' 12',' ',' 40'\n" +
+                "'1',' 102',' 12',' 52',' 42'\n" +
+                "'2',' 103',' 15',' 6',' 16'\n" +
+                "'3',' 101',' ',' 43',' 13'\n" +
+                "'4',' 103',' 16',' 74',' 16'\n" +
+                "'5',' 100',' ',' 32',' 48'\n" +
+                "'6',' D/L',' 14',' 72',' 41'\n" +
+                "'7',' 101',' ',' 69',' 11'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testMergeFilesDiffSize() throws Exception {
+        InputStream is1 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        InputStream is2 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Assert.assertEquals(8, service.mergeFiles(is1, is2, os, Arrays.asList(0), Arrays.asList(1)));
+
+        String expected = "'0',' gold (au) ppm'\n" +
+                          "'1','40'\n" +
+                          "'2','42'\n" +
+                          "'3','DL'\n" +
+                          "'4','DLVal'\n" +
+                          "'5','DL'\n" +
+                          "'6',''\n" +
+                          "'7',''\n";
+
+        Assert.assertEquals(expected, os.toString());
+        is1 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        is2 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+
+        os = new ByteArrayOutputStream();
+        Assert.assertEquals(8, service.mergeFiles(is2, is1, os, Arrays.asList(1), Arrays.asList(0)));
+
+        expected = "' gold (au) ppm','0'\n" +
+                "'40','1'\n" +
+                "'42','2'\n" +
+                "'DL','3'\n" +
+                "'DLVal','4'\n" +
+                "'DL','5'\n" +
+                "'','6'\n" +
+                "'','7'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testMergeFilesClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            allowing(mockOutputStream).flush();
+
+            atLeast(1).of(mockStream).close();
+            atLeast(2).of(mockStream2).close();
+            atLeast(1).of(mockOutputStream).close();
+        }});
+
+        service.mergeFiles(mockStream, mockStream2, mockOutputStream, null, null);
+    }
+
+    @Test
+    public void testMergeFilesNoCols() throws Exception {
+        InputStream is1 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        InputStream is2 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        Assert.assertEquals(6, service.mergeFiles(is1, is2, os, null, null));
+
+        String expected = "'sample',' gold (au) ppm','sample',' gold (au) ppm'\n" +
+                "'40','40','40','40'\n" +
+                "'','42','','42'\n" +
+                "'DL','DL','DL','DL'\n" +
+                "'DLVal','DLVal','DLVal','DLVal'\n" +
+                "'DL','DL','DL','DL'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
 }
+

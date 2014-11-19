@@ -1,0 +1,29 @@
+.bar {
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+.acf-axis {
+  font: 10px sans-serif;
+}
+
+.acf-axis path,
+.acf-axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.acf-x.axis path {
+  display: none;
+}
+
+
+.acf-ci-line {
+	fill: none;
+    stroke: black;
+    stroke-width: 1.5px;
+}
