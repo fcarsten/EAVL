@@ -96,6 +96,14 @@ Ext.define('eavl.widgets.charts.MeanACFChart', {
                     .attr("y", function(d) {return y(d);})
                     .attr("height", function(d) { return height - y(d); });
 
+                g.append("path")
+                    .datum([{x:0, y: data.data.ci},{x:d3.max(x.domain()), y: data.data.ci}])
+                    .attr("class", "acf-ci-line")
+                    .attr("stroke-dasharray", "5, 5")
+                    .attr("d", d3.svg.line()
+                            .x(function(d) { return x(d.x); })
+                            .y(function(d) { return y(d.y); }));
+
                 me.d3svg.append("text")
                     .attr("x", margin.left + (width / 2))
                     .attr("y", 0 + (margin.top / 2) +  8)
