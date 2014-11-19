@@ -62,8 +62,8 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
                     flex: 1,
                     layout: 'fit',
                     items : [{
-                        xtype: 'container',
-                        html : 'todo'
+                        xtype: 'meanacfchart',
+                        itemId: 'meanacfchart'
                     }]
                 }]
             }]
@@ -89,6 +89,7 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
 
 
         this.down('#dpdfchart').plotParameterDetails(parameterDetails);
+        this.down('#meanacfchart').plotParameterDetails(parameterDetails);
 
         if (this.getLayout().getActiveItem().getItemId() !== 'card-inspect') {
             this.getLayout().setActiveItem('card-inspect');
@@ -102,6 +103,7 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
         this.parameterDetails = null;
 
         this.down('#dpdfchart').clearPlot();
+        this.down('#meanacfchart').clearPlot();
 
         this.getLayout().setActiveItem('card-empty');
     }

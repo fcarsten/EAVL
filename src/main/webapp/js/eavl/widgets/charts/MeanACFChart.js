@@ -28,11 +28,11 @@ Ext.define('eavl.widgets.charts.MeanACFChart', {
 
         this.mask(Ext.util.Format.format("Loading data for '{0}'", parameterDetails.get('name')));
 
-        d3.json(Ext.String.urlAppend("wps/getDoublePDFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex')})),
+        d3.json(Ext.String.urlAppend("wps/getMeanACFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex')})),
                 function(error, data) {
             me.maskClear();
             if (error) {
-                me.clearPlot("There was an error accessing PDF data");
+                me.clearPlot("There was an error accessing ACF data");
                 return;
             }
 
@@ -47,49 +47,27 @@ Ext.define('eavl.widgets.charts.MeanACFChart', {
                 me.d3 = {};
             }
 
-            var x = me.d3.x ? me.d3.x : me.d3.x = d3.scale.linear().range([0, width]);
+            var x = me.d3.x ? me.d3.x : me.d3.x = d3.scale.ordinal().rangeRoundBands([0, width], .1);
             var y = me.d3.y ? me.d3.y : me.d3.y = d3.scale.linear().range([height, 0]);
 
             var xAxis = me.d3.xAxis ? me.d3.xAxis : me.d3.xAxis = d3.svg.axis().scale(x).orient("bottom");
             var yAxis = me.d3.yAxis ? me.d3.yAxis : me.d3.yAxis = d3.svg.axis().scale(y).orient("left");
 
-            if (me.allowCutoffSelection) {
-                var brush = me.d3.brush ? me.d3.brush : me.d3.brush = d3.svg.brush()
-                        .x(x)
-                        .on("brush", Ext.bind(me._handleBrush, me, [true], false));
-            }
-
-            var lineMain = me.d3.lineMain ? me.d3.lineMain : me.d3.lineMain = d3.svg.line()
-                    .x(function(d) { return x(d[0]); })
-                    .y(function(d) { return y(d[1]); });
-
-            var lineSecondary = me.d3.lineSecondary ? me.d3.lineSecondary : me.d3.lineSecondary = d3.svg.line()
-                    .x(function(d) { return x(d[2]); })
-                    .y(function(d) { return y(d[3]); });
-
-            x.domain(d3.extent(data, function(d) { return d[0]; }));
-            y.domain(d3.extent(data, function(d) { return d[1]; }));
+            x.domain(d3.range(data.data.acf.length));
+            y.domain([0, 1]);
 
             //Either update existing line or create new one
-            var title = Ext.util.Format.format('Probability Density Function for "{0}"', parameterDetails.get('name'));
+            var title = Ext.util.Format.format('Mean ACF for "{0}"', parameterDetails.get('name'));
             if (update) {
-                var svg = me.d3svg.transition();
+                var bar = me.d3svg.selectAll("rect")
+                    .data(data.data.acf);
 
-                svg.select(".line-main")
+                bar.transition()
                     .duration(750)
-                    .attr("d", lineMain(data));
-                svg.select(".line-secondary")
-                    .duration(750)
-                    .attr("d", lineSecondary(data));
-                svg.select(".x.axis") // change the x axis
-                    .duration(750)
-                    .call(xAxis);
-                svg.select(".y.axis") // change the y axis
-                    .duration(750)
-                    .call(yAxis);
+                    .attr("y", function(d) {return y(d);})
+                    .attr("height", function(d) { return height - y(d); })
 
-
-                svg.select('.title').text(title)
+                me.d3svg.select('.title').text(title)
             } else {
                 var g = me.d3svg.append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -107,26 +85,16 @@ Ext.define('eavl.widgets.charts.MeanACFChart', {
                     .attr("y", 6)
                     .attr("dy", ".71em")
                     .style("text-anchor", "end")
-                    .text("log(density)");
+                    .text("TODO - What is this scale??");
 
-                g.append("path")
-                    .datum(data)
-                    .attr("class", "line-main line")
-                    .attr("d", lineMain(data));
-
-                g.append("path")
-                    .datum(data)
-                    .attr("class", "line-secondary line")
-                    .attr("stroke-dasharray", "5, 5")
-                    .attr("d", lineSecondary(data));
-
-                if (me.d3.brush) {
-                    me.d3.brushgroup = g.append("g")
-                        .attr("class", "x brush")
-                        .call(me.d3.brush)
-                    me.d3.brushgroup.selectAll("rect")
-                        .attr("height", height);
-                }
+                g.selectAll(".bar")
+                    .data(data.data.acf)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function(d,i) {return x(i);})
+                    .attr("width", x.rangeBand())
+                    .attr("y", function(d) {return y(d);})
+                    .attr("height", function(d) { return height - y(d); });
 
                 me.d3svg.append("text")
                     .attr("x", margin.left + (width / 2))
