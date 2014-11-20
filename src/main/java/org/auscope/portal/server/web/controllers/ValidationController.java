@@ -85,6 +85,9 @@ public class ValidationController extends BasePortalController {
             }
             file = fss.handleFileUpload(job, (MultipartHttpServletRequest) request);
 
+            job.setName(file.getName());
+            jobService.save(job);
+
             //Rename it to a temp file, remove missing lines and put it into the correct file
             if (!fss.renameStageInFile(job, file.getName(), EAVLJobConstants.FILE_TEMP_DATA_CSV)) {
                 throw new IOException("Unable to operate on files in staging area - rename file failed");

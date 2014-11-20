@@ -1,0 +1,38 @@
+.viewer-empty-container {
+    width: 90%;
+    position:absolute;
+    height: 90%;
+}
+
+.viewer-empty-container-inner {
+    text-align: center;
+    height : 160px;
+    position:absolute;
+    top:50%;
+    margin-top:-50px;
+}
+
+.viewer-empty-image {
+	background-image:url(../../img/trash.svg) !important;
+	width : 100px;
+}
+
+
+.jobs-empty-container {
+    width: 90%;
+    position:absolute;
+    height: 90%;
+}
+
+.jobs-empty-container-inner {
+    text-align: center;
+    height : 160px;
+    position:absolute;
+    top:50%;
+    margin-top:-50px;
+}
+
+.jobs-empty-image {
+    background-image:url(../../img/alert.svg) !important;
+    width : 100px;
+}

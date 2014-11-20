@@ -26,9 +26,6 @@ public class EAVLJobService {
 
     public EAVLJobService() {
         debugJobSingleton = new EAVLJob(1);
-        debugJobSingleton.setHoleIdParameter("holeid"); //debug value
-        debugJobSingleton.setPredictionParameter("Au_assay"); //debug value
-        debugJobSingleton.setPredictionCutoff(1.0); //debug value
     }
 
     /**

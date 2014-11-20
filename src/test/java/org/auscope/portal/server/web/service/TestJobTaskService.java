@@ -124,6 +124,22 @@ public class TestJobTaskService extends PortalTestClass {
     }
 
     /**
+     * Tests fetching null guids returns false/null as expected
+     * @throws Exception
+     */
+    @Test
+    public void testNullGuids() throws Exception {
+        executor = Executors.newFixedThreadPool(1);
+        context.checking(new Expectations() {{
+            oneOf(mockPersistor).getPersistedJobs();will(returnValue(new ArrayList<JobTask>()));
+        }});
+        service = new JobTaskService(executor, mockListener, mockPersistor);
+
+        Assert.assertFalse(service.isExecuting(null));
+        Assert.assertNull(service.getTask(null));
+    }
+
+    /**
      * Tests persistance and listeners all are called as appropriate
      * when the jobs run as expected
      * @throws Exception
