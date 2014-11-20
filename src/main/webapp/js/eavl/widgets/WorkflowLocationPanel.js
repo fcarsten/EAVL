@@ -12,8 +12,10 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
                 window.location.href = url;
             } else {
                 Ext.getCmp('workflow-location-panel').allowNext(function(proceed) {
-                    if (proceed) {
+                    if (proceed === true) {
                         window.location.href = url;
+                    } else if (proceed !== false) {
+                        window.location.href = proceed;
                     }
                 });
             }
@@ -23,8 +25,10 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
                 window.location.href = url;
             } else {
                 Ext.getCmp('workflow-location-panel').allowPrevious(function(proceed) {
-                    if (proceed) {
+                    if (proceed === true) {
                         window.location.href = url;
+                    } else if (proceed !== false) {
+                        window.location.href = proceed;
                     }
                 });
             }
@@ -44,8 +48,10 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
     /**
      * Adds the following config to Ext.panel.Panel
      * {
-     *  allowNext : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true)
+     *  allowNext : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true).
+     *                                   If a string is returned, its value will be used as the URL instead.
      *  allowPrevious : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true)
+     *                                       If a string is returned, its value will be used as the URL instead.
      *  hideNavigator : boolean - If true, the Navigator panel (big left/right arrows) will be omitted
      *  urlOverride : String - if set, highlight location based on this string rather than window.location
      * }

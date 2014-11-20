@@ -25,7 +25,7 @@ Ext.application({
         if (next.endsWith("setproxy.html")) {
             taskName = "Imputation";
         } else if (next.endsWith("results.html")) {
-            taskName = "Conditional Probability";
+            taskName = "Calculations";
         }
 
         var viewport = Ext.create('Ext.container.Viewport', {

@@ -75,7 +75,7 @@ Ext.application({
                                     return;
                                 }
 
-                                callback(true);
+                                callback("taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data, next: 'results.html'}));
                             }
                         });
                     }
