@@ -5,7 +5,7 @@ Ext.application({
     name : 'eavl-results',
 
     init: function() {
-        eavl.widget.SplashScren.showLoadingSplash('Loading results browser, please stand by ...');
+        eavl.widgets.SplashScreen.showLoadingSplash('Loading results browser, please stand by ...');
     },
 
     viewport : null,
@@ -16,17 +16,17 @@ Ext.application({
     launch : function() {
         //Called if the init code fails badly
         var initError = function() {
-            eavl.widget.SplashScren.hideLoadingScreen();
-            eavl.widget.SplashScren.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+            eavl.widgets.SplashScreen.hideLoadingScreen();
+            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
         };
 
         var initNotReady = function(message, url) {
-            eavl.widget.SplashScren.hideLoadingScreen();
-            eavl.widget.SplashScren.showErrorSplash(message + Ext.util.Format.format('<br><a href="{0}">Continue</a>', url));
+            eavl.widgets.SplashScreen.hideLoadingScreen();
+            eavl.widgets.SplashScreen.showErrorSplash(message + Ext.util.Format.format('<br><a href="{0}">Continue</a>', url));
         };
 
         var initSuccess = function(records) {
-            eavl.widget.SplashScren.hideLoadingScreen();
+            eavl.widgets.SplashScreen.hideLoadingScreen();
 
             Ext.tip.QuickTipManager.init();
 

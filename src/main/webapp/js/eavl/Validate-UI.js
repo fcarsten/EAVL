@@ -5,7 +5,7 @@ Ext.application({
     name : 'eavl-validate',
 
     init: function() {
-        eavl.widget.SplashScren.showLoadingSplash('Loading Validator, please stand by ...');
+        eavl.widgets.SplashScreen.showLoadingSplash('Loading Validator, please stand by ...');
     },
 
     viewport : null,
@@ -16,12 +16,12 @@ Ext.application({
     launch : function() {
         //Called if the init code fails badly
         var initError = function() {
-            eavl.widget.SplashScren.hideLoadingScreen();
-            eavl.widget.SplashScren.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+            eavl.widgets.SplashScreen.hideLoadingScreen();
+            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
         };
 
         var initSuccess = function(parameterDetails) {
-            eavl.widget.SplashScren.hideLoadingScreen();
+            eavl.widgets.SplashScreen.hideLoadingScreen();
 
             Ext.tip.QuickTipManager.init();
 
@@ -60,14 +60,14 @@ Ext.application({
                         for (var i = 0; i < ds.getCount(); i++) {
                             indexes.push(ds.getAt(i).get('columnIndex'));
                         }
-                        eavl.widget.SplashScren.showLoadingSplash("Trashing parameters...");
+                        eavl.widgets.SplashScreen.showLoadingSplash("Trashing parameters...");
                         Ext.Ajax.request({
                             url: 'validation/deleteParameters.do',
                             params : {
                                 columnIndex : indexes
                             },
                             callback : function(options, success, response) {
-                                eavl.widget.SplashScren.hideLoadingScreen();
+                                eavl.widgets.SplashScreen.hideLoadingScreen();
 
                                 if (!success) {
                                     callback(false);
@@ -126,7 +126,7 @@ Ext.application({
                         margin : '0 10 0 10',
                         listeners : {
                             parameterchanged : function(pdpanel, parameterDetails) {
-                                eavl.widget.SplashScren.showLoadingSplash('Reloading CSV Data...');
+                                eavl.widgets.SplashScreen.showLoadingSplash('Reloading CSV Data...');
                                 pdStore.load();
                             }
                         }
@@ -147,7 +147,7 @@ Ext.application({
                         }],
                         listeners : {
                             parameterchanged : function(pdpanel, parameterDetails) {
-                                eavl.widget.SplashScren.showLoadingSplash('Reloading CSV Data...');
+                                eavl.widgets.SplashScreen.showLoadingSplash('Reloading CSV Data...');
                                 pdStore.load();
                             }
                         }

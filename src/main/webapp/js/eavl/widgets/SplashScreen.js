@@ -1,7 +1,7 @@
 /**
  * Utility functions for rendering full screen splashes.
  */
-Ext.define('eavl.widget.SplashScren', {
+Ext.define('eavl.widgets.SplashScreen', {
     singleton: true
 }, function() {
 
@@ -9,32 +9,32 @@ Ext.define('eavl.widget.SplashScren', {
     /**
      * Loads a full screen splash screen with the specified message. If a splash is already showing, it will be hidden
      */
-    eavl.widget.SplashScren.showLoadingSplash = function(message) {
-        if (!eavl.widget.SplashScren._splashscreen) {
-            eavl.widget.SplashScren.hideLoadingScreen();
+    eavl.widgets.SplashScreen.showLoadingSplash = function(message) {
+        if (!eavl.widgets.SplashScreen._splashscreen) {
+            eavl.widgets.SplashScreen.hideLoadingScreen();
         }
-        eavl.widget.SplashScren._splashscreen = Ext.getBody().mask(message, 'splashscreen');
+        eavl.widgets.SplashScreen._splashscreen = Ext.getBody().mask(message, 'splashscreen');
     };
 
     /**
      * Hides any open loading splash screens, otherwise  has no effect
      */
-    eavl.widget.SplashScren.hideLoadingScreen = function() {
-        if (!eavl.widget.SplashScren._splashscreen) {
+    eavl.widgets.SplashScreen.hideLoadingScreen = function() {
+        if (!eavl.widgets.SplashScreen._splashscreen) {
             return;
         }
-        eavl.widget.SplashScren._splashscreenfading = eavl.widget.SplashScren._splashscreen;
-        eavl.widget.SplashScren._splashscreen = null;
+        eavl.widgets.SplashScreen._splashscreenfading = eavl.widgets.SplashScreen._splashscreen;
+        eavl.widgets.SplashScreen._splashscreen = null;
         var task = new Ext.util.DelayedTask(function() {
 
             // fade out the body mask
-            eavl.widget.SplashScren._splashscreenfading.fadeOut({
+            eavl.widgets.SplashScreen._splashscreenfading.fadeOut({
                 duration: 500,
                 remove: true
             });
 
             // fade out the message
-            eavl.widget.SplashScren._splashscreenfading.next().fadeOut({
+            eavl.widgets.SplashScreen._splashscreenfading.next().fadeOut({
                 duration: 500,
                 remove: true
             });
@@ -47,7 +47,7 @@ Ext.define('eavl.widget.SplashScren', {
      * Shows a full screen error splash that overrides the current viewport. This is a "nuclear" option and
      * will destroy everything in the current viewport. Only use if there is no chance of recovery
      */
-    eavl.widget.SplashScren.showErrorSplash = function(message) {
+    eavl.widgets.SplashScreen.showErrorSplash = function(message) {
         var viewport = Ext.ComponentQuery.query('viewport')[0];
         if (!viewport) {
             viewport = Ext.create('Ext.container.Viewport', {
