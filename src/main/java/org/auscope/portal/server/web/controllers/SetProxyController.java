@@ -48,7 +48,7 @@ public class SetProxyController extends BasePortalController {
 
         EAVLJob job;
         try {
-            job = jobService.getJobForSession(request);
+            job = jobService.getJobForSession(request, user);
         } catch (PortalServiceException ex) {
             log.error("Unable to lookup job:", ex);
             return generateJSONResponseMAV(false);
@@ -83,7 +83,7 @@ public class SetProxyController extends BasePortalController {
 
         EAVLJob job;
         try {
-            job = jobService.getJobForSession(request);
+            job = jobService.getJobForSession(request, user);
         } catch (PortalServiceException ex) {
             log.error("Unable to lookup job:", ex);
             return generateJSONResponseMAV(false);

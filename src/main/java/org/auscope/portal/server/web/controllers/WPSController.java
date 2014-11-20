@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.auscope.eavl.wpsclient.ACF;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
+import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
@@ -20,6 +21,7 @@ import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,11 +46,11 @@ public class WPSController extends BasePortalController {
     }
 
     @RequestMapping("/getPDFData.do")
-    public ModelAndView getPDFData(HttpServletRequest request,
+    public ModelAndView getPDFData(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("columnIndex") int columnIndex) {
 
         try {
-            EAVLJob job = jobService.getJobForSession(request);
+            EAVLJob job = jobService.getJobForSession(request, user);
             InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             List<Double> columnData = csvService.getParameterValues(csvData, columnIndex, false);
 
@@ -70,11 +72,11 @@ public class WPSController extends BasePortalController {
     }
 
     @RequestMapping("/getDoublePDFData.do")
-    public ModelAndView getDoublePDFData(HttpServletRequest request,
+    public ModelAndView getDoublePDFData(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("columnIndex") int columnIndex) {
 
         try {
-            EAVLJob job = jobService.getJobForSession(request);
+            EAVLJob job = jobService.getJobForSession(request, user);
             if (job == null) {
                 return generateJSONResponseMAV(false, null, "No job");
             }
@@ -128,10 +130,10 @@ public class WPSController extends BasePortalController {
     }
 
     @RequestMapping("/getMeanACFData.do")
-    public ModelAndView getMeanACFData(HttpServletRequest request,
+    public ModelAndView getMeanACFData(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("columnIndex") int columnIndex) {
         try {
-            EAVLJob job = jobService.getJobForSession(request);
+            EAVLJob job = jobService.getJobForSession(request, user);
             if (job == null) {
                 return generateJSONResponseMAV(false, null, "No job");
             }

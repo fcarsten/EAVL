@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
+import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.web.service.CSVService;
@@ -12,6 +13,7 @@ import org.auscope.portal.server.web.service.JobTaskService;
 import org.auscope.portal.server.web.service.jobtask.ImputationCallable;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,7 +54,7 @@ public class ImputationController extends BasePortalController {
      * @return
      */
     @RequestMapping("saveAndSubmitImputation.do")
-    public ModelAndView saveImputationConfig(HttpServletRequest request,
+    public ModelAndView saveImputationConfig(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam(required=false, value="savedColName") String[] savedNames,
             @RequestParam("holeIdName") String holeIdName,
             @RequestParam("predictorName") String predictorName,
@@ -63,7 +65,7 @@ public class ImputationController extends BasePortalController {
         }
 
         try {
-            EAVLJob job = jobService.getJobForSession(request);
+            EAVLJob job = jobService.getJobForSession(request, user);
 
             job.setSavedParameters(Sets.newHashSet(new ArrayIterator<String>(savedNames)));
             job.setPredictionCutoff(predictorCutoff);

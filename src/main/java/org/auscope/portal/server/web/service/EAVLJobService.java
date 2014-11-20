@@ -1,9 +1,13 @@
 package org.auscope.portal.server.web.service;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.springframework.stereotype.Service;
@@ -42,9 +46,10 @@ public class EAVLJobService {
      * Gets an EAVLJob for a particular user session. If the job DNE this will return null
      *
      * @param request Used to identify session
+     * @param user Owner of the session
      * @return
      */
-    public EAVLJob getJobForSession(HttpServletRequest request) throws PortalServiceException {
+    public EAVLJob getJobForSession(HttpServletRequest request, PortalUser user) throws PortalServiceException {
         log.warn("TODO - getJobForSession");
         return debugJobSingleton;
     }
@@ -79,5 +84,15 @@ public class EAVLJobService {
         //TODO - save job
         log.warn("TODO - save job");
         debugJobSingleton = job;
+    }
+
+    /**
+     * Returns every Job belonging to a particular user
+     * @param request The users request
+     * @param user The authenticated user object
+     * @return
+     */
+    public List<EAVLJob> getJobsForUser(HttpServletRequest request, PortalUser user) throws PortalServiceException {
+        return Arrays.asList(debugJobSingleton);
     }
 }
