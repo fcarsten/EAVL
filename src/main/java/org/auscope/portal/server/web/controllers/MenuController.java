@@ -15,7 +15,12 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer;
+import org.auscope.portal.core.server.security.oauth2.PortalUser;
+import org.auscope.portal.core.services.PortalServiceException;
+import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,10 +37,12 @@ public class MenuController {
    protected final Log logger = LogFactory.getLog(getClass());
 
    private PortalPropertyPlaceholderConfigurer hostConfigurer;
+   private EAVLJobService jobService;
 
    @Autowired
-   public MenuController(PortalPropertyPlaceholderConfigurer hostConfigurer) {
+   public MenuController(PortalPropertyPlaceholderConfigurer hostConfigurer, EAVLJobService jobService) {
        this.hostConfigurer = hostConfigurer;
+       this.jobService = jobService;
    }
 
    /**
@@ -99,7 +106,7 @@ public class MenuController {
     * @throws IOException
     */
    @RequestMapping("/*.html")
-   public ModelAndView handleHtmlToView(HttpServletRequest request, HttpServletResponse response) throws IOException {
+   public ModelAndView handleHtmlToView(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal PortalUser user) throws IOException {
        //Detect whether this is a new session or not...
        HttpSession session = request.getSession();
        boolean isNewSession = session.getAttribute("existingSession") == null;
@@ -117,6 +124,25 @@ public class MenuController {
        String resourceName = requestedResource.replace(".html", "");
 
        logger.trace(String.format("view name '%1$s' extracted from request '%2$s'", resourceName, requestUri));
+
+
+       //If the sessionJobId parameter is set, let's update the session job transparently
+       String sessionJobId = request.getParameter("sessionJobId");
+       if (sessionJobId != null) {
+           try {
+               EAVLJob job = jobService.getUserJobById(request, user, Integer.parseInt(sessionJobId));
+               if (job == null) {
+                   throw new PortalServiceException(String.format("Job '%1$s' DNE or current user doesnt have permission to access it.", sessionJobId));
+               }
+               jobService.setSessionJob(job, request, user);
+           } catch (Exception ex) {
+               //I dont think there is much we can do here. Its either
+               //a malicious user or a bug with our client code.
+               logger.error("Unable to update session job: ", ex);
+               response.sendError(HttpStatus.SC_FORBIDDEN);
+               return null;
+           }
+       }
 
        //Give the user the view they are actually requesting
        ModelAndView mav = new ModelAndView(resourceName);

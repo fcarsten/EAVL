@@ -52,11 +52,37 @@ public class EAVLJobService {
     }
 
     /**
-     * Gets an EAVLJob with a particular ID. If the job DNE this will return null
+     * Sets the specified job as the current job for this user's session. The current session job (if any) will be
+     * replaced but not overwritten.
+     *
+     * @param job The job to set
+     * @param request Used to identify session
+     * @param user Owner of the session
+     * @return
+     * @throws PortalServiceException
+     */
+    public void setSessionJob(EAVLJob job, HttpServletRequest request, PortalUser user) throws PortalServiceException {
+        log.warn("TODO - setSessionJob");
+    }
+
+    /**
+     * Gets an EAVLJob with a particular ID (no checks made against permissions). If the job DNE this will return null
+     * @see getUserJobById
      * @param id
      * @return
      */
     public EAVLJob getJobById(Integer id) throws PortalServiceException {
+        return debugJobSingleton;
+    }
+
+    /**
+     * Gets an EAVLJob with a particular ID. If the job DNE this will return null. If the requesting user does not have
+     * permissions to access the job, this will also return null.
+     * @see getJobById
+     * @param id
+     * @return
+     */
+    public EAVLJob getUserJobById(HttpServletRequest request, PortalUser user, Integer id) throws PortalServiceException {
         return debugJobSingleton;
     }
 

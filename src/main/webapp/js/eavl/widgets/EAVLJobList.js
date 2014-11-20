@@ -45,17 +45,17 @@ Ext.define('eavl.widgets.EAVLJobList', {
                     case eavl.models.EAVLJob.STATUS_UNSUBMITTED:
                         img = 'img/edit.png';
                         tip = 'This job hasn\'t been submitted for imputation.';
-                        imgLink = "imputation.html?" + Ext.Object.toQueryString({jobId: record.get('id')});
+                        imgLink = "imputation.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_KDE_ERROR:
                         img = 'img/exclamation.png';
                         tip = 'There was an error during the conditional probability calculations.';
-                        imgLink = "setproxy.html?" + Ext.Object.toQueryString({jobId: record.get('id')});
+                        imgLink = "setproxy.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_IMPUTE_ERROR:
                         img = 'img/exclamation.png';
                         tip = 'There was an error during the imputation calculations.';
-                        imgLink = "imputation.html?" + Ext.Object.toQueryString({jobId: record.get('id')});
+                        imgLink = "imputation.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_IMPUTING:
                         img = 'img/loading-bars.svg';
@@ -65,7 +65,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
                     case eavl.models.EAVLJob.STATUS_PROXY:
                         img = 'img/edit.png';
                         tip = 'This has finished imputation and is awaiting proxy selection.';
-                        imgLink = "setproxy.html?" + Ext.Object.toQueryString({jobId: record.get('id')});
+                        imgLink = "setproxy.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_SUBMITTED:
                         img = 'img/loading-bars.svg';
