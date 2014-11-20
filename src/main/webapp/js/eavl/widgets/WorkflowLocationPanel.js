@@ -176,13 +176,8 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             url = window.location.pathname;
         }
 
-        //Cross browser support
-        function endsWith(str, suffix) {
-            return str.indexOf(suffix, str.length - suffix.length) !== -1;
-        }
-
         for (var i = 0; i < this.steps.length; i++) {
-            if (endsWith(url, this.steps[i].url)) {
+            if (url.endsWith(this.steps[i].url)) {
                 return i;
             }
         }
