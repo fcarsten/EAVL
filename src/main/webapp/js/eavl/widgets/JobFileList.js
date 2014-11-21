@@ -16,7 +16,7 @@ Ext.define('eavl.widgets.JobFileList', {
      *
      * Adds the following events
      * {
-     *
+     *  preview : function(this, fileName, job)
      * }
      */
     constructor : function(config) {
@@ -90,7 +90,7 @@ Ext.define('eavl.widgets.JobFileList', {
                     return "Click to inspect this file.";
                 },
                 listeners : {
-                    columnclick : Ext.bind(this.inspectClickHandler, this)
+                    columnclick : Ext.bind(this._inspectClickHandler, this)
                 }
             },{
                 dataIndex : 'name',
@@ -112,6 +112,8 @@ Ext.define('eavl.widgets.JobFileList', {
         });
 
         this.callParent(arguments);
+
+        this.addEvents(['preview']);
     },
 
     _downloadClickHandler :  function(value, record, column, tip) {
@@ -122,7 +124,7 @@ Ext.define('eavl.widgets.JobFileList', {
     },
 
     _inspectClickHandler :  function(value, record, column, tip) {
-        console.log("inspect click: ", value);
+        this.fireEvent('preview', this, record.get('name'), this.job);
     },
 
     /**

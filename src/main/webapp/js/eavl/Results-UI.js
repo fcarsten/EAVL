@@ -48,6 +48,7 @@ Ext.application({
                         title : 'Available Jobs',
                         width: 300,
                         jobs : records,
+                        margin: '0 10 0 0',
                         viewConfig : {
                             deferEmptyText : false,
                             emptyText : '<div class="jobs-empty-container"><div class="jobs-empty-container-inner">No jobs available.</div></div>'
@@ -69,13 +70,22 @@ Ext.application({
                             xtype: 'jobfilelist',
                             id: 'jobfilelist',
                             width: '100%',
-                            flex: 1,
-                            title: 'File Browser'
+                            height: 200,
+                            margin: '0 0 10 0',
+                            title: 'File Browser',
+                            listeners: {
+                                preview : function(jobFileList, fileName, job) {
+                                    if (fileName.endsWith(".csv")) {
+                                        Ext.getCmp('filepreviewpanel').preview(job, fileName, "csv");
+                                    }
+                                }
+                            }
                         },{
-                            xtype: 'panel',
+                            xtype: 'filepreviewpanel',
+                            id: 'filepreviewpanel',
                             flex: 1,
-                            title: 'File Preview',
-                            html: 'TODO'
+                            title: 'Preview',
+                            width: '100%',
                         }]
                     }]
                 }]

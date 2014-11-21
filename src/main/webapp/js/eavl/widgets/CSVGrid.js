@@ -13,7 +13,12 @@ Ext.define('eavl.widgets.CSVGrid', {
     /**
      * Adds the following config options
      * {
-     *  parameterDetails : eavl.models.ParameterDetails[] - The data columns in this CSVGrid
+     *  parameterDetails : eavl
+     *  .models.ParameterDetails[] - The data columns in this CSVGrid
+     *  jobId : String - [Optional] EavlJob ID to request CSV data from (defaults to session job)
+     *  file : String - [Optional] EavlJob file name to request CSV data from (defaults to session job)
+     *  readOnly: Boolean - [Optional - default false] Is this grid read only?
+     *  sortColumns: Boolean - [Optional - default true] Sort the column headers so bad columns are first
      * }
      *
      * Adds the following events
@@ -26,6 +31,17 @@ Ext.define('eavl.widgets.CSVGrid', {
         this.parameterDetails = config.parameterDetails ? config.parameterDetails : [];
         this.cachedStyles = null;
 
+        this.readOnly = config.readOnly ? true : false;
+        this.sortColumns = config.sortColumns === false ? false : true;
+
+        var proxyParams = {};
+        if (config.jobId) {
+            proxyParams['jobId'] = config.jobId;
+        }
+        if (config.file) {
+            proxyParams['file'] = config.file;
+        }
+
         var fields = [];
         var columns = [];
         for (var i = 0; i < this.parameterDetails.length; i++) {
@@ -37,40 +53,42 @@ Ext.define('eavl.widgets.CSVGrid', {
         }
 
         //Sort our columns so that "bad" columns are first
-        columns = Ext.Array.sort(columns, function(a, b) {
-            var aVal = 2;
-            var bVal = 2;
-            if (a.text.indexOf('error.png') >= 0) {
-                aVal = 1;
-            } else if (a.text.indexOf('exclamation.png') >= 0) {
-                aVal = 0;
-            }
+        if (this.sortColumns) {
+            columns = Ext.Array.sort(columns, function(a, b) {
+                var aVal = 2;
+                var bVal = 2;
+                if (a.text.indexOf('error.png') >= 0) {
+                    aVal = 1;
+                } else if (a.text.indexOf('exclamation.png') >= 0) {
+                    aVal = 0;
+                }
 
-            if (b.text.indexOf('error.png') >= 0) {
-                bVal = 1;
-            } else if (b.text.indexOf('exclamation.png') >= 0) {
-                bVal = 0;
-            }
+                if (b.text.indexOf('error.png') >= 0) {
+                    bVal = 1;
+                } else if (b.text.indexOf('exclamation.png') >= 0) {
+                    bVal = 0;
+                }
 
-            if (aVal != bVal) {
-                return aVal - bVal;
-            }
+                if (aVal != bVal) {
+                    return aVal - bVal;
+                }
 
-            if (a.itemId > b.itemId) {
-                return 1;
-            }
-            if (a.itemId < b.itemId) {
-                return -1;
-            }
-            return 0;
-        });
+                if (a.itemId > b.itemId) {
+                    return 1;
+                }
+                if (a.itemId < b.itemId) {
+                    return -1;
+                }
+                return 0;
+            });
+        }
 
         var csvStore = Ext.create('Ext.data.Store', {
             remoteGroup: true,
             // allow the grid to interact with the paging scroller by buffering
             buffered: true,
             pageSize: 100,
-            leadingBufferZone: 300,
+            leadingBufferZone: 100,
             fields : fields,
             autoLoad: true,
             proxy: {
@@ -78,6 +96,7 @@ Ext.define('eavl.widgets.CSVGrid', {
                 // this page, an Ajax proxy would be better
                 type: 'ajax',
                 url: 'validation/streamRows.do',
+                extraParams: proxyParams,
                 reader: {
                     type : 'array',
                     root: 'rows',
@@ -107,6 +126,10 @@ Ext.define('eavl.widgets.CSVGrid', {
     },
 
     _handleCellClick : function(me, td, cellIndex, record, tr, rowIndex, e, eOpts ) {
+        if (this.readOnly) {
+            return;
+        }
+
         var pd = this._getParameterDetails(cellIndex);
         var find = record.get(pd.get('name')).trim();
 
@@ -242,8 +265,10 @@ Ext.define('eavl.widgets.CSVGrid', {
         } else {
             if (value.trim() === "") {
                 return '<span class="csv-grid-missing">No sample</span>';
-            } else {
+            } else if (this.readOnly) {
                 return Ext.util.Format.format('<span class="csv-grid-text">{0}</span>', value);
+            } else {
+                return Ext.util.Format.format('<span class="csv-grid-text csv-grid-text-clickable">{0}</span>', value);
             }
         }
     }

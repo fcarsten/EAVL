@@ -111,10 +111,19 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/getParameterDetails.do")
-    public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user) {
+    public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+            @RequestParam(required=false,value="file") String file,
+            @RequestParam(required=false,value="jobId") Integer jobId) {
         try {
-            EAVLJob job = jobService.getJobForSession(request, user);
-            InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            EAVLJob job;
+            if (jobId != null) {
+                job = jobService.getUserJobById(request, user, jobId);
+            } else {
+                job = jobService.getJobForSession(request, user);
+            }
+
+            String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
+            InputStream csvData = fss.readFile(job, fileToRead);
             return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
         } catch (Exception ex) {
             log.warn("Unable to get parameter details: ", ex);
@@ -140,11 +149,20 @@ public class ValidationController extends BasePortalController {
     public ModelAndView streamRows(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("limit") Integer limit,
             @RequestParam("page") Integer page,
-            @RequestParam("start") Integer start) {
+            @RequestParam("start") Integer start,
+            @RequestParam(required=false,value="file") String file,
+            @RequestParam(required=false,value="jobId") Integer jobId) {
         try {
-            EAVLJob job = jobService.getJobForSession(request, user);
-            List<String[]> data = csvService.readLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV), start + 1, limit); //we add 1 to start to skip header
-            int totalData = csvService.countLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV)) - 1; //we skip 1 for the header too (This could be cached)
+            EAVLJob job;
+            if (jobId != null) {
+                job = jobService.getUserJobById(request, user, jobId);
+            } else {
+                job = jobService.getJobForSession(request, user);
+            }
+
+            String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
+            List<String[]> data = csvService.readLines(fss.readFile(job, fileToRead), start + 1, limit); //we add 1 to start to skip header
+            int totalData = csvService.countLines(fss.readFile(job, fileToRead)) - 1; //we skip 1 for the header too (This could be cached)
 
             ModelMap response = new ModelMap();
             response.put("totalCount", totalData);

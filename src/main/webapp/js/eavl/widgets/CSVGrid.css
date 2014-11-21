@@ -19,6 +19,9 @@
 .csv-grid-body .csv-grid-text {
     color : #FF6961;
     font-weight: bold;
-    text-decoration: underline;
-    cursor: pointer;
+}
+
+.csv-grid-text-clickable {
+	text-decoration: underline;
+	cursor: pointer;
 }

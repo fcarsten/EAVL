@@ -1,0 +1,10 @@
+.preview-empty-container {
+    width: 90%;
+    position:absolute;
+    height: 90%;
+}
+
+.preview-empty-container-inner {
+    text-align: center;
+    margin-top: 40px;
+}
