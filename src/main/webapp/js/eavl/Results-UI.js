@@ -51,6 +51,11 @@ Ext.application({
                         viewConfig : {
                             deferEmptyText : false,
                             emptyText : '<div class="jobs-empty-container"><div class="jobs-empty-container-inner">No jobs available.</div></div>'
+                        },
+                        listeners: {
+                            select: function(sm, job) {
+                                Ext.getCmp('jobfilelist').showFilesForJob(job);
+                            }
                         }
                     },{
                         xtype: 'container',
@@ -61,10 +66,11 @@ Ext.application({
                             pack : 'center'
                         },
                         items: [{
-                            xtype: 'panel',
+                            xtype: 'jobfilelist',
+                            id: 'jobfilelist',
+                            width: '100%',
                             flex: 1,
-                            title: 'File Browser',
-                            html: 'TODO'
+                            title: 'File Browser'
                         },{
                             xtype: 'panel',
                             flex: 1,
