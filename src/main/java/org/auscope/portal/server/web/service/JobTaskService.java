@@ -74,6 +74,10 @@ public class JobTaskService {
      * @return
      */
     public boolean isExecuting(String guid) {
+        if (guid == null) {
+            return false;
+        }
+
         ExecutingTask et = activeTasks.get(guid);
         if (et == null) {
             return false;
@@ -92,6 +96,10 @@ public class JobTaskService {
      * @return
      */
     public JobTask getTask(String guid) {
+        if (guid == null) {
+            return null;
+        }
+
         ExecutingTask et = activeTasks.get(guid);
         if (et == null) {
             return null;

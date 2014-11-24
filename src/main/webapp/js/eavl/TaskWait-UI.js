@@ -6,7 +6,7 @@ Ext.application({
 
 
     init: function() {
-        eavl.widget.SplashScren.showLoadingSplash('Please stand by ...');
+        eavl.widgets.SplashScreen.showLoadingSplash('Please stand by ...');
     },
 
     //Here we build our GUI from existing components - this function should only be assembling the GUI
@@ -14,7 +14,7 @@ Ext.application({
     //monolithic 'do everything' function
     launch : function() {
 
-        eavl.widget.SplashScren.hideLoadingScreen();
+        eavl.widgets.SplashScreen.hideLoadingScreen();
 
 
         var urlParams = Ext.Object.fromQueryString(window.location.search.substring(1));
@@ -24,6 +24,8 @@ Ext.application({
         var taskName = "???";
         if (next.endsWith("setproxy.html")) {
             taskName = "Imputation";
+        } else if (next.endsWith("results.html")) {
+            taskName = "Calculations";
         }
 
         var viewport = Ext.create('Ext.container.Viewport', {

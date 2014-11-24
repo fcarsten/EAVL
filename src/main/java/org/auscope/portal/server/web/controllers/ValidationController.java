@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
+import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
@@ -19,6 +20,7 @@ import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -83,6 +85,9 @@ public class ValidationController extends BasePortalController {
             }
             file = fss.handleFileUpload(job, (MultipartHttpServletRequest) request);
 
+            job.setName(file.getName());
+            jobService.save(job);
+
             //Rename it to a temp file, remove missing lines and put it into the correct file
             if (!fss.renameStageInFile(job, file.getName(), EAVLJobConstants.FILE_TEMP_DATA_CSV)) {
                 throw new IOException("Unable to operate on files in staging area - rename file failed");
@@ -106,10 +111,19 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/getParameterDetails.do")
-    public ModelAndView getParameterDetails(HttpServletRequest request) {
+    public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+            @RequestParam(required=false,value="file") String file,
+            @RequestParam(required=false,value="jobId") Integer jobId) {
         try {
-            EAVLJob job = jobService.getJobForSession(request);
-            InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            EAVLJob job;
+            if (jobId != null) {
+                job = jobService.getUserJobById(request, user, jobId);
+            } else {
+                job = jobService.getJobForSession(request, user);
+            }
+
+            String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
+            InputStream csvData = fss.readFile(job, fileToRead);
             return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
         } catch (Exception ex) {
             log.warn("Unable to get parameter details: ", ex);
@@ -118,10 +132,10 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/getParameterValues.do")
-    public ModelAndView getParameterValues(HttpServletRequest request,
+    public ModelAndView getParameterValues(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("columnIndex") int columnIndex) {
         try {
-            EAVLJob job = jobService.getJobForSession(request);
+            EAVLJob job = jobService.getJobForSession(request, user);
             InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             return generateJSONResponseMAV(true, csvService.getParameterValues(csvData, columnIndex), "");
         } catch (Exception ex) {
@@ -132,14 +146,23 @@ public class ValidationController extends BasePortalController {
 
 
     @RequestMapping("/streamRows.do")
-    public ModelAndView streamRows(HttpServletRequest request,
+    public ModelAndView streamRows(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("limit") Integer limit,
             @RequestParam("page") Integer page,
-            @RequestParam("start") Integer start) {
+            @RequestParam("start") Integer start,
+            @RequestParam(required=false,value="file") String file,
+            @RequestParam(required=false,value="jobId") Integer jobId) {
         try {
-            EAVLJob job = jobService.getJobForSession(request);
-            List<String[]> data = csvService.readLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV), start + 1, limit); //we add 1 to start to skip header
-            int totalData = csvService.countLines(fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV)) - 1; //we skip 1 for the header too (This could be cached)
+            EAVLJob job;
+            if (jobId != null) {
+                job = jobService.getUserJobById(request, user, jobId);
+            } else {
+                job = jobService.getJobForSession(request, user);
+            }
+
+            String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
+            List<String[]> data = csvService.readLines(fss.readFile(job, fileToRead), start + 1, limit); //we add 1 to start to skip header
+            int totalData = csvService.countLines(fss.readFile(job, fileToRead)) - 1; //we skip 1 for the header too (This could be cached)
 
             ModelMap response = new ModelMap();
             response.put("totalCount", totalData);
@@ -152,7 +175,7 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/findReplace.do")
-    public ModelAndView findReplace(HttpServletRequest request,
+    public ModelAndView findReplace(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("find") String find,
             @RequestParam("replace") String replace,
             @RequestParam("columnIndex") int columnIndex) {
@@ -166,7 +189,7 @@ public class ValidationController extends BasePortalController {
         }
 
         try {
-            EAVLJob job = jobService.getJobForSession(request);
+            EAVLJob job = jobService.getJobForSession(request, user);
             os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
 
@@ -185,14 +208,14 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/deleteParameters.do")
-    public ModelAndView deleteParameters(HttpServletRequest request,
+    public ModelAndView deleteParameters(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("columnIndex") Integer[] columnIndexes) {
 
         OutputStream os = null;
         InputStream is = null;
 
         try {
-            EAVLJob job = jobService.getJobForSession(request);
+            EAVLJob job = jobService.getJobForSession(request, user);
             os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
 

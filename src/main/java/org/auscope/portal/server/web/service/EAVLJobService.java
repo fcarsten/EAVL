@@ -1,9 +1,13 @@
 package org.auscope.portal.server.web.service;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.springframework.stereotype.Service;
@@ -22,9 +26,6 @@ public class EAVLJobService {
 
     public EAVLJobService() {
         debugJobSingleton = new EAVLJob(1);
-        debugJobSingleton.setHoleIdParameter("holeid"); //debug value
-        debugJobSingleton.setPredictionParameter("Au_assay"); //debug value
-        debugJobSingleton.setPredictionCutoff(1.0); //debug value
     }
 
     /**
@@ -42,19 +43,46 @@ public class EAVLJobService {
      * Gets an EAVLJob for a particular user session. If the job DNE this will return null
      *
      * @param request Used to identify session
+     * @param user Owner of the session
      * @return
      */
-    public EAVLJob getJobForSession(HttpServletRequest request) throws PortalServiceException {
+    public EAVLJob getJobForSession(HttpServletRequest request, PortalUser user) throws PortalServiceException {
         log.warn("TODO - getJobForSession");
         return debugJobSingleton;
     }
 
     /**
-     * Gets an EAVLJob with a particular ID. If the job DNE this will return null
+     * Sets the specified job as the current job for this user's session. The current session job (if any) will be
+     * replaced but not overwritten.
+     *
+     * @param job The job to set
+     * @param request Used to identify session
+     * @param user Owner of the session
+     * @return
+     * @throws PortalServiceException
+     */
+    public void setSessionJob(EAVLJob job, HttpServletRequest request, PortalUser user) throws PortalServiceException {
+        log.warn("TODO - setSessionJob");
+    }
+
+    /**
+     * Gets an EAVLJob with a particular ID (no checks made against permissions). If the job DNE this will return null
+     * @see getUserJobById
      * @param id
      * @return
      */
     public EAVLJob getJobById(Integer id) throws PortalServiceException {
+        return debugJobSingleton;
+    }
+
+    /**
+     * Gets an EAVLJob with a particular ID. If the job DNE this will return null. If the requesting user does not have
+     * permissions to access the job, this will also return null.
+     * @see getJobById
+     * @param id
+     * @return
+     */
+    public EAVLJob getUserJobById(HttpServletRequest request, PortalUser user, Integer id) throws PortalServiceException {
         return debugJobSingleton;
     }
 
@@ -79,5 +107,15 @@ public class EAVLJobService {
         //TODO - save job
         log.warn("TODO - save job");
         debugJobSingleton = job;
+    }
+
+    /**
+     * Returns every Job belonging to a particular user
+     * @param request The users request
+     * @param user The authenticated user object
+     * @return
+     */
+    public List<EAVLJob> getJobsForUser(HttpServletRequest request, PortalUser user) throws PortalServiceException {
+        return Arrays.asList(debugJobSingleton);
     }
 }

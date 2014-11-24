@@ -5,7 +5,7 @@ Ext.application({
     name : 'eavl-imputation',
 
     init: function() {
-        eavl.widget.SplashScren.showLoadingSplash('Loading Imputation setup, please stand by ...');
+        eavl.widgets.SplashScreen.showLoadingSplash('Loading Imputation setup, please stand by ...');
     },
 
     viewport : null,
@@ -16,12 +16,12 @@ Ext.application({
     launch : function() {
         //Called if the init code fails badly
         var initError = function() {
-            eavl.widget.SplashScren.hideLoadingScreen();
-            eavl.widget.SplashScren.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+            eavl.widgets.SplashScreen.hideLoadingScreen();
+            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
         };
 
         var initSuccess = function(parameterDetails) {
-            eavl.widget.SplashScren.hideLoadingScreen();
+            eavl.widgets.SplashScreen.hideLoadingScreen();
 
             Ext.tip.QuickTipManager.init();
 
@@ -59,7 +59,7 @@ Ext.application({
                         for (var i = 0; i < ds.getCount(); i++) {
                             savedNames.push(ds.getAt(i).get('name'));
                         }
-                        eavl.widget.SplashScren.showLoadingSplash("Saving predictor...");
+                        eavl.widgets.SplashScreen.showLoadingSplash("Saving predictor...");
                         Ext.Ajax.request({
                             url: 'imputation/saveAndSubmitImputation.do',
                             params : {
@@ -69,7 +69,7 @@ Ext.application({
                                 holeIdName : holeIdPd.get('name')
                             },
                             callback : function(options, success, response) {
-                                eavl.widget.SplashScren.hideLoadingScreen();
+                                eavl.widgets.SplashScreen.hideLoadingScreen();
 
                                 if (!success) {
                                     callback(false);

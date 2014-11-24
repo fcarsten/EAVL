@@ -1,0 +1,12 @@
+.job-row-img {
+	margin-right: 10;
+	width: 32px;
+	height: 32px;
+}
+	
+.job-row-text {
+    font-weight: bold;
+    font-size: 150%;
+    display: table-cell;
+    vertical-align: middle;
+}

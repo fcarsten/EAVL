@@ -6,7 +6,7 @@ Ext.application({
 
 
     init: function() {
-        eavl.widget.SplashScren.showLoadingSplash('Loading upload form, please stand by ...');
+        eavl.widgets.SplashScreen.showLoadingSplash('Loading upload form, please stand by ...');
     },
 
     //Here we build our GUI from existing components - this function should only be assembling the GUI
@@ -14,7 +14,7 @@ Ext.application({
     //monolithic 'do everything' function
     launch : function() {
 
-        eavl.widget.SplashScren.hideLoadingScreen();
+        eavl.widgets.SplashScreen.hideLoadingScreen();
 
         var viewport = Ext.create('Ext.container.Viewport', {
             layout: 'border',
