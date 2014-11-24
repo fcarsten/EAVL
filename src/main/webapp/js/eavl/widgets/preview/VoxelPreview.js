@@ -57,7 +57,7 @@ void main() {\n \
         // renderer
         this.threeJs.renderer = new THREE.WebGLRenderer( { antialias: false } );
         this.threeJs.renderer.setClearColor( this.threeJs.scene.fog.color, 1 );
-        this.threeJs.renderer.setSize( window.innerWidth, window.innerHeight );
+        this.threeJs.renderer.setSize( el.getWidth(), el.getHeight());
 
         var container = document.getElementById( this.innerId );
         container.appendChild( this.threeJs.renderer.domElement );
@@ -89,6 +89,38 @@ void main() {\n \
         this.threeJs.renderer.setSize( el.getWidth(), el.getHeight() );
 
         this.render();
+    },
+
+    /**
+     * Creates a Object3D containing labelled axes
+     *
+     * Original Source - http://soledadpenades.com/articles/three-js-tutorials/drawing-the-coordinate-axes/
+     */
+    _buildAxes : function() {
+        var buildAxis = function( src, dst, colorHex ) {
+            var geom = new THREE.Geometry(),
+                mat;
+
+            mat = new THREE.LineBasicMaterial({ linewidth: 3, color: colorHex });
+
+            geom.vertices.push( src.clone() );
+            geom.vertices.push( dst.clone() );
+
+            var axis = new THREE.Line( geom, mat, THREE.LinePieces );
+
+            return axis;
+        };
+
+        var axes = new THREE.Object3D();
+
+        var length = 1000;
+        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000 ) ); // +X
+        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000) ); // -X
+        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00 ) ); // +Y
+        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00 ) ); // -Y
+        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF ) ); // +Z
+        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF ) ); // -Z
+        return axes;
     },
 
     _getGeometry : function(job, fileName, suppressRender) {
@@ -184,6 +216,9 @@ void main() {\n \
 
                 var light = new THREE.AmbientLight( 0x222222 );
                 this.threeJs.scene.add( light );
+
+                //Create axes
+                this.threeJs.scene.add(this._buildAxes());
 
                 if (!suppressRender) {
                     this.render();
