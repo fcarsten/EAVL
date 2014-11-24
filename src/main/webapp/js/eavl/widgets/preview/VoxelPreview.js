@@ -4,6 +4,25 @@
 Ext.define('eavl.widgets.preview.VoxelPreview', {
     extend: 'Ext.container.Container',
 
+    innerId: null,
+    threeJs: null,
+    fragmentShader: '\
+varying vec3 vCustomColor;\n \
+void main() {\n \
+    gl_FragColor = vec4( vCustomColor, 1.0 );\n \
+}\n',
+
+    vertexShader: '\
+#define USE_SIZEATTENUATION\n \
+attribute vec3 customColor;\n \
+varying vec3 vCustomColor;\n \
+void main() {\n \
+    vCustomColor = customColor;\n \
+    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n \
+    gl_PointSize = 16.0;\n \
+    gl_Position = projectionMatrix * mvPosition;\n \
+}\n',
+
     constructor : function(config) {
         this.innerId = Ext.id();
         Ext.apply(config, {
@@ -11,6 +30,166 @@ Ext.define('eavl.widgets.preview.VoxelPreview', {
         });
 
         this.callParent(arguments);
+    },
+
+    initThreeJs: function(job, fileName) {
+        this.threeJs = {
+            camera: null,
+            controls : null,
+            scene: null,
+            renderer: null
+        };
+
+        var el = this.getEl();
+        this.threeJs.camera = new THREE.PerspectiveCamera( 60, el.getWidth() / el.getHeight(), 1, 1000 );
+        this.threeJs.camera.position.z = 500;
+
+        this.threeJs.controls = new THREE.OrbitControls( this.threeJs.camera );
+        this.threeJs.controls.damping = 0.2;
+        this.threeJs.controls.addEventListener( 'change', Ext.bind(this.render, this));
+
+        this.threeJs.scene = new THREE.Scene();
+        this.threeJs.scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+
+        // world
+        this._getGeometry(job, fileName, true);
+
+        // renderer
+        this.threeJs.renderer = new THREE.WebGLRenderer( { antialias: false } );
+        this.threeJs.renderer.setClearColor( this.threeJs.scene.fog.color, 1 );
+        this.threeJs.renderer.setSize( window.innerWidth, window.innerHeight );
+
+        var container = document.getElementById( this.innerId );
+        container.appendChild( this.threeJs.renderer.domElement );
+
+        this.on('resize', this._resizeHandler, this);
+
+        //Kickoff animation loop
+        var me = this;
+        var animate = function() {
+            requestAnimationFrame(animate);
+            me.threeJs.controls.update();
+        };
+        animate();
+    },
+
+    render: function() {
+        this.threeJs.renderer.render( this.threeJs.scene, this.threeJs.camera );
+    },
+
+    _resizeHandler : function() {
+        if (!this.threeJs) {
+            return;
+        }
+
+        var el = this.getEl();
+        this.threeJs.camera.aspect = el.getWidth() / el.getHeight();
+        this.threeJs.camera.updateProjectionMatrix();
+
+        this.threeJs.renderer.setSize( el.getWidth(), el.getHeight() );
+
+        this.render();
+    },
+
+    _getGeometry : function(job, fileName, suppressRender) {
+        //Clear scene first
+        for (var i = this.threeJs.scene.children.length - 1; i >= 0; i--) {
+            this.threeJs.scene.remove(this.threeJs.scene.children[i]);
+        }
+
+        Ext.Ajax.request({
+            url: 'results/getKDEGeometry.do',
+            params: {
+                jobId : job.get('id'),
+                name: fileName
+            },
+            scope: this,
+            callback: function(options, success, response) {
+
+                console.log(this.vertexShader);
+                console.log(this.fragmentShader);
+
+                if (!success) {
+                    return;
+                }
+
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (!responseObj || !responseObj.success) {
+                    return;
+                }
+
+                //Build our geometry (all the points received)
+                var geometry = new THREE.Geometry();
+                var maxEstimate = Number.MIN_VALUE;
+                var minEstimate = Number.MAX_VALUE;
+                var target = new THREE.Vector3();
+                for (var i = 0; i < responseObj.data.length; i++) {
+                    var vertex = new THREE.Vector3();
+
+                    vertex.x = responseObj.data[i].x;
+                    vertex.y = responseObj.data[i].y;
+                    vertex.z = responseObj.data[i].z;
+
+                    target.x += vertex.x;
+                    target.y += vertex.y;
+                    target.z += vertex.z;
+
+                    var e = responseObj.data[i].estimate;
+                    if (e > maxEstimate) {
+                        maxEstimate = e;
+                    }
+                    if (e < minEstimate) {
+                        minEstimate = e;
+                    }
+
+                    geometry.vertices.push(vertex);
+                }
+                target.x /= responseObj.data.length;
+                target.y /= responseObj.data.length;
+                target.z /= responseObj.data.length;
+                this.threeJs.controls.target = target;
+
+                //Build a custom material that can shade each point based on an RGB
+                // attributes
+                attributes = {
+                    customColor: { type: "c", value: []}
+                };
+
+                // uniforms
+                uniforms = {};
+
+                // point cloud material using our custom shaders
+                var shaderMaterial = new THREE.ShaderMaterial( {
+                    uniforms:       uniforms,
+                    attributes:     attributes,
+                    vertexShader:   this.vertexShader,
+                    fragmentShader: this.fragmentShader,
+                    transparent:    true
+                });
+
+                //Setup colors for each vertex based on estimate
+                for( var i = 0; i < geometry.vertices.length; i ++ ) {
+                    var e = responseObj.data[i].estimate;
+                    var ratio = (e - minEstimate) / (maxEstimate - minEstimate);
+                    var rainbow = 'hsl(' +  + ',100%,50%)'; //Create a rainbow from blue (low) to red (high)
+
+                    var color = new THREE.Color();
+                    color.setHSL(((1 - ratio) * 240 / 255), 1.0, 0.5);
+
+                    attributes.customColor.value[ i ] = color;
+                }
+
+                var pointCloud = new THREE.PointCloud(geometry, shaderMaterial);
+                this.threeJs.scene.add(pointCloud);
+
+                var light = new THREE.AmbientLight( 0x222222 );
+                this.threeJs.scene.add( light );
+
+                if (!suppressRender) {
+                    this.render();
+                }
+            }
+        });
     },
 
     /**
@@ -23,97 +202,12 @@ Ext.define('eavl.widgets.preview.VoxelPreview', {
      * returns nothing
      */
     preview : function(job, fileName) {
-        var container;
 
-        var camera, controls, scene, renderer;
-        var me = this;
-
-        var animate = function() {
-
-            requestAnimationFrame(animate);
-            controls.update();
-
-        };
-
-        var init = function() {
-
-            camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-            camera.position.z = 500;
-
-            controls = new THREE.OrbitControls( camera );
-            controls.damping = 0.2;
-            controls.addEventListener( 'change', render );
-
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
-
-            // world
-
-            var geometry = new THREE.CylinderGeometry( 0, 10, 30, 4, 1 );
-            var material =  new THREE.MeshLambertMaterial( { color:0xffffff, shading: THREE.FlatShading } );
-
-            for ( var i = 0; i < 500; i ++ ) {
-
-                var mesh = new THREE.Mesh( geometry, material );
-                mesh.position.x = ( Math.random() - 0.5 ) * 1000;
-                mesh.position.y = ( Math.random() - 0.5 ) * 1000;
-                mesh.position.z = ( Math.random() - 0.5 ) * 1000;
-                mesh.updateMatrix();
-                mesh.matrixAutoUpdate = false;
-                scene.add( mesh );
-
-            }
-
-
-            // lights
-
-            light = new THREE.DirectionalLight( 0xffffff );
-            light.position.set( 1, 1, 1 );
-            scene.add( light );
-
-            light = new THREE.DirectionalLight( 0x002288 );
-            light.position.set( -1, -1, -1 );
-            scene.add( light );
-
-            light = new THREE.AmbientLight( 0x222222 );
-            scene.add( light );
-
-
-            // renderer
-
-            renderer = new THREE.WebGLRenderer( { antialias: false } );
-            renderer.setClearColor( scene.fog.color, 1 );
-            renderer.setSize( window.innerWidth, window.innerHeight );
-
-            container = document.getElementById( me.innerId );
-            container.appendChild( renderer.domElement );
-
-            //
-
-            window.addEventListener( 'resize', onWindowResize, false );
-
-            animate();
-
-        };
-
-        var onWindowResize = function() {
-
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-
-            renderer.setSize( window.innerWidth, window.innerHeight );
-
-            render();
-
-        };
-
-        var render = function() {
-
-            renderer.render( scene, camera );
-
-        };
-
-        init();
-        render();
+        if (!this.threeJs) {
+            this.initThreeJs(job, fileName);
+            this.render();
+        } else {
+            this._getGeometry(job, fileName);
+        }
     }
 });

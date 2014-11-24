@@ -2,6 +2,7 @@ package org.auscope.portal.server.web.controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +12,9 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
@@ -147,6 +151,53 @@ public class ResultsController extends BasePortalController {
         }
     }
 
+    @RequestMapping("getKDEGeometry.do")
+    public ModelAndView getKDEGeometry(HttpServletRequest request,
+            @AuthenticationPrincipal PortalUser user,
+            @RequestParam("jobId") Integer jobId,
+            @RequestParam("name") String fileName) {
+
+        InputStream is = null;
+        try {
+            EAVLJob job = jobService.getUserJobById(request, user, jobId);
+            if (job == null) {
+                log.warn(String.format("getKDEGeometry - User %1$s attempting to access job %2$s was rejected. (Job might not exist)", user, jobId));
+                return generateJSONResponseMAV(false);
+            }
+
+            is = fss.readFile(job, fileName);
+            String jsonData = IOUtils.toString(is, StandardCharsets.UTF_8.name());
+            JSONObject json = JSONObject.fromObject(jsonData);
+            List<ModelMap> response = new ArrayList<ModelMap>();
+
+            JSONObject gkde = (JSONObject) json.get("gkde");
+            JSONArray x1 = (JSONArray) ((JSONObject) gkde.get("eval.points")).get("X1");
+            JSONArray x2 = (JSONArray) ((JSONObject) gkde.get("eval.points")).get("X2");
+            JSONArray x3 = (JSONArray) ((JSONObject) gkde.get("eval.points")).get("X3");
+            JSONObject estimate = (JSONObject) gkde.get("estimate");
+
+            if (x1.size() != x2.size() || x2.size() != x3.size()) {
+                log.error("JSON response points contain a differing number of X1/X2/X3 values for jobId:" + jobId);
+                return generateJSONResponseMAV(false);
+            }
+
+            for (int i = 0; i < x1.size(); i++) {
+                ModelMap point = new ModelMap();
+                point.put("x", x1.get(i));
+                point.put("y", x2.get(i));
+                point.put("z", x3.get(i));
+                point.put("estimate", estimate.get(Integer.toString((i + 1))));
+                response.add(point);
+            }
+
+            return generateJSONResponseMAV(true, response, "");
+        } catch (Exception ex) {
+            log.error("Unable to get KDE geometry for job: ", ex);
+            return generateJSONResponseMAV(false);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
+    }
 
     /**
      * Sends the contents of one or more job files to the client.
