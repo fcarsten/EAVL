@@ -24,7 +24,8 @@ Ext.define('eavl.widgets.FilePreviewPanel', {
                 itemId: 'empty',
                 html: '<div class="preview-empty-container"><div class="preview-empty-container-inner">Select a file above to activate the preview window.</div></div>'
             },
-            Ext.create('eavl.widgets.preview.CSVFilePreview', {itemId: 'csv'})
+            Ext.create('eavl.widgets.preview.CSVFilePreview', {itemId: 'csv'}),
+            Ext.create('eavl.widgets.preview.VoxelPreview', {itemId: 'voxel'})
         ];
 
 

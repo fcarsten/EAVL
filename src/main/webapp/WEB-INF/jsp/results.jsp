@@ -7,6 +7,9 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
+        <script src="js/threejs/three.min.js" type="text/javascript"></script>
+        <script src="js/threejs/controls/OrbitControls.js" type="text/javascript"></script>
+        
         <script src="portal-core/js/portal/util/UnimplementedFunction.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/util/FileDownloader.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/util/GoogleAnalytic.js" type="text/javascript"></script>
@@ -33,6 +36,7 @@
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/BaseFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/CSVFilePreview.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/preview/VoxelPreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/FilePreviewPanel.js"></script>
         
         <script type="text/javascript" src="js/eavl/Results-UI.js"></script>
