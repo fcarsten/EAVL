@@ -13,13 +13,12 @@ void main() {\n \
 }\n',
 
     vertexShader: '\
-#define USE_SIZEATTENUATION\n \
 attribute vec3 customColor;\n \
 varying vec3 vCustomColor;\n \
 void main() {\n \
     vCustomColor = customColor;\n \
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n \
-    gl_PointSize = 16.0;\n \
+    gl_PointSize = 160.0 * ( 1.0 / length( mvPosition.xyz ) );\n \
     gl_Position = projectionMatrix * mvPosition;\n \
 }\n',
 
