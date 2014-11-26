@@ -27,12 +27,21 @@
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
     </bean>
-    
-    
-    <bean id="wpsClient" class="org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient">
-        <constructor-arg name="serviceUrl" value="${wps.endpoint}"/>
+
+
+    <bean id="vmPoolPersister" class="org.auscope.portal.server.web.service.wps.FileVmPoolPersister">
     </bean>
-    
+
+    <bean id="vmPool" class="org.auscope.portal.server.web.service.wps.VmPool">
+                <constructor-arg name="persistor" ref="vmPoolPersister"/>
+                <constructor-arg name="accessKey" value="${env.nectar.ec2.accesskey}"/>
+                <constructor-arg name="secretKey" value="${env.nectar.ec2.secretkey}"/>
+    </bean>
+
+    <bean id="wpsService" class="org.auscope.portal.server.web.service.WpsService">
+        <constructor-arg name="vmPool" ref="vmPool" />
+    </bean>
+
     <bean name="emailListener" class="org.auscope.portal.server.web.service.jobtask.EmailListener">
         <constructor-arg name="mailSender">
             <bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
@@ -53,7 +62,7 @@
         <constructor-arg name="templateFileEncoding" value="UTF-8"/>
         <constructor-arg name="emailSender"><value><![CDATA[EAVL Admin <noreply-cg-admin@csiro.au>]]></value></constructor-arg>
     </bean>
-    
+
     <!-- This is the core threadpool shared by object instances throughout the portal -->
     <!-- <bean id="executorFactory" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
         <property name="corePoolSize" value="5" />
@@ -62,7 +71,7 @@
     </bean>
     <bean id="executor" factory-bean="executorFactory" factory-method="getObject">
     </bean>  -->
-    
+
     <bean id="executor" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
         <property name="corePoolSize" value="5" />
         <property name="maxPoolSize" value="5" />

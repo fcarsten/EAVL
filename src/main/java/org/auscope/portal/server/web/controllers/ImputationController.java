@@ -10,8 +10,10 @@ import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
+import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.jobtask.ImputationCallable;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
+import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -30,18 +32,18 @@ public class ImputationController extends BasePortalController {
     private JobTaskService jobTaskService;
     private CSVService csvService;
     private FileStagingService fss;
-    private ConditionalProbabilityWpsClient wpsClient;
+    private WpsService wpsService;
 
     @Autowired
     public ImputationController(EAVLJobService jobService,
             JobTaskService jobTaskService, CSVService csvService,
-            FileStagingService fss, ConditionalProbabilityWpsClient wpsClient) {
+            FileStagingService fss, WpsService wpsService) {
         super();
         this.jobService = jobService;
         this.jobTaskService = jobTaskService;
         this.csvService = csvService;
         this.fss = fss;
-        this.wpsClient = wpsClient;
+        this.wpsService = wpsService;
     }
 
     /**
@@ -71,7 +73,7 @@ public class ImputationController extends BasePortalController {
             job.setPredictionCutoff(predictorCutoff);
             job.setPredictionParameter(predictorName);
             job.setHoleIdParameter(holeIdName);
-
+            WpsServiceClient wpsClient = wpsService.getWpsClient();
             JobTask newTask = new JobTask(new ImputationCallable(job, wpsClient, csvService, fss), job);
             String taskId = jobTaskService.submit(newTask);
 

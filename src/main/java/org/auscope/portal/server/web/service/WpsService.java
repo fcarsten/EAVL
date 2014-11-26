@@ -2,9 +2,9 @@ package org.auscope.portal.server.web.service;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.web.service.wps.VmPool;
+import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.auscope.portal.server.web.service.wps.WpsVm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,9 +34,9 @@ public class WpsService {
         this.vmPool = vmPool;
     }
 
-    public ConditionalProbabilityWpsClient getWpsClient() throws PortalServiceException  {
+    public WpsServiceClient getWpsClient() throws PortalServiceException  {
     	WpsVm vm= vmPool.getFreeVm();
-    	return new ConditionalProbabilityWpsClient(vm.getServiceUrl());
+    	return new WpsServiceClient(vm);
     }
 
 }

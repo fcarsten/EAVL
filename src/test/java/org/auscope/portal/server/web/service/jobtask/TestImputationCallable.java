@@ -9,13 +9,13 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.test.PortalTestClass;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.jmock.Expectations;
 import org.junit.Test;
 
@@ -23,7 +23,7 @@ import com.google.common.collect.Sets;
 
 public class TestImputationCallable extends PortalTestClass {
     private EAVLJob mockJob = context.mock(EAVLJob.class);
-    private ConditionalProbabilityWpsClient mockWpsClient = context.mock(ConditionalProbabilityWpsClient.class);
+    private WpsServiceClient mockWpsClient = context.mock(WpsServiceClient.class);
     private CSVService mockCsvService = context.mock(CSVService.class);
     private FileStagingService mockFss = context.mock(FileStagingService.class);
 
