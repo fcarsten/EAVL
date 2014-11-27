@@ -23,7 +23,7 @@ Ext.application({
 
         var taskName = "???";
         if (next.endsWith("setproxy.html")) {
-            taskName = "Imputing values for missing samples";
+            taskName = "Imputing missing samples";
         } else if (next.endsWith("results.html")) {
             taskName = "Performing Calculations";
         }
