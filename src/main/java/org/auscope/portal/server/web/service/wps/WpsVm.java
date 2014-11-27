@@ -95,27 +95,33 @@ public class WpsVm {
 		}
 	}
 
-	private void updateStatus() {
+	public void updateStatus() {
 		if (status == VmStatus.DECOMMISSIONED)
 			return;
 
 		HttpClient client = new HttpClient();
 
+		log.info("Updating status of VM: "+id + " ("+ipAddress+")");
 		GetMethod method = new GetMethod("http://" + ipAddress + ":8080/wps");
 		try {
 			int statusCode = client.executeMethod(method);
 			if (statusCode == HttpStatus.SC_OK) {
 				status = VmStatus.READY;
-			} else if (status == VmStatus.UNKNOWN) {
+				log.info(" VM: "+id + " ("+ipAddress+") is ready.");
+			} else if (status == VmStatus.STARTING) {
+				log.info(" VM: "+id + " ("+ipAddress+") no ready yet.");
+			} else {				// TODO: Handle other status codes
 				status = VmStatus.FAILED;
+				log.info(" VM: "+id + " ("+ipAddress+") has failed.");
 			}
 		} catch (ConnectException e) {
 			log.error("Can't connect to WPS VM "+ipAddress+". Assume it's dead: "+e.getMessage());
 			if (status == VmStatus.UNKNOWN) {
 				status = VmStatus.FAILED;
+				log.info(" VM: "+id + " ("+ipAddress+") has failed");
 			}
 		} catch (IOException e) {
-			log.error(e.getMessage(), e);
+			log.error("Error connecting to VM: "+id + " ("+ipAddress+"): "+e.getMessage(), e);
 		}
 
 	}

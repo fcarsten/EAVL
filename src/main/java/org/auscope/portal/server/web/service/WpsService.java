@@ -10,12 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Utility for executing JobTask's using an internal executor. Optional
- * listeners can be notified soon after a task finishes execution.
- *
- * This service does not persist any data by default but the
- *
- * @author Josh Vote
+ * @author Carsten Friedrich
  *
  */
 @Service
@@ -24,10 +19,6 @@ public class WpsService {
     protected final Log log = LogFactory.getLog(getClass());
 
     private VmPool vmPool;
-
-    public WpsService() {
-        this(null);
-    }
 
     @Autowired
     public WpsService(VmPool vmPool) {

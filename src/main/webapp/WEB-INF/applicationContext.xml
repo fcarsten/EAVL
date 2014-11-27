@@ -36,6 +36,7 @@
                 <constructor-arg name="persistor" ref="vmPoolPersister"/>
                 <constructor-arg name="accessKey" value="${env.nectar.ec2.accesskey}"/>
                 <constructor-arg name="secretKey" value="${env.nectar.ec2.secretkey}"/>
+                <constructor-arg name="executor" ref="executor" />
     </bean>
 
     <bean id="wpsService" class="org.auscope.portal.server.web.service.WpsService">
