@@ -40,7 +40,7 @@ void main() {\n \
         };
 
         var el = this.getEl();
-        this.threeJs.camera = new THREE.PerspectiveCamera( 60, el.getWidth() / el.getHeight(), 1, 1000 );
+        this.threeJs.camera = new THREE.PerspectiveCamera( 60, el.getWidth() / el.getHeight(), 1, 10000 );
         this.threeJs.camera.position.z = 50;
 
         this.threeJs.controls = new THREE.OrbitControls( this.threeJs.camera );
@@ -48,14 +48,14 @@ void main() {\n \
         this.threeJs.controls.addEventListener( 'change', Ext.bind(this.render, this));
 
         this.threeJs.scene = new THREE.Scene();
-        this.threeJs.scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+        //this.threeJs.scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
 
         // world
         this._getGeometry(job, fileName, true);
 
         // renderer
         this.threeJs.renderer = new THREE.WebGLRenderer( { antialias: false } );
-        this.threeJs.renderer.setClearColor( this.threeJs.scene.fog.color, 1 );
+        this.threeJs.renderer.setClearColor( 0xffffff, 1 );
         this.threeJs.renderer.setSize( el.getWidth(), el.getHeight());
 
         var container = document.getElementById( this.innerId );
@@ -198,7 +198,7 @@ void main() {\n \
                 uniforms = {};
 
                 //Shaders
-                var pointScale = (mmX.max - mmX.min + mmY.max - mmY.min + mmZ.max - mmZ.min) / 3;
+                var pointScale = ((mmX.max - mmX.min + mmY.max - mmY.min + mmZ.max - mmZ.min) / 3) * 2;
                 var vs = Ext.util.Format.format(this.vertexShader, Ext.util.Format.number(pointScale, '0.0'));
                 var fs = this.fragmentShader;
 
