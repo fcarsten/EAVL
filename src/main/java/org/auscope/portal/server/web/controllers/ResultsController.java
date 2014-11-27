@@ -69,7 +69,7 @@ public class ResultsController extends BasePortalController {
 
         if (jobTaskService.isExecuting(job.getKdeTaskId())) {
             status = STATUS_SUBMITTED;
-        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_KDE_JSON)) {
+        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_KDE_CSV)) {
             status = STATUS_DONE;
         } else if (job.getKdeTaskId() != null) {
             status = STATUS_KDE_ERROR;
