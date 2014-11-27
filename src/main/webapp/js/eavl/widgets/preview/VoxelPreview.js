@@ -18,7 +18,7 @@ varying vec3 vCustomColor;\n \
 void main() {\n \
     vCustomColor = customColor;\n \
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n \
-    gl_PointSize = 160.0 * ( 1.0 / length( mvPosition.xyz ) );\n \
+    gl_PointSize = {0} * ( 1.0 / length( mvPosition.xyz ) );\n \
     gl_Position = projectionMatrix * mvPosition;\n \
 }\n',
 
@@ -41,7 +41,7 @@ void main() {\n \
 
         var el = this.getEl();
         this.threeJs.camera = new THREE.PerspectiveCamera( 60, el.getWidth() / el.getHeight(), 1, 1000 );
-        this.threeJs.camera.position.z = 500;
+        this.threeJs.camera.position.z = 50;
 
         this.threeJs.controls = new THREE.OrbitControls( this.threeJs.camera );
         this.threeJs.controls.damping = 0.2;
@@ -114,11 +114,8 @@ void main() {\n \
 
         var length = 1000;
         axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000 ) ); // +X
-        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000) ); // -X
         axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00 ) ); // +Y
-        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00 ) ); // -Y
         axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF ) ); // +Z
-        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF ) ); // -Z
         return axes;
     },
 
@@ -128,6 +125,9 @@ void main() {\n \
             this.threeJs.scene.remove(this.threeJs.scene.children[i]);
         }
 
+        var me = this;
+        var mask = new Ext.LoadMask(me, {msg:"Please wait..."});
+        mask.show();
         Ext.Ajax.request({
             url: 'results/getKDEGeometry.do',
             params: {
@@ -136,10 +136,8 @@ void main() {\n \
             },
             scope: this,
             callback: function(options, success, response) {
-
-                console.log(this.vertexShader);
-                console.log(this.fragmentShader);
-
+                mask.hide();
+                mask.destroy();
                 if (!success) {
                     return;
                 }
@@ -149,10 +147,23 @@ void main() {\n \
                     return;
                 }
 
+                //Utility for easily generating an object with
+                var minMax = function(mm, value) {
+                    if (value > mm.max) {
+                        mm.max = value;
+                    }
+                    if (value < mm.min) {
+                        mm.min = value;
+                    }
+                    return mm;
+                }
+
                 //Build our geometry (all the points received)
                 var geometry = new THREE.Geometry();
-                var maxEstimate = Number.MIN_VALUE;
-                var minEstimate = Number.MAX_VALUE;
+                var mmEstimate = {max: Number.MIN_VALUE,min: Number.MAX_VALUE};
+                var mmX = {max: Number.MIN_VALUE,min: Number.MAX_VALUE};
+                var mmY = {max: Number.MIN_VALUE,min: Number.MAX_VALUE};
+                var mmZ = {max: Number.MIN_VALUE,min: Number.MAX_VALUE};
                 var target = new THREE.Vector3();
                 for (var i = 0; i < responseObj.data.length; i++) {
                     var vertex = new THREE.Vector3();
@@ -165,13 +176,10 @@ void main() {\n \
                     target.y += vertex.y;
                     target.z += vertex.z;
 
-                    var e = responseObj.data[i].estimate;
-                    if (e > maxEstimate) {
-                        maxEstimate = e;
-                    }
-                    if (e < minEstimate) {
-                        minEstimate = e;
-                    }
+                    minMax(mmEstimate, responseObj.data[i].estimate);
+                    minMax(mmX, vertex.x);
+                    minMax(mmY, vertex.y);
+                    minMax(mmZ, vertex.z);
 
                     geometry.vertices.push(vertex);
                 }
@@ -189,21 +197,24 @@ void main() {\n \
                 // uniforms
                 uniforms = {};
 
+                //Shaders
+                var pointScale = (mmX.max - mmX.min + mmY.max - mmY.min + mmZ.max - mmZ.min) / 3;
+                var vs = Ext.util.Format.format(this.vertexShader, Ext.util.Format.number(pointScale, '0.0'));
+                var fs = this.fragmentShader;
+
                 // point cloud material using our custom shaders
                 var shaderMaterial = new THREE.ShaderMaterial( {
                     uniforms:       uniforms,
                     attributes:     attributes,
-                    vertexShader:   this.vertexShader,
-                    fragmentShader: this.fragmentShader,
+                    vertexShader:   vs,
+                    fragmentShader: fs,
                     transparent:    true
                 });
 
                 //Setup colors for each vertex based on estimate
                 for( var i = 0; i < geometry.vertices.length; i ++ ) {
                     var e = responseObj.data[i].estimate;
-                    var ratio = (e - minEstimate) / (maxEstimate - minEstimate);
-                    var rainbow = 'hsl(' +  + ',100%,50%)'; //Create a rainbow from blue (low) to red (high)
-
+                    var ratio = (e - mmEstimate.min) / (mmEstimate.max - mmEstimate.min);
                     var color = new THREE.Color();
                     color.setHSL(((1 - ratio) * 240 / 255), 1.0, 0.5);
 
