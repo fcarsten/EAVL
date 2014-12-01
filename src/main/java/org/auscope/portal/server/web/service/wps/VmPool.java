@@ -40,7 +40,23 @@ import com.google.common.base.Optional;
 @ThreadSafe
 public class VmPool {
 
-	private static final int VM_POOL_SIZE = 1;
+	private int vmPoolSize = 1;
+
+	/**
+	 * @return the vmPoolSize
+	 */
+	public int getVmPoolSize() {
+		return vmPoolSize;
+	}
+
+	/**
+	 * @param vmPoolSize the vmPoolSize to set
+	 */
+	public void setVmPoolSize(int vmPoolSize) {
+		if(vmPoolSize<1) throw new IllegalArgumentException("VM Pool size must be bigger than 0");
+		this.vmPoolSize = vmPoolSize;
+		checkAndFixPoolSizeAsync();
+	}
 
 	protected final Log log = LogFactory.getLog(getClass());
 
@@ -59,8 +75,26 @@ public class VmPool {
 	private String keypair = null;
 
 	private ThreadPoolExecutor executor;
+    private Set<String> skippedZones = new HashSet<String>();
 
 	private NovaApi lowLevelApi;
+    /**
+     * Gets the set of zone names that should be skipped when attempting to find
+     * a zone to run a job at.
+     * @return
+     */
+    public Set<String> getSkippedZones() {
+        return skippedZones;
+    }
+
+    /**
+     * Sets the set of zone names that should be skipped when attempting to find
+     * a zone to run a job at.
+     * @param skippedZones
+     */
+    public void setSkippedZones(Set<String> skippedZones) {
+        this.skippedZones = skippedZones;
+    }
 
 	@Autowired
 	public VmPool(VmPoolPersistor persistor, String accessKey,
@@ -201,7 +235,7 @@ public class VmPool {
 				}
 			}
 			currentPoolSize = vmPool.size() + numOrderedVms;
-			numNewVmsNeeded = VM_POOL_SIZE - currentPoolSize;
+			numNewVmsNeeded = vmPoolSize - currentPoolSize;
 			numOrderedVms += numNewVmsNeeded;
 		}
 
@@ -298,7 +332,22 @@ public class VmPool {
 		// TODO Implement VmPool#retireVms()
 	}
 
-	public static void main(String[] arg) {}
+	public static void main(String[] arg) {
+		VmPool pool = new VmPool(new FileVmPoolPersister(),
+				"GeophysicsVL:Carsten.Friedrich@csiro.au",
+				"MjI1NDNlMWEwMjMzNWFm", new ThreadPoolExecutor(10, 20, 60,
+						TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>()));
+		try {
+			WpsVm vm = pool.getFreeVm();
+			vm.updateStatus();
+			System.out.println("VM Status: " + vm.getStatus());
+		} catch (PortalServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		System.exit(0);
+	}
 
 	private WpsVm startVmOnCloud() throws PortalServiceException {
 		TemplateOptions options = ((NovaTemplateOptions) computeService
@@ -333,6 +382,7 @@ public class VmPool {
 		String ipAddress = result.getPublicAddresses().iterator().next();
 		log.info(result.getId() + ": " + ipAddress);
 		WpsVm res = new WpsVm(result.getId(), ipAddress);
+		res.setOrderTime(System.currentTimeMillis());
 		res.setStatus(VmStatus.STARTING);
 		return res;
 	}
@@ -347,12 +397,13 @@ public class VmPool {
 					location));
 
 			for (AvailabilityZone currentZone : zones) {
-				// if (skippedZones.contains(currentZone.getName())) {
-				// log.info(String.format("skipping: '%1$s' - configured as a skipped zone",
-				// currentZone.getName()));
-				// continue;
-				// }
-				log.info(String.format("Trying zone '%1$s' ...",
+				 if (skippedZones.contains(currentZone.getName())) {
+				 log.info(String.format("skipping: '%1$s' - configured as a skipped zone",
+				 currentZone.getName()));
+				 continue;
+				 }
+
+				 log.info(String.format("Trying zone '%1$s' ...",
 						currentZone.getName()));
 
 				if (!currentZone.getState().available()) {
@@ -392,6 +443,7 @@ public class VmPool {
 						.next();
 				log.info(result.getId() + ": " + ipAddress);
 				WpsVm res = new WpsVm(result.getId(), ipAddress);
+				res.setOrderTime(System.currentTimeMillis());
 				res.setStatus(VmStatus.STARTING);
 				return res;
 			}

@@ -23,6 +23,11 @@ public class WpsVm {
 	protected final Log log = LogFactory.getLog(getClass());
 
 	/**
+	 * Maximum time in milliseconds that we wait for VM start-up until we give up.
+	 *
+	 */
+	final public int VM_STARTUP_TIMEOUT = 1000*60*10;
+	/**
 	 * @author fri096
 	 *
 	 */
@@ -35,6 +40,14 @@ public class WpsVm {
 
 	@JsonIgnore
 	private VmStatus status = VmStatus.UNKNOWN;
+	private long orderTime;
+
+	/**
+	 * @return the orderTime
+	 */
+	public long getOrderTime() {
+		return orderTime;
+	}
 
 	@JsonIgnore
 	public void setStatus(VmStatus status) {
@@ -110,15 +123,19 @@ public class WpsVm {
 				log.info(" VM: "+id + " ("+ipAddress+") is ready.");
 			} else if (status == VmStatus.STARTING) {
 				log.info(" VM: "+id + " ("+ipAddress+") no ready yet.");
-			} else {				// TODO: Handle other status codes
+			} else if (status == VmStatus.STARTING && System.currentTimeMillis()-getOrderTime()>VM_STARTUP_TIMEOUT){
+				status = VmStatus.FAILED;
+				log.info(" VM: "+id + " ("+ipAddress+") has failed to start up within " +(VM_STARTUP_TIMEOUT/1000)+ " seconds. Giving up.");
+			} else { // TODO: Handle other status codes
 				status = VmStatus.FAILED;
 				log.info(" VM: "+id + " ("+ipAddress+") has failed.");
 			}
 		} catch (ConnectException e) {
-			log.error("Can't connect to WPS VM "+ipAddress+". Assume it's dead: "+e.getMessage());
 			if (status == VmStatus.UNKNOWN) {
 				status = VmStatus.FAILED;
-				log.info(" VM: "+id + " ("+ipAddress+") has failed");
+				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). I assume its dead and will remove from VM Pool. Error: "+e.getMessage());
+			} else {
+				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). Will try again shortly. Error: "+e.getMessage());
 			}
 		} catch (IOException e) {
 			log.error("Error connecting to VM: "+id + " ("+ipAddress+"): "+e.getMessage(), e);
@@ -129,5 +146,9 @@ public class WpsVm {
 	private boolean isStable(VmStatus s) {
 		return s == VmStatus.READY || s == VmStatus.FAILED
 				|| s == VmStatus.DECOMMISSIONED;
+	}
+
+	public void setOrderTime(long orderTime) {
+		this.orderTime=orderTime;
 	}
 }
