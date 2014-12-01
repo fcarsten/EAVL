@@ -11,7 +11,6 @@ import net.sf.json.JSONArray;
 
 import org.apache.commons.io.IOUtils;
 import org.auscope.eavl.wpsclient.ACF;
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.cloud.FileStagingService;
@@ -59,13 +58,14 @@ public class WPSController extends BasePortalController {
             double[][] response = wpsClient.logDensity(columnData.toArray(new Double[columnData.size()]));
 
             JSONArray xyPairs = new JSONArray();
-            for (int i = 0; i < response[0].length; i++) {
-                JSONArray xy = new JSONArray();
-                xy.add(response[0][i]);
-                xy.add(response[1][i]);
-                xyPairs.add(xy);
-            }
-
+			if (response.length > 0) {
+				for (int i = 0; i < response[0].length; i++) {
+					JSONArray xy = new JSONArray();
+					xy.add(response[0][i]);
+					xy.add(response[1][i]);
+					xyPairs.add(xy);
+				}
+			}
             return new ModelAndView(new JSONView(xyPairs), null);
         } catch (Exception ex) {
             log.warn("Unable to get pdf values: ", ex);
