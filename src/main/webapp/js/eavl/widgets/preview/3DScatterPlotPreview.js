@@ -252,16 +252,6 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
             size: 10
         });
 
-        // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
-        function hexToRgb(hex) { //TODO rewrite with vector output
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-        }
-
         var pointCount = data.length;
         var pointGeo = new THREE.Geometry();
         for (var i = 0; i < pointCount; i ++) {
