@@ -6,21 +6,6 @@ Ext.define('eavl.widgets.preview.VoxelPreview', {
 
     innerId: null,
     threeJs: null,
-    fragmentShader: '\
-varying vec3 vCustomColor;\n \
-void main() {\n \
-    gl_FragColor = vec4( vCustomColor, 1.0 );\n \
-}\n',
-
-    vertexShader: '\
-attribute vec3 customColor;\n \
-varying vec3 vCustomColor;\n \
-void main() {\n \
-    vCustomColor = customColor;\n \
-    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n \
-    gl_PointSize = {0} * ( 1.0 / length( mvPosition.xyz ) );\n \
-    gl_Position = projectionMatrix * mvPosition;\n \
-}\n',
 
     constructor : function(config) {
         this.innerId = Ext.id();
@@ -91,32 +76,247 @@ void main() {\n \
     },
 
     /**
-     * Creates a Object3D containing labelled axes
-     *
-     * Original Source - http://soledadpenades.com/articles/three-js-tutorials/drawing-the-coordinate-axes/
+     * Originally sourced but then adapted from http://bl.ocks.org/phil-pedruco/9852362
      */
-    _buildAxes : function() {
-        var buildAxis = function( src, dst, colorHex ) {
-            var geom = new THREE.Geometry(),
-                mat;
+    _renderEstimatePoints : function(suppressRender, data) {
+        function v(x, y, z) {
+            return new THREE.Vector3(x, y, z);
+        }
 
-            mat = new THREE.LineBasicMaterial({ linewidth: 3, color: colorHex });
+        function createTextCanvas(text, color, font, size) {
+            size = size || 16;
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var fontStr = (size + 'px ') + (font || 'Arial');
+            ctx.font = fontStr;
+            var w = ctx.measureText(text).width;
+            var h = Math.ceil(size);
+            canvas.width = w;
+            canvas.height = h;
+            ctx.font = fontStr;
+            ctx.fillStyle = color || 'black';
+            ctx.fillText(text, 0, Math.ceil(size * 0.8));
+            return canvas;
+        }
 
-            geom.vertices.push( src.clone() );
-            geom.vertices.push( dst.clone() );
+        function createText2D(text, color, font, size, segW, segH) {
+            var canvas = createTextCanvas(text, color, font, size);
+            var plane = new THREE.PlaneGeometry(canvas.width, canvas.height, segW, segH);
+            var tex = new THREE.Texture(canvas);
+            tex.needsUpdate = true;
+            var planeMat = new THREE.MeshBasicMaterial({
+                map: tex,
+                color: 0xffffff,
+                transparent: true
+            });
 
-            var axis = new THREE.Line( geom, mat, THREE.LinePieces );
+            //This is how we view the reversed text from behind
+            //see: http://stackoverflow.com/questions/20406729/three-js-double-sided-plane-one-side-reversed
+            var backPlane = plane.clone();
+            backPlane.applyMatrix(new THREE.Matrix4().makeRotationY( Math.PI ));
+            THREE.GeometryUtils.merge( plane, backPlane, 1 );
 
-            return axis;
+            var mesh = new THREE.Mesh(plane, planeMat);
+            mesh.scale.set(0.5, 0.5, 0.5);
+            mesh.material.side = THREE.FrontSide;
+            return mesh;
+        }
+
+        var xExtent = d3.extent(data, function (d) {return d.x; }),
+            yExtent = d3.extent(data, function (d) {return d.y; }),
+            zExtent = d3.extent(data, function (d) {return d.z; }),
+            eExtent = d3.extent(data, function (d) {return d.estimate; });
+
+        var format = d3.format("+.3f");
+
+        var vpts = {
+            xMax: xExtent[1],
+            xCen: (xExtent[1] + xExtent[0]) / 2,
+            xMin: xExtent[0],
+            yMax: yExtent[1],
+            yCen: (yExtent[1] + yExtent[0]) / 2,
+            yMin: yExtent[0],
+            zMax: zExtent[1],
+            zCen: (zExtent[1] + zExtent[0]) / 2,
+            zMin: zExtent[0]
         };
 
-        var axes = new THREE.Object3D();
+        var xScale = d3.scale.linear()
+                .domain(xExtent)
+                .range([-50,50]);
+        var yScale = d3.scale.linear()
+                .domain(yExtent)
+                .range([-50,50]);
+        var zScale = d3.scale.linear()
+                .domain(zExtent)
+                .range([-50,50]);
+        var eScale = d3.scale.log()
+                .domain(eExtent)
+                .range([0, 240 / 255]);
 
-        var length = 1000;
-        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000 ) ); // +X
-        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00 ) ); // +Y
-        axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF ) ); // +Z
-        return axes;
+
+
+        this.threeJs.controls.target = v(0, 0 ,0);
+
+        //Build our axes
+        var lineGeo = new THREE.Geometry();
+        lineGeo.vertices.push(
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)),
+            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)),
+
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zCen)),
+            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zCen)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zCen)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zCen)),
+
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)),v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)),v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMin)),v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMax)),v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax)),
+            v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax)),v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)),v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMax)),v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMin)),v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMax)),
+            v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMax)),v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMin)),
+            v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMin)),v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zCen)),
+            v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zCen)),v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zCen)),
+            v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zCen)),v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zCen))
+
+
+            //original
+            /*v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zCen)),
+            v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zCen)),
+            v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMax)), v(xScale(vpts.xCen), yScale(vpts.yCen), zScale(vpts.zMin)),
+
+            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zCen)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zCen)),
+
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMax)),
+            v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zCen)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zCen)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zCen)),
+
+            v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMax), zScale(vpts.zMax)),
+            v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yMin), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yMax), zScale(vpts.zMax)),
+            v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yMin), zScale(vpts.zMax)),
+
+            v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMin)), v(xScale(vpts.xMin), yScale(vpts.yCen), zScale(vpts.zMax)),
+            v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMin)), v(xScale(vpts.xMax), yScale(vpts.yCen), zScale(vpts.zMax)),
+            v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMax), zScale(vpts.zMin)),
+            v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMin)), v(xScale(vpts.xCen), yScale(vpts.yMin), zScale(vpts.zMax))*/
+
+        );
+        var lineMat = new THREE.LineBasicMaterial({
+            color: 0x000000,
+            lineWidth: 1
+        });
+        var line = new THREE.Line(lineGeo, lineMat);
+        line.type = THREE.Lines;
+        this.threeJs.scene.add(line);
+
+        var titleX = createText2D('-X');
+        titleX.position.x = xScale(vpts.xMin) - 12,
+        titleX.position.y = 5;
+        this.threeJs.scene.add(titleX);
+
+        var valueX = createText2D(format(xExtent[0]));
+        valueX.position.x = xScale(vpts.xMin) - 12,
+        valueX.position.y = -5;
+        this.threeJs.scene.add(valueX);
+
+        var titleX = createText2D('X');
+        titleX.position.x = xScale(vpts.xMax) + 12;
+        titleX.position.y = 5;
+        this.threeJs.scene.add(titleX);
+
+        var valueX = createText2D(format(xExtent[1]));
+        valueX.position.x = xScale(vpts.xMax) + 12,
+        valueX.position.y = -5;
+        this.threeJs.scene.add(valueX);
+
+        var titleY = createText2D('-Y');
+        titleY.position.y = yScale(vpts.yMin) - 5;
+        this.threeJs.scene.add(titleY);
+
+        var valueY = createText2D(format(yExtent[0]));
+        valueY.position.y = yScale(vpts.yMin) - 15,
+        this.threeJs.scene.add(valueY);
+
+        var titleY = createText2D('Y');
+        titleY.position.y = yScale(vpts.yMax) + 15;
+        this.threeJs.scene.add(titleY);
+
+        var valueY = createText2D(format(yExtent[1]));
+        valueY.position.y = yScale(vpts.yMax) + 5,
+        this.threeJs.scene.add(valueY);
+
+        var titleZ = createText2D('-Z ' + format(zExtent[0]));
+        titleZ.position.z = zScale(vpts.zMin) + 2;
+        this.threeJs.scene.add(titleZ);
+
+        var titleZ = createText2D('Z ' + format(zExtent[1]));
+        titleZ.position.z = zScale(vpts.zMax) + 2;
+        this.threeJs.scene.add(titleZ);
+
+        //Build our scatter plot points
+        var mat = new THREE.ParticleBasicMaterial({
+            vertexColors: true,
+            size: 10
+        });
+
+        // from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+        function hexToRgb(hex) { //TODO rewrite with vector output
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        var pointCount = data.length;
+        var pointGeo = new THREE.Geometry();
+        for (var i = 0; i < pointCount; i ++) {
+            var x = xScale(data[i].x);
+            var y = yScale(data[i].y);
+            var z = zScale(data[i].z);
+            var e = eScale(data[i].estimate);
+
+            pointGeo.vertices.push(new THREE.Vector3(x, y, z));
+            pointGeo.colors.push(new THREE.Color().setHSL(e, 1.0, 0.5));
+        }
+
+        var points = new THREE.PointCloud(pointGeo, mat);
+        this.threeJs.scene.add(points);
+
+        if (!suppressRender) {
+            this.render();
+        }
     },
 
     _getGeometry : function(job, fileName, suppressRender) {
@@ -147,8 +347,10 @@ void main() {\n \
                     return;
                 }
 
+                this._renderEstimatePoints(suppressRender, responseObj.data);
+
                 //Utility for easily generating an object with
-                var minMax = function(mm, value) {
+                /*var minMax = function(mm, value) {
                     if (value > mm.max) {
                         mm.max = value;
                     }
@@ -232,7 +434,7 @@ void main() {\n \
 
                 if (!suppressRender) {
                     this.render();
-                }
+                }*/
             }
         });
     },

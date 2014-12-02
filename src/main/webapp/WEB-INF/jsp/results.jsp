@@ -7,6 +7,7 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
+        <script src="js/d3/d3.min.js" type="text/javascript" ></script>
         <script src="js/threejs/three.min.js" type="text/javascript"></script>
         <script src="js/threejs/controls/OrbitControls.js" type="text/javascript"></script>
         
