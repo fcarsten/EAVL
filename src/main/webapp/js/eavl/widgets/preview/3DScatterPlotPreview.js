@@ -26,7 +26,8 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
 
         var el = this.getEl();
         this.threeJs.camera = new THREE.PerspectiveCamera( 60, el.getWidth() / el.getHeight(), 1, 10000 );
-        this.threeJs.camera.position.z = 50;
+        this.threeJs.camera.position.z = 180;
+        this.threeJs.camera.position.y = 18;
 
         this.threeJs.controls = new THREE.OrbitControls( this.threeJs.camera );
         this.threeJs.controls.damping = 0.2;
@@ -55,6 +56,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
             me.threeJs.controls.update();
         };
         animate();
+        this.render();
     },
 
     render: function() {
@@ -113,8 +115,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
             //This is how we view the reversed text from behind
             //see: http://stackoverflow.com/questions/20406729/three-js-double-sided-plane-one-side-reversed
             var backPlane = plane.clone();
-            backPlane.applyMatrix(new THREE.Matrix4().makeRotationY( Math.PI ));
-            THREE.GeometryUtils.merge( plane, backPlane, 1 );
+            plane.merge(backPlane, new THREE.Matrix4().makeRotationY( Math.PI ), 1);
 
             var mesh = new THREE.Mesh(plane, planeMat);
             mesh.scale.set(0.5, 0.5, 0.5);
@@ -247,7 +248,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
         this.threeJs.scene.add(titleZ);
 
         //Build our scatter plot points
-        var mat = new THREE.ParticleBasicMaterial({
+        var mat = new THREE.PointCloudMaterial({
             vertexColors: true,
             size: 10
         });
