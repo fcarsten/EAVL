@@ -1,7 +1,7 @@
 /**
- * Previewer for rendering 3D voxels
+ * Previewer for rendering 3D Scatter Plots
  */
-Ext.define('eavl.widgets.preview.VoxelPreview', {
+Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
     extend: 'Ext.container.Container',
 
     innerId: null,

@@ -37,7 +37,7 @@
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/BaseFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/CSVFilePreview.js"></script>
-        <script type="text/javascript" src="js/eavl/widgets/preview/VoxelPreview.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/preview/3DScatterPlotPreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/FilePreviewPanel.js"></script>
         
         <script type="text/javascript" src="js/eavl/Results-UI.js"></script>

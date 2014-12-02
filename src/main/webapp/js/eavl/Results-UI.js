@@ -78,7 +78,7 @@ Ext.application({
                                     if (fileName.endsWith(".csv")) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "csv");
                                     } else if (fileName.endsWith(".json")) {
-                                        Ext.getCmp('filepreviewpanel').preview(job, fileName, "voxel");
+                                        Ext.getCmp('filepreviewpanel').preview(job, fileName, "3dscatter");
                                     }
                                 }
                             }
