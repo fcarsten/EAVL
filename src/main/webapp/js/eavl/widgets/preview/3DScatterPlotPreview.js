@@ -43,7 +43,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
         this.threeJs.scene = new THREE.Scene();
 
         // world
-        this._getGeometry(job, fileName, true);
+        this._getGeometry(job, fileName, false);
 
         // renderer
         this.threeJs.renderer = new THREE.WebGLRenderer({antialias : false});
@@ -69,7 +69,6 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
     },
 
     render : function() {
-        console.log('render from: ', callee);
         this.threeJs.renderer.render(this.threeJs.scene, this.threeJs.camera);
     },
 
