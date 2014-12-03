@@ -34,7 +34,9 @@
         <script type="text/javascript" src="js/eavl/widgets/JobFileList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/charts/3DScatterPlot.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/BaseFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/CSVFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/3DScatterPlotPreview.js"></script>
