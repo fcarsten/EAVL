@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -168,7 +169,7 @@ public class ResultsController extends BasePortalController {
             is = fss.readFile(job, fileName);
             String jsonData = IOUtils.toString(is, StandardCharsets.UTF_8.name());
             JSONObject json = JSONObject.fromObject(jsonData);
-            List<ModelMap> response = new ArrayList<ModelMap>();
+            List<ModelMap> responsePoints = new ArrayList<ModelMap>();
 
             JSONObject gkde = (JSONObject) json.get("gkde");
             JSONArray x1 = (JSONArray) ((JSONObject) gkde.get("eval.points")).get("X1");
@@ -187,8 +188,16 @@ public class ResultsController extends BasePortalController {
                 point.put("y", x2.get(i));
                 point.put("z", x3.get(i));
                 point.put("estimate", estimate.get(Integer.toString((i + 1))));
-                response.add(point);
+                responsePoints.add(point);
             }
+
+            Iterator<String> proxies = job.getProxyParameters().iterator(); //TODO: This may potentially fail due to set order being undefined
+
+            ModelMap response = new ModelMap();
+            response.put("points", responsePoints);
+            response.put("xLabel", proxies.next());
+            response.put("yLabel", proxies.next());
+            response.put("zLabel", proxies.next());
 
             return generateJSONResponseMAV(true, response, "");
         } catch (Exception ex) {

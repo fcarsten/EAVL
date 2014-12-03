@@ -21,7 +21,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                 },
                 items : [{
                     xtype: 'panel',
-                    width: 175,
+                    width: 150,
                     layout: {
                         type: 'vbox',
                         align: 'center'
@@ -113,7 +113,11 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                 }
 
                 var scatterPlot = this.down('#plot');
-                scatterPlot.plot(responseObj.data);
+
+                scatterPlot.xLabel = responseObj.data.xLabel;
+                scatterPlot.yLabel = responseObj.data.yLabel;
+                scatterPlot.zLabel = responseObj.data.zLabel;
+                scatterPlot.plot(responseObj.data.points);
             }
         });
     }
