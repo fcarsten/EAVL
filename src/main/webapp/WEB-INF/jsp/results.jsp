@@ -7,6 +7,34 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
+        <style>
+	        .x-form-value-field {
+			  margin: 0 0 0 0;
+			  padding: 0 0 0 0;
+			  font-size: 22px;
+			  font-weight: 700;
+			}
+			
+			.x-form-value-field-uom {
+			  margin: 0 0 0 0;
+			  padding: 0 0 0 0;
+			  font: normal 18px impact, sans-serif;
+			  color: #D05353;
+			}
+			
+			.x-form-value-field-label {
+			  margin: 0 0 0 0;
+			  padding: 0 0 0 0;
+			  font: normal 11px tahoma,arial,verdana,sans-serif;;
+			  text-align: center;
+			  color: black;
+			}
+			
+			.x-form-image-field {
+			  text-align: center;
+			}
+        </style>
+        
         <script src="js/d3/d3.min.js" type="text/javascript" ></script>
         <script src="js/threejs/three.min.js" type="text/javascript"></script>
         <script src="js/threejs/controls/OrbitControls.js" type="text/javascript"></script>
@@ -16,6 +44,7 @@
         <script src="portal-core/js/portal/util/GoogleAnalytic.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/widgets/grid/column/ClickColumn.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/widgets/grid/plugin/CellTips.js" type="text/javascript"></script>
+        <script src="portal-core/js/portal/widgets/field/DataDisplayField.js" type="text/javascript"></script>
         
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/CSVGrid.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">

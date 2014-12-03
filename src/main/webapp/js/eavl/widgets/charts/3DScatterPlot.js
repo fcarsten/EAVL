@@ -18,6 +18,8 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
      * Adds the following config
      * {
      *   data - Object[] - Optional - Data to intially plot in this widget. No data will be plotted if this is missing.
+     *   pointSize - Number - Optional - Size of the data points in pixels (Unscaled each axis is 50 pixels wide) - Default - 10
+     *
      *
      *   xAttr - String - Optional - The name of the attribute to plot on the x axis (default - 'x')
      *   xLabel - String - Optional - The name of the x axis to show on the plot (default - 'X')
@@ -50,6 +52,7 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
         this.threeJs = null;
         this.innerId = Ext.id();
         this.data = config.data ? config.data : null;
+        this.pointSize = config.pointSize ? config.pointSize : 10;
 
         this.xAttr = config.xAttr ? config.xAttr : 'x';
         this.xLabel = config.xLabel ? config.xLabel : 'X';
@@ -87,7 +90,6 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
             controls : null,
             scene : null,
             renderer : null,
-            pointSize : 10,
             width : null,
             height : null
         };
@@ -116,7 +118,7 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
         this.threeJs.renderer.setSize(this.threeJs.width, this.threeJs.height);
 
         this.threeJs.raycaster = new THREE.Raycaster();
-        this.threeJs.raycaster.params.PointCloud.threshold = this.threeJs.pointSize / 3;
+        this.threeJs.raycaster.params.PointCloud.threshold = this.pointSize / 3;
 
         var container = document.getElementById(this.innerId);
         container.appendChild(this.threeJs.renderer.domElement);
@@ -225,7 +227,9 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
     },
 
     _handlePointSelect : function(index, point) {
-        this.fireEvent('select', this, this.data[index]);
+        var dataItem = this.data[index];
+        console.log(dataItem[this.valueAttr]);
+        this.fireEvent('select', this, dataItem);
     },
 
     _clearPointSelect : function() {
@@ -341,7 +345,7 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
         } else {
             throw 'Invalid valueScale: ' + this.valueScale;
         }
-        valueScale.domain(this.d3.valueExtent).range([ 0, 240 / 255 ]);
+        valueScale.domain(this.d3.valueExtent).range([ 0, 1]);
 
         // Build our axes
         var lineGeo = new THREE.Geometry();
@@ -433,7 +437,7 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
         // Build our scatter plot points
         var mat = new THREE.PointCloudMaterial({
             vertexColors : true,
-            size : this.threeJs.pointSize
+            size : this.pointSize
         });
 
         var pointCount = data.length;
@@ -449,12 +453,18 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
                 color = new THREE.Color(this.valueRenderer(rawValue));
             } else {
                 var scaledValue = valueScale(rawValue); //Scale to HSL rainbow from 0 - 240
-                color = new THREE.Color().setHSL(scaledValue, 1.0, 0.5);
+                var hue = (1 - scaledValue) * 180 / 255;
+
+                console.log(rawValue, scaledValue, hue);
+
+                color = new THREE.Color().setHSL(hue, 1.0, 0.5);
             }
 
             pointGeo.vertices.push(v(x, y, z));
             pointGeo.colors.push(color);
         }
+
+        console.log(d3.extent(pointGeo.colors, function(c) {return c.getHSL().h;}));
 
         this.threeJs.pointCloud = new THREE.PointCloud(pointGeo, mat);
         this.threeJs.scene.add(this.threeJs.pointCloud);

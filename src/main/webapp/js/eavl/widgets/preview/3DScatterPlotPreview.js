@@ -14,10 +14,64 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
         Ext.apply(config,{
             layout : 'fit',
             items : [{
-                xtype : '3dscatterplot',
-                itemId : 'plot',
-                valueAttr : 'estimate',
-                valueScale : 'log'
+                xtype : 'container',
+                layout: {
+                    type: 'hbox',
+                    align: 'stretch'
+                },
+                items : [{
+                    xtype: 'panel',
+                    width: 175,
+                    layout: {
+                        type: 'vbox',
+                        align: 'center'
+                    },
+                    itemId: 'details'
+                },{
+                    xtype : '3dscatterplot',
+                    itemId : 'plot',
+                    valueAttr : 'estimate',
+                    valueScale : 'log',
+                    pointSize: 4,
+                    flex: 1,
+                    listeners: {
+                        select: function(plot, data) {
+                            var parent = plot.ownerCt.down('#details');
+
+                            if (parent.items.getCount() !== 0) {
+                                parent.removeAll(true);
+                            }
+
+                            parent.add({
+                                xtype: 'datadisplayfield',
+                                fieldLabel: plot.xLabel,
+                                value: data.x
+                            });
+                            parent.add({
+                                xtype: 'datadisplayfield',
+                                fieldLabel: plot.yLabel,
+                                value: data.y
+                            });
+                            parent.add({
+                                xtype: 'datadisplayfield',
+                                fieldLabel: plot.zLabel,
+                                value: data.z
+                            });
+                            parent.add({
+                                xtype: 'datadisplayfield',
+                                fieldLabel: 'Estimate',
+                                value: data.estimate
+                            });
+                        },
+                        deselect: function(plot) {
+                            var parent = plot.ownerCt.down('#details');
+
+                            if (parent.items.getCount() !== 0) {
+                                parent.removeAll(true);
+                            }
+                        }
+                    }
+                }]
             }]
         });
 
