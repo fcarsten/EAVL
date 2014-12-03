@@ -228,7 +228,6 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
 
     _handlePointSelect : function(index, point) {
         var dataItem = this.data[index];
-        console.log(dataItem[this.valueAttr]);
         this.fireEvent('select', this, dataItem);
     },
 
@@ -454,17 +453,12 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
             } else {
                 var scaledValue = valueScale(rawValue); //Scale to HSL rainbow from 0 - 240
                 var hue = (1 - scaledValue) * 180 / 255;
-
-                console.log(rawValue, scaledValue, hue);
-
                 color = new THREE.Color().setHSL(hue, 1.0, 0.5);
             }
 
             pointGeo.vertices.push(v(x, y, z));
             pointGeo.colors.push(color);
         }
-
-        console.log(d3.extent(pointGeo.colors, function(c) {return c.getHSL().h;}));
 
         this.threeJs.pointCloud = new THREE.PointCloud(pointGeo, mat);
         this.threeJs.scene.add(this.threeJs.pointCloud);
