@@ -23,9 +23,9 @@ Ext.application({
 
         var taskName = "???";
         if (next.endsWith("setproxy.html")) {
-            taskName = "Imputation";
+            taskName = "Imputing missing samples";
         } else if (next.endsWith("results.html")) {
-            taskName = "Calculations";
+            taskName = "Performing Calculations";
         }
 
         var viewport = Ext.create('Ext.container.Viewport', {
@@ -63,7 +63,7 @@ Ext.application({
                             src : 'img/loading-bars.svg'
                         },{
                             tag : 'h1',
-                            html : 'Performing ' + taskName + "..."
+                            html : taskName
                         },{
                             tag : 'div',
                             html : 'This page will refresh when complete.'

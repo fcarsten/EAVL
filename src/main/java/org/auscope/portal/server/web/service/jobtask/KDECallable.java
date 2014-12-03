@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import net.sf.json.JSONObject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -79,6 +81,28 @@ public class KDECallable implements Callable<Object> {
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_JSON);
             writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
             writer.write(kdeJson);
+
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(os);
+
+            //Create a "fake" CSV file containing just the estimate data
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+            writer.write("eavl-kde-estimate\n");
+            JSONObject json = JSONObject.fromObject(kdeJson);
+            JSONObject gkde = (JSONObject) json.get("gkde");
+            JSONObject estimate = (JSONObject) gkde.get("estimate");
+            for (int i = 0; i < estimate.size(); i++) {
+                writer.write(estimate.get(Integer.toString((i + 1))).toString() + "\n");
+            }
+            IOUtils.closeQuietly(writer);
+            IOUtils.closeQuietly(os);
+
+            //Merge that fake CSV file with the imputed CSV data
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            in2 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_CSV);
+            csvService.mergeFiles(in, in2, os, null, null);
 
             return kdeJson;
         } catch (Exception ex) {
