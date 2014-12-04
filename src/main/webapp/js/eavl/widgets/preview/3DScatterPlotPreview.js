@@ -33,6 +33,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                     valueAttr : 'estimate',
                     valueScale : 'log',
                     pointSize: 4,
+                    allowSelection : true,
                     flex: 1,
                     listeners: {
                         select: function(plot, data) {

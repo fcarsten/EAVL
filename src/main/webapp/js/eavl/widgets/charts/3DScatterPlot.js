@@ -19,7 +19,7 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
      * {
      *   data - Object[] - Optional - Data to intially plot in this widget. No data will be plotted if this is missing.
      *   pointSize - Number - Optional - Size of the data points in pixels (Unscaled each axis is 50 pixels wide) - Default - 10
-     *
+     *   allowSelection - Booelan - Optional - True if points can be selected by clicking with the mouse. Default - false
      *
      *   xAttr - String - Optional - The name of the attribute to plot on the x axis (default - 'x')
      *   xLabel - String - Optional - The name of the x axis to show on the plot (default - 'X')
@@ -53,6 +53,7 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
         this.innerId = Ext.id();
         this.data = config.data ? config.data : null;
         this.pointSize = config.pointSize ? config.pointSize : 10;
+        this.allowSelection = config.allowSelection ? true : false;
 
         this.xAttr = config.xAttr ? config.xAttr : 'x';
         this.xLabel = config.xLabel ? config.xLabel : 'X';
@@ -99,8 +100,14 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
         var el = this.getEl();
         this.threeJs.width = el.getWidth();
         this.threeJs.height = el.getHeight();
-        el.on('mousedown', this._handleMouseDown, this);
-        el.on('mouseup', this._handleMouseUp, this);
+
+        if (this.allowSelection) {
+            el.on('mousedown', this._handleMouseDown, this);
+            el.on('mouseup', this._handleMouseUp, this);
+
+            this.threeJs.raycaster = new THREE.Raycaster();
+            this.threeJs.raycaster.params.PointCloud.threshold = this.pointSize / 3;
+        }
 
         this.threeJs.camera = new THREE.PerspectiveCamera(60, this.threeJs.width / this.threeJs.height, 1, 10000);
         this.threeJs.camera.position.z = 180;
@@ -116,9 +123,6 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
         this.threeJs.renderer = new THREE.WebGLRenderer({antialias : false});
         this.threeJs.renderer.setClearColor(0xffffff, 1);
         this.threeJs.renderer.setSize(this.threeJs.width, this.threeJs.height);
-
-        this.threeJs.raycaster = new THREE.Raycaster();
-        this.threeJs.raycaster.params.PointCloud.threshold = this.pointSize / 3;
 
         var container = document.getElementById(this.innerId);
         container.appendChild(this.threeJs.renderer.domElement);
@@ -228,10 +232,32 @@ Ext.define('eavl.widgets.charts.3DScatterPlot', {
 
     _handlePointSelect : function(index, point) {
         var dataItem = this.data[index];
+        var color = this.threeJs.pointCloud.geometry.colors[index];
+
+        if (!this.threeJs.selectionMesh) {
+            var selectionBox = new THREE.SphereGeometry(this.pointSize * 0.8, 8, 8);
+            var selectionMaterial = new THREE.MeshBasicMaterial( { color: color, opacity: 1.0, transparent: false } );
+            this.threeJs.selectionMesh = new THREE.Mesh( selectionBox, selectionMaterial );
+        } else {
+            this.threeJs.selectionMesh.material.color = color;
+        }
+
+        this.threeJs.selectionMesh.position.set(
+                this.d3.xScale(dataItem[this.xAttr]),
+                this.d3.yScale(dataItem[this.yAttr]),
+                this.d3.zScale(dataItem[this.zAttr]));
+        this.threeJs.scene.add(this.threeJs.selectionMesh);
+        this._renderThreeJs();
         this.fireEvent('select', this, dataItem);
     },
 
     _clearPointSelect : function() {
+        if (this.threeJs.selectionMesh) {
+            this.threeJs.scene.remove(this.threeJs.selectionMesh);
+            this.threeJs.selectionMesh = null;
+            this._renderThreeJs();
+        }
+
         this.fireEvent('deselect', this);
     },
 
