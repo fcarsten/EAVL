@@ -14,6 +14,8 @@ import org.auscope.portal.server.eavl.EAVLJob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
+
 /**
  * Service class for reading/writing instances of EAVLJob objects from a persistent store
  * @author Josh Vote
@@ -39,6 +41,7 @@ public class EAVLJobService {
         try {
             while (fss.stageInDirectoryExists(job)) {
                 job.setName("file-" + job.getId() + ".csv");
+                job.setProxyParameters(Sets.newHashSet("Sb_ppm", "Cr_ppm", "Rb_ppm"));
                 debugJobSingleton.add(job);
                 job = new EAVLJob(++debugIdCounter);
             }
