@@ -63,7 +63,7 @@ public class VmPool {
 	private static final String TYPE_STRING = "openstack-nova";
 	private static final String CLOUD_ENDPOINT = "https://keystone.rc.nectar.org.au:5000/v2.0";
 
-	private static final String VM_ID = "Melbourne/84460643-569c-4871-8e2e-d8a8d4db4e2f";
+	private static final String VM_ID = "Melbourne/85f8903b-2cc4-4c3a-a9e9-38f5599f7996";
 
 	private static final String INSTANCE_TYPE = "Melbourne/1";
 
@@ -335,7 +335,7 @@ public class VmPool {
 	public static void main(String[] arg) {
 		VmPool pool = new VmPool(new FileVmPoolPersister(),
 				"GeophysicsVL:Carsten.Friedrich@csiro.au",
-				"MjI1NDNlMWEwMjMzNWFm", new ThreadPoolExecutor(10, 20, 60,
+				"", new ThreadPoolExecutor(10, 20, 60,
 						TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>()));
 		try {
 			WpsVm vm = pool.getFreeVm();
