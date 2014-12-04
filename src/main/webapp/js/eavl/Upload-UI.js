@@ -16,6 +16,30 @@ Ext.application({
 
         eavl.widgets.SplashScreen.hideLoadingScreen();
 
+        var jobId = null;
+
+        var showCSVGrid = function(id, parameterDetails) {
+            jobId = id;
+            var parent = Ext.getCmp('parent-container');
+            if (parent.down('#csvGrid')) {
+                parent.down('#csvGrid').destroy();
+            }
+
+            parent.add(Ext.create('eavl.widgets.CSVGrid', {
+                itemId: 'csvGrid',
+                jobId: id,
+                readOnly: true,
+                sortColumns: false,
+                width: 1000,
+                parameterDetails : parameterDetails,
+                title: 'Double check the file has been read correctly...',
+                flex: 1,
+                margin: '0 0 10 0'
+            }));
+
+
+        };
+
         var viewport = Ext.create('Ext.container.Viewport', {
             layout: 'border',
             items : [{
@@ -23,10 +47,17 @@ Ext.application({
                 region: 'north',
                 height: 200,
                 allowNext : function(callback) {
-                    callback(Ext.getCmp('upload-form').getForm().isValid());
+                    if (jobId == null) {
+                        eavl.widgets.util.HighlightUtil.highlight(Ext.getCmp('upload-form'), eavl.widgets.util.HighlightUtil.ERROR_COLOR);
+                        callback(false);
+                        return;
+                    }
+
+                    callback(true);
                 }
             },{
                 xtype: 'container',
+                id : 'parent-container',
                 region: 'center',
                 style: {
                     'background-color' : 'white'
@@ -34,19 +65,19 @@ Ext.application({
                 layout : {
                     type: 'vbox',
                     align: 'center',
-                    pack: 'center'
+                    pack: 'start'
                 },
                 items: [{
                     xtype: 'form',
                     id: 'upload-form',
                     title: 'Choose CSV file to upload for processing',
                     width: 300,
+                    margin: '30 0 10 0',
                     bodyPadding : '30 10 10 10',
                     items : [{
                         xtype: 'filefield',
                         name: 'file',
                         anchor : '100%',
-                        allowBlank: false,
                         hideLabel: true,
 
                         listeners : {
@@ -61,18 +92,24 @@ Ext.application({
                                 form.submit({
                                     url: 'validation/uploadFile.do',
                                     scope : this,
+                                    params : {
+                                        jobId : jobId
+                                    },
                                     success: function(form, action) {
                                         if (!action.result.success) {
                                             Ext.Msg.alert('Error uploading file. ' + action.result.error);
                                             return;
                                         }
-                                        window.location.href = "validate.html";
+
+                                        var pdList = [];
+                                        Ext.each(action.result.data.parameterDetails, function(o) {
+                                            pdList.push(Ext.create('eavl.models.ParameterDetails', o));
+                                        });
+
+                                        showCSVGrid(action.result.data.id, pdList);
                                     },
                                     failure: function() {
                                         Ext.Msg.alert('Failure', 'File upload failed. Please try again in a few minutes.');
-                                    },
-                                    params: {
-                                        jobId : this.jobId
                                     },
                                     waitMsg: 'Uploading file, please wait...',
                                     waitTitle: 'Upload file'
