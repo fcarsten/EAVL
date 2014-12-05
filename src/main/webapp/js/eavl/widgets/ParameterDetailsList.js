@@ -10,6 +10,7 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
      * Adds the following config to Ext.grid.Panel
      * {
      *  parameterDetails : eavl.model.ParameterDetails[] [Optional] The set of parameter details to initialise this list with
+     *  sortFn : function(a,b) - Sorter to apply to this list
      * }
      *
      * Adds the following events
@@ -20,10 +21,17 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
     constructor : function(config) {
         this.emptyText = config.emptyText ? config.emptyText : "";
 
+        var sorters = [];
+        if (config.sortFn) {
+            sorters.push({
+                sorterFn : config.sortFn
+            });
+        }
 
         var store = Ext.create('Ext.data.Store', {
             model : 'eavl.models.ParameterDetails',
-            data : config.parameterDetails ? config.parameterDetails : []
+            data : config.parameterDetails ? config.parameterDetails : [],
+            sorters: sorters
         });
 
         Ext.apply(config, {
@@ -35,18 +43,16 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
                 flex : 1,
                 renderer : function(value, md, record) {
                     var emptyString = value === '';
+                    var status = record.calculateStatus();
 
-                    var totalDataPoints = record.get('totalNumeric') + record.get('totalText') + record.get('totalMissing');
-                    var percentageNumeric = (record.get('totalNumeric') * 100) / totalDataPoints;
                     var img = 'img/tick.png';
-                    var tip = 'This parameter contains more than 95% numeric values';
-
-                    if (percentageNumeric < 70) {
+                    var tip = 'This parameter contains more than 70% numeric values';
+                    if (status === eavl.models.ParameterDetails.STATUS_ERROR) {
                         img = 'img/exclamation.png';
-                        tip = 'This parameter contains less than 70% numeric values';
-                    } else if (percentageNumeric < 95) {
+                        tip = 'This parameter contains non numeric values.';
+                    } else if (status === eavl.models.ParameterDetails.STATUS_WARNING) {
                         img = 'img/error.png';
-                        tip = 'This parameter contains between 70% and 95% numeric values';
+                        tip = 'This parameter less than 70% numeric values.';
                     }
 
                     return Ext.DomHelper.markup({

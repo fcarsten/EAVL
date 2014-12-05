@@ -20,7 +20,7 @@
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/utils/HighlightUtil.js"></script>
-        <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderDragLink.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/plugins/ModelDragDrop.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>

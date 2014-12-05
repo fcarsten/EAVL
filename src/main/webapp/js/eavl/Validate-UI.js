@@ -27,20 +27,6 @@ Ext.application({
 
             //If we are just reloading the store, tell our widgets to update instead of recreating everything
             if (Ext.app.Application.viewport) {
-                Ext.app.Application.viewport.queryById('csvpanel').reloadParameterDetails(parameterDetails);
-
-                //Update parameter details panel
-                var pdpanel = Ext.app.Application.viewport.queryById('pdpanel');
-                var newPd = null;
-                if (pdpanel.parameterDetails) {
-                    var name = pdpanel.parameterDetails.get('name');
-                    Ext.each(parameterDetails, function(pd) {
-                       if (pd.get('name') === name) {
-                           newPd = pd;
-                       }
-                    });
-                }
-                pdpanel.showParameterDetails(newPd);
                 return;
             }
             Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
@@ -49,22 +35,40 @@ Ext.application({
                     xtype: 'workflowpanel',
                     region: 'north',
                     allowNext: function(callback) {
-                        //Delete trashed parameters before proceeding
-                        var ds = Ext.getCmp('trashpanel').getStore();
-                        if (ds.getCount() == 0) {
-                            callback(true);
+                        //Dont allow any text values in compositional params
+                        var cp = Ext.getCmp('comppanel');
+                        var badValue = false;
+                        cp.getStore().each(function(pd) {
+                            if (pd.calculateStatus() === eavl.models.ParameterDetails.STATUS_ERROR) {
+                                badValue = true;
+                                return false;
+                            }
+                        });
+                        if (badValue) {
+                            eavl.widgets.util.HighlightUtil.highlight(cp, eavl.widgets.util.HighlightUtil.ERROR_COLOR);
+                            callback(false);
                             return;
                         }
 
-                        var indexes = [];
+
+                        var ds = Ext.getCmp("trashpanel").getStore();
+                        var saveColNames = [];
                         for (var i = 0; i < ds.getCount(); i++) {
-                            indexes.push(ds.getAt(i).get('columnIndex'));
+                            saveColNames.push(ds.getAt(i).get('name'));
                         }
-                        eavl.widgets.SplashScreen.showLoadingSplash("Trashing parameters...");
+
+                        ds = Ext.getCmp("noncomppanel").getStore();
+                        var deleteColIndexes = [];
+                        for (var i = 0; i < ds.getCount(); i++) {
+                            deleteColIndexes.push(ds.getAt(i).get('columnIndex'));
+                        }
+
+                        eavl.widgets.SplashScreen.showLoadingSplash("Saving Selection...");
                         Ext.Ajax.request({
-                            url: 'validation/deleteParameters.do',
+                            url: 'validation/saveValidation.do',
                             params : {
-                                columnIndex : indexes
+                                deleteColIndex : deleteColIndexes,
+                                saveColName : saveColNames
                             },
                             callback : function(options, success, response) {
                                 eavl.widgets.SplashScreen.hideLoadingScreen();
@@ -94,55 +98,103 @@ Ext.application({
                     },
                     bodyPadding : '10 100 50 100',
                     items: [{
-                        id : 'trashpanel',
-                        xtype : 'pdlist',
-                        title : 'Trashed Parameters',
-                        width : 200,
+                        xtype: 'container',
+                        layout: {
+                            type: 'vbox',
+                            pack: 'start',
+                            align: 'stretch'
+                        },
+                        width : 300,
                         margin : '0 10 0 0',
+                        items: [{
+                            id : 'noncomppanel',
+                            xtype : 'pdlist',
+                            title : 'Non Compositional Parameters',
+                            flex: 1,
+                            sortFn : eavl.models.ParameterDetails.sortSeverityFn,
+                            viewConfig : {
+                                deferEmptyText : false,
+                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a column header here to exclude it from calculations but include it in the results</div></div>'
+                            },
+                            plugins : [{
+                                ptype : 'modeldnd',
+                                ddGroup : 'validate-dnd-pd',
+                                highlightBody : false,
+                                handleDrop : function(pdlist, pd) {
+                                    pdlist.getStore().add(pd);
+                                },
+                                handleDrag : function(pdlist, pd, source) {
+                                    if (source == Ext.getCmp("pdpanel")) {
+                                        return;
+                                    }
+                                    pdlist.getStore().remove(pd);
+                                }
+                            }]
+                        },{
+                            id : 'trashpanel',
+                            xtype : 'pdlist',
+                            title : 'Trashed Parameters',
+                            margin : '0 10 0 0',
+                            height: 200,
+                            sortFn : eavl.models.ParameterDetails.sortSeverityFn,
+                            viewConfig : {
+                                deferEmptyText : false,
+                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/trash.svg" width="100"/><br>Drag a column header here to delete</div></div>'
+                            },
+                            plugins : [{
+                                ptype : 'modeldnd',
+                                ddGroup : 'validate-dnd-pd',
+                                highlightBody : false,
+                                handleDrop : function(pdlist, pd) {
+                                    pdlist.getStore().add(pd);
+                                },
+                                handleDrag : function(pdlist, pd, source) {
+                                    if (source == Ext.getCmp("pdpanel")) {
+                                        return;
+                                    }
+                                    pdlist.getStore().remove(pd);
+                                }
+                            }]
+                        }]
+                    },{
+                        id : 'comppanel',
+                        xtype : 'pdlist',
+                        title : 'Compositional Parameters',
+                        width : 300,
+                        margin : '0 10 0 0',
+                        parameterDetails : parameterDetails,
+                        sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                         viewConfig : {
                             deferEmptyText : false,
-                            emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/trash.svg" width="100"/><br>Drag a column header here to delete</div></div>'
+                            emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner">No parameters could be extracted. Try uploading again.</div></div>'
                         },
                         plugins : [{
-                            ptype : 'headerdraglink',
-                            removeOnDrop : true,
-                            allowDrag : true,
-                            grid : function(pdlist) {return pdlist.ownerCt.queryById('csvpanel');},
-                            dropFn : function(pdlist, columnId) {
-                                var paramDetails = pdStore.getById(columnId)
-                                pdlist.getStore().add(paramDetails);
+                            ptype : 'modeldnd',
+                            ddGroup : 'validate-dnd-pd',
+                            highlightBody : false,
+                            handleDrop : function(pdlist, pd) {
+                                pdlist.getStore().add(pd);
                             },
-                            dragDropNewColFn : function(pdlist, csvGrid, parameterDetails) {
-                                pdlist.getStore().remove(parameterDetails);
-                                return csvGrid.generateColumnForParameterDetails(parameterDetails);
+                            handleDrag : function(pdlist, pd, source) {
+                                if (source == Ext.getCmp("pdpanel")) {
+                                    return;
+                                }
+                                pdlist.getStore().remove(pd);
                             }
                         }]
                     },{
-                        itemId : 'csvpanel',
-                        xtype: 'csvgrid',
-                        title : 'Uploaded data file',
-                        parameterDetails : parameterDetails,
-                        flex : 1,
-                        margin : '0 10 0 10',
-                        listeners : {
-                            parameterchanged : function(pdpanel, parameterDetails) {
-                                eavl.widgets.SplashScreen.showLoadingSplash('Reloading CSV Data...');
-                                pdStore.load();
-                            }
-                        }
-                    },{
-                        itemId : 'pdpanel',
+                        id : 'pdpanel',
                         xtype : 'pdpanel',
                         title : 'Parameter Details',
                         emptyText : 'Drag a column header into this panel to inspect it.',
                         flex : 1,
                         margin : '0 0 0 10',
                         plugins : [{
-                            ptype : 'headerdraglink',
-                            grid : function(pdpanel) {return pdpanel.ownerCt.queryById('csvpanel');},
-                            dropFn : function(pdpanel, columnId) {
-                                var paramDetails = pdStore.getById(columnId)
-                                pdpanel.showParameterDetails(paramDetails);
+                            ptype : 'modeldnd',
+                            ddGroup : 'validate-dnd-pd',
+                            highlightBody : false,
+                            handleDrop : function(pdpanel, pd) {
+                                pdpanel.showParameterDetails(pd);
                             }
                         }],
                         listeners : {

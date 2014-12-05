@@ -5,6 +5,29 @@
 Ext.define('eavl.models.ParameterDetails', {
     extend: 'Ext.data.Model',
 
+    statics : {
+        STATUS_GOOD : 0,
+        STATUS_WARNING : 1,
+        STATUS_ERROR : 2,
+
+        /**
+         * Compares two parameter details based on "status"
+         *
+         * @param a eavl.models.ParameterDetails First parameter to compare
+         * @param b eavl.models.ParameterDetails Second parameter to compare
+         */
+        sortSeverityFn : function(a, b) {
+            var aStatus = a.calculateStatus();
+            var bStatus = b.calculateStatus();
+
+            if (aStatus === bStatus) {
+                return a.get('name').localeCompare(b.get('name'));
+            }
+
+            return bStatus - aStatus;
+        }
+    },
+
     fields: [
         { name: 'name', type: 'string' }, //(ideally) unique name of this details
         { name: 'totalNumeric', type: 'int' }, //Total number of numeric values in this parameter
@@ -14,5 +37,25 @@ Ext.define('eavl.models.ParameterDetails', {
         { name: 'textValues', type: 'auto' } //Hashmap of totals keyed by each text (non numeric) value in this parameter
     ],
 
-    idProperty : 'name'
+    idProperty : 'name',
+
+    /**
+     * Calculates one of [STATUS_GOOD, STATUS_WARNING, STATUS_ERROR] for this ParameterDetails object.
+     *
+     */
+    calculateStatus : function() {
+
+        if (this.get('totalText') > 0) {
+            return eavl.models.ParameterDetails.STATUS_ERROR;
+        }
+
+        var totalDataPoints = this.get('totalNumeric') + this.get('totalMissing');
+        var percentageNumeric = (this.get('totalNumeric') * 100) / totalDataPoints;
+
+        if (percentageNumeric < 70) {
+            return eavl.models.ParameterDetails.STATUS_WARNING;
+        }
+
+        return eavl.models.ParameterDetails.STATUS_GOOD;
+    }
 });

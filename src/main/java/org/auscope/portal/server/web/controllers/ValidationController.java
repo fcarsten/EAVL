@@ -247,4 +247,32 @@ public class ValidationController extends BasePortalController {
 
         return generateJSONResponseMAV(true, null, "");
     }
+
+    @RequestMapping("/saveValidation.do")
+    public ModelAndView saveValidation(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+            @RequestParam("deleteColIndex") Integer[] delColIndexes,
+            @RequestParam("saveColNames") String[] saveColNames) {
+
+        OutputStream os = null;
+        InputStream is = null;
+
+        try {
+            EAVLJob job = jobService.getJobForSession(request, user);
+            os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
+            fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+
+            job.setSavedParameters(Sets.newHashSet(saveColNames));
+            jobService.save(job);
+        } catch (Exception ex) {
+            log.error("Error deleting columns: ", ex);
+            return generateJSONResponseMAV(false, null, "Unable to find/replace");
+        } finally {
+            IOUtils.closeQuietly(os);
+            IOUtils.closeQuietly(is);
+        }
+
+        return generateJSONResponseMAV(true, null, "");
+    }
 }
