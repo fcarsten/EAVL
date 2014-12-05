@@ -70,16 +70,21 @@ Ext.application({
                 items: [{
                     xtype: 'form',
                     id: 'upload-form',
-                    title: 'Choose CSV file to upload for processing',
                     width: 300,
                     margin: '30 0 10 0',
                     bodyPadding : '30 10 10 10',
                     items : [{
+                        xtype: 'label',
+                        style: {
+                            'font-size': '15px'
+                        },
+                        text: 'Choose CSV file to upload for processing'
+                    },{
                         xtype: 'filefield',
                         name: 'file',
                         anchor : '100%',
                         hideLabel: true,
-
+                        margin: '20 0 10 0',
                         listeners : {
                             change : function(ff, value, eOpts) {
                                 var formPanel = ff.findParentByType('form');
