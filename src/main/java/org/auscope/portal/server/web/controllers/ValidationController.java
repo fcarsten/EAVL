@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.cloud.StagedFile;
@@ -17,6 +16,7 @@ import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.eavl.ParameterDetails;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,15 +63,20 @@ public class ValidationController extends BasePortalController {
      */
     @RequestMapping("/uploadFile.do")
     public ModelAndView uploadFile(HttpServletRequest request,
-            HttpServletResponse response) {
+            @AuthenticationPrincipal PortalUser user,
+            @RequestParam(required=false,value="jobId") Integer jobId) {
 
 
         EAVLJob job;
         try {
-            job = jobService.createJobForSession(request);
+            if (jobId == null) {
+                job = jobService.createJobForSession(request);
+            } else {
+                job = jobService.getUserJobById(request, user, jobId);
+            }
         } catch (PortalServiceException ex) {
-            log.error("Error creating new job during upload file", ex);
-            return generateJSONResponseMAV(false);
+            log.error("Error creating/fetching job during upload file", ex);
+            return generateHTMLResponseMAV(false, null, "");
         }
 
         InputStream inputCsv = null;
@@ -96,6 +101,21 @@ public class ValidationController extends BasePortalController {
             inputCsv = fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             outputCsv = fss.writeFile(job, EAVLJobConstants.FILE_DATA_CSV);
             csvService.findReplace(inputCsv, outputCsv, 0, null, null, true); //This just culls empty lines and autogenerates a header (if missing)
+
+            IOUtils.closeQuietly(inputCsv);
+            IOUtils.closeQuietly(outputCsv);
+
+            inputCsv = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            List<ParameterDetails> pdList = csvService.extractParameterDetails(inputCsv);
+
+            ModelMap response = new ModelMap();
+            response.put("id", job.getId());
+            response.put("parameterDetails", pdList);
+
+            //We have to use a HTML response due to ExtJS's use of a hidden iframe for file uploads
+            //Failure to do this will result in the upload working BUT the user will also get prompted
+            //for a file download containing the encoded response from this function (which we don't want).
+            return generateHTMLResponseMAV(true, response, "");
         } catch (Exception ex) {
             log.error("Error uploading file", ex);
             return generateHTMLResponseMAV(false, null, "Error uploading file");
@@ -103,11 +123,6 @@ public class ValidationController extends BasePortalController {
             IOUtils.closeQuietly(inputCsv);
             IOUtils.closeQuietly(outputCsv);
         }
-
-        //We have to use a HTML response due to ExtJS's use of a hidden iframe for file uploads
-        //Failure to do this will result in the upload working BUT the user will also get prompted
-        //for a file download containing the encoded response from this function (which we don't want).
-        return generateHTMLResponseMAV(true, null, "");
     }
 
     @RequestMapping("/getParameterDetails.do")

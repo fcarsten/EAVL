@@ -26,13 +26,33 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                         type: 'vbox',
                         align: 'center'
                     },
-                    itemId: 'details'
+                    itemId: 'details',
+                    items: [{
+                        xtype: 'label',
+                        margin: '50 0 0 0',
+                        style: {
+                            color: '#888888',
+                            'font-style': 'italic',
+                            'font-size': '14.5px'
+                        },
+                        text: 'Click a point'
+                    },{
+                        xtype: 'label',
+                        margin: '2 0 0 0',
+                        style: {
+                            color: '#888888',
+                            'font-style': 'italic',
+                            'font-size': '14.5px'
+                        },
+                        text: 'for more information'
+                    }]
                 },{
                     xtype : '3dscatterplot',
                     itemId : 'plot',
                     valueAttr : 'estimate',
                     valueScale : 'log',
                     pointSize: 4,
+                    allowSelection : true,
                     flex: 1,
                     listeners: {
                         select: function(plot, data) {
@@ -45,30 +65,52 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 fieldLabel: plot.xLabel,
+                                margin : '10 0 0 0',
                                 value: data.x
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 fieldLabel: plot.yLabel,
+                                margin : '10 0 0 0',
                                 value: data.y
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 fieldLabel: plot.zLabel,
+                                margin : '10 0 0 0',
                                 value: data.z
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 fieldLabel: 'Estimate',
+                                margin : '10 0 0 0',
                                 value: data.estimate
                             });
                         },
                         deselect: function(plot) {
                             var parent = plot.ownerCt.down('#details');
 
-                            if (parent.items.getCount() !== 0) {
-                                parent.removeAll(true);
-                            }
+                            parent.removeAll(true);
+                            parent.add({
+                                xtype: 'label',
+                                margin: '50 0 0 0',
+                                style: {
+                                    color: '#888888',
+                                    'font-style': 'italic',
+                                    'font-size': '14.5px'
+                                },
+                                text: 'Click a point'
+                            });
+                            parent.add({
+                                xtype: 'label',
+                                margin: '2 0 0 0',
+                                style: {
+                                    color: '#888888',
+                                    'font-style': 'italic',
+                                    'font-size': '14.5px'
+                                },
+                                text: 'for more information'
+                            });
                         }
                     }
                 }]
