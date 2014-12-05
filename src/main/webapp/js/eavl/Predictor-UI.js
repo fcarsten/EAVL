@@ -5,7 +5,7 @@ Ext.application({
     name : 'eavl-imputation',
 
     init: function() {
-        eavl.widgets.SplashScreen.showLoadingSplash('Loading Imputation setup, please stand by ...');
+        eavl.widgets.SplashScreen.showLoadingSplash('Loading predictor setup, please stand by ...');
     },
 
     viewport : null,
@@ -18,6 +18,11 @@ Ext.application({
         var initError = function() {
             eavl.widgets.SplashScreen.hideLoadingScreen();
             eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+        };
+
+        var initNotReady = function(message, url) {
+            eavl.widgets.SplashScreen.hideLoadingScreen();
+            eavl.widgets.SplashScreen.showErrorSplash(message + Ext.util.Format.format('<br><a href="{0}">Continue</a>', url));
         };
 
         var initSuccess = function(parameterDetails) {
@@ -54,16 +59,10 @@ Ext.application({
                             return;
                         }
 
-                        var ds = Ext.getCmp('saved-params').getStore();
-                        var savedNames = [];
-                        for (var i = 0; i < ds.getCount(); i++) {
-                            savedNames.push(ds.getAt(i).get('name'));
-                        }
                         eavl.widgets.SplashScreen.showLoadingSplash("Saving predictor...");
                         Ext.Ajax.request({
-                            url: 'imputation/saveAndSubmitImputation.do',
+                            url: 'predictor/savePrediction.do',
                             params : {
-                                savedColName : savedNames,
                                 predictorCutoff : pdfCutoff,
                                 predictorName : predictorPd.get('name'),
                                 holeIdName : holeIdPd.get('name')
@@ -95,54 +94,26 @@ Ext.application({
                         pack : 'center'
                     },
                     items: [{
-                        xtype : 'container',
+                        xtype : 'pdlist',
+                        title : 'Available Parameters',
                         width: 300,
-                        layout: 'vbox',
                         margins: '0 10 0 10',
-                        items: [{
-                            xtype : 'pdlist',
-                            title : 'Available Parameters',
-                            width: '100%',
-                            flex : 1,
-                            parameterDetails : parameterDetails,
-                            plugins: [{
-                                ptype : 'modeldnd',
-                                ddGroup : 'set-prediction-pd',
-                                highlightBody : false,
-                                handleDrop : function(pdlist, pd) {
-                                    pdlist.getStore().add(pd);
-                                },
-                                handleDrag : function(pdlist, pd) {
-                                    pdlist.getStore().remove(pd);
-                                }
-                            }],
-                            viewConfig : {
-                                deferEmptyText : false,
-                                emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner">You will want at least three parameters here to serve as proxies for the predictor.</div></div>'
+                        parameterDetails : parameterDetails,
+                        plugins: [{
+                            ptype : 'modeldnd',
+                            ddGroup : 'set-prediction-pd',
+                            highlightBody : false,
+                            handleDrop : function(pdlist, pd) {
+                                pdlist.getStore().add(pd);
+                            },
+                            handleDrag : function(pdlist, pd) {
+                                pdlist.getStore().remove(pd);
                             }
-                        },{
-                            xtype : 'pdlist',
-                            title : 'Saved Parameters',
-                            id : 'saved-params',
-                            width: '100%',
-                            height : 250,
-                            margins: '10 0 0 0',
-                            plugins: [{
-                                ptype : 'modeldnd',
-                                ddGroup : 'set-prediction-pd',
-                                highlightBody : false,
-                                handleDrop : function(pdlist, pd) {
-                                    pdlist.getStore().add(pd);
-                                },
-                                handleDrag : function(pdlist, pd) {
-                                    pdlist.getStore().remove(pd);
-                                }
-                            }],
-                            viewConfig : {
-                                deferEmptyText : false,
-                                emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a parameter here to save it<br>(But not use it in any calculations)</div></div>'
-                            }
-                        }]
+                        }],
+                        viewConfig : {
+                            deferEmptyText : false,
+                            emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner">You will want at least three parameters here to serve as proxies for the predictor.</div></div>'
+                        }
                     },{
                         xtype: 'container',
                         flex: 1,
@@ -224,7 +195,7 @@ Ext.application({
 
         var pdStore = Ext.create('Ext.data.Store', {
             model : 'eavl.models.ParameterDetails',
-            autoLoad : true,
+            autoLoad : false,
             proxy : {
                 type : 'ajax',
                 url : 'validation/getParameterDetails.do',
@@ -243,6 +214,46 @@ Ext.application({
                 }
             }
         });
+
+        //Before loading
+        Ext.Ajax.request({
+            url: 'predictor/getImputationStatus.do',
+            callback: function(options, success, response) {
+                if (!success) {
+                    initError();
+                    return;
+                }
+
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (!responseObj.success) {
+                    initError();
+                    return;
+                }
+
+                if (responseObj.data == true) {
+                    pdStore.load();
+                    return;
+                }
+
+                //At this point imputation hasn't been run/hasn't finished
+                if (responseObj.msg === "nodata") {
+                    initNotReady("There's no record of an imputation task running for this job. Did you complete the validation steps?", "validate.html");
+                    return;
+                }
+                if (responseObj.msg === "nojob") {
+                    initNotReady("There's no job selected. Did you upload a file?", "upload.html");
+                    return;
+                }
+                if (responseObj.msg === "failed") {
+                    initNotReady("Imputation failed. Did you remove all the non compositional parameters? You can try resubmitting.", "validate.html");
+                    return;
+                }
+
+                //OK imputation is running - shift to loading page
+                window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.msg, next: 'predictor.html'});
+            }
+        });
+
     }
 
 });

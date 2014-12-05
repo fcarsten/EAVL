@@ -3,7 +3,7 @@
 
 <html xmlns:v="urn:schemas-microsoft-com:vml">
     <head>
-        <title>EAVL - Imputation</title>
+        <title>EAVL - Prediction</title>
         
         <jsp:include page="../../jsimports.htm"/>
         
@@ -12,7 +12,7 @@
         <script src="portal-core/js/portal/util/UnimplementedFunction.js" type="text/javascript"></script>
         
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
-        <link rel="stylesheet" type="text/css" href="js/eavl/Imputation-UI.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/Predictor-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
         
@@ -25,7 +25,7 @@
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/BaseParameterDetailsChart.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.js"></script>
-        <script type="text/javascript" src="js/eavl/Imputation-UI.js"></script>
+        <script type="text/javascript" src="js/eavl/Predictor-UI.js"></script>
     </head>
     <body>
         

@@ -154,6 +154,35 @@ public class ValidationController extends BasePortalController {
         }
     }
 
+    @RequestMapping("/getCompositionalParameterDetails.do")
+    public ModelAndView getCompositionalParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+            @RequestParam(required=false,value="file") String file,
+            @RequestParam(required=false,value="jobId") Integer jobId) {
+        try {
+            EAVLJob job;
+            if (jobId != null) {
+                job = jobService.getUserJobById(request, user, jobId);
+            } else {
+                job = jobService.getJobForSession(request, user);
+            }
+
+            String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
+            InputStream csvData = fss.readFile(job, fileToRead);
+
+            List<ParameterDetails> pds = csvService.extractParameterDetails(csvData);
+            for (int i = pds.size() - 1; i >= 0; i--) {
+                if (job.getSavedParameters().contains(pds.get(i).getName())) {
+                    pds.remove(i);
+                }
+            }
+
+            return generateJSONResponseMAV(true, pds, "");
+        } catch (Exception ex) {
+            log.warn("Unable to get parameter details: ", ex);
+            return generateJSONResponseMAV(false, null, "Error reading file");
+        }
+    }
+
     @RequestMapping("/getParameterValues.do")
     public ModelAndView getParameterValues(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("columnIndex") int columnIndex) {
