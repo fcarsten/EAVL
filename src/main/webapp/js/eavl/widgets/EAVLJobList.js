@@ -45,7 +45,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
                     case eavl.models.EAVLJob.STATUS_UNSUBMITTED:
                         img = 'img/edit.png';
                         tip = 'This job hasn\'t been submitted for imputation.';
-                        imgLink = "imputation.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
+                        imgLink = "validate.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_KDE_ERROR:
                         img = 'img/exclamation.png';
@@ -55,12 +55,17 @@ Ext.define('eavl.widgets.EAVLJobList', {
                     case eavl.models.EAVLJob.STATUS_IMPUTE_ERROR:
                         img = 'img/exclamation.png';
                         tip = 'There was an error during the imputation calculations.';
-                        imgLink = "imputation.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
+                        imgLink = "validate.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_IMPUTING:
                         img = 'img/loading-bars.svg';
                         tip = 'This job is currently undergoing imputation.';
-                        imgLink = "taskwait.html?" + Ext.Object.toQueryString({taskId: record.get('imputationTaskId'), next: 'setproxy.html'});
+                        imgLink = "taskwait.html?" + Ext.Object.toQueryString({taskId: record.get('imputationTaskId'), next: 'predictor.html'});
+                        break;
+                    case eavl.models.EAVLJob.STATUS_PREDICTOR:
+                        img = 'img/edit.png';
+                        tip = 'This has finished imputation and is awaiting predictor selection.';
+                        imgLink = "predictor.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_PROXY:
                         img = 'img/edit.png';
