@@ -40,6 +40,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
 
     _handleBrush : function(fireEvent) {
         if (this.d3.brush.empty()) {
+            this.d3.brushgroup.selectAll('.brush-text').attr("x", 9999);
             this.fireEvent('cutoffchanged', this, null);
             return;
         }
@@ -49,8 +50,12 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
             this.d3.brush.extent([value, this.d3.x.domain()[1]]);
         }
 
+        var x = this.d3.brushgroup.selectAll(".extent").attr("x");
+
         this.d3.brushgroup.selectAll(".extent").attr("width", 9999);
         this.d3.brushgroup.selectAll('.resize.w rect').attr("width", 9999);
+
+        this.d3.brushgroup.selectAll('.brush-text').attr("x", Number(x) + 100);
 
         if (fireEvent) {
             this.fireEvent('cutoffchanged', this, value);
@@ -156,7 +161,11 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
                         //.attr("width", 9999)
                         .attr("height", height);
 
-
+                    me.d3.brushgroup.append("text")
+                    .attr("x", 9999) //initially off the side
+                    .attr("y", 0 + (margin.top / 2) +  170)
+                    .attr("class", "brush-text")
+                    .text("High values");
                 }
 
                 me.d3svg.append("text")
