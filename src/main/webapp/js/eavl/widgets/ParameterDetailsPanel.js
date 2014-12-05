@@ -143,7 +143,10 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                 },{
                     itemId : 'prob-density-chart',
                     region: 'center',
-                    xtype : 'pdfchart'
+                    xtype : 'pdfchart',
+                    targetChartWidth: 700,
+                    targetChartHeight: 400,
+                    preserveAspectRatio: true
                 }]
             }]
         });

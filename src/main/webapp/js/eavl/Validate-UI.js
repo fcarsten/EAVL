@@ -27,8 +27,37 @@ Ext.application({
 
             //If we are just reloading the store, tell our widgets to update instead of recreating everything
             if (Ext.app.Application.viewport) {
+
+                var updatePdList = function(pdlist, parameterDetails) {
+                    var ds = pdlist.getStore();
+                    Ext.Array.each(parameterDetails, function(pd) {
+                        var existingPd = ds.getById(pd.get("name"));
+                        if (existingPd) {
+                            ds.remove(existingPd);
+                            ds.add(pd);
+                        }
+                    });
+                };
+
+                //we need to find all of our parameter details (wherever they are) and update them
+                updatePdList(Ext.getCmp("trashpanel"), parameterDetails);
+                updatePdList(Ext.getCmp("noncomppanel"), parameterDetails);
+                updatePdList(Ext.getCmp("comppanel"), parameterDetails);
+
+                //Need to also update our PD panel
+                var pdPanel = Ext.getCmp("pdpanel");
+                var name = pdPanel.parameterDetails.get("name");
+                Ext.Array.each(parameterDetails, function(pd) {
+                    if (pd.get("name") === name) {
+                        pdPanel.showParameterDetails(pd);
+                        return false;
+                    }
+                });
+
                 return;
             }
+
+
             Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
                 layout: 'border',
                 items: [{
