@@ -143,7 +143,7 @@ Ext.application({
                             sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                             viewConfig : {
                                 deferEmptyText : false,
-                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a column header here to exclude it from calculations but include it in the final results.</div></div>'
+                                emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a column header here to exclude it from calculations but include it in the final results.</div></div>'
                             },
                             plugins : [{
                                 ptype : 'modeldnd',

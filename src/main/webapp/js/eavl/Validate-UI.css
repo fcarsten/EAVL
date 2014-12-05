@@ -1,3 +1,18 @@
+.save-empty-container {
+    width: 95%;
+    position:absolute;
+    height: 95%;
+}
+
+.save-empty-container-inner {
+    text-align: center;
+    height : 160px;
+    position:absolute;
+    top:50%;
+    margin-top:-50px;
+    width: 100%;
+}
+
 .trash-empty-container {
     width: 95%;
     position:absolute;
@@ -6,10 +21,10 @@
 
 .trash-empty-container-inner {
     text-align: center;
-    height : 160px;
+    height : 120px;
+    margin-top: 15px;
     position:absolute;
-    top:50%;
-    margin-top:-50px;
+    width: 100%;
 }
 
 .trash-empty-image {
