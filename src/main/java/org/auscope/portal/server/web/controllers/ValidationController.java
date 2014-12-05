@@ -170,9 +170,11 @@ public class ValidationController extends BasePortalController {
             InputStream csvData = fss.readFile(job, fileToRead);
 
             List<ParameterDetails> pds = csvService.extractParameterDetails(csvData);
-            for (int i = pds.size() - 1; i >= 0; i--) {
-                if (job.getSavedParameters().contains(pds.get(i).getName())) {
-                    pds.remove(i);
+            if (job.getSavedParameters() != null) {
+                for (int i = pds.size() - 1; i >= 0; i--) {
+                    if (job.getSavedParameters().contains(pds.get(i).getName())) {
+                        pds.remove(i);
+                    }
                 }
             }
 
