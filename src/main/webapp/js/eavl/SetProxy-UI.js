@@ -89,9 +89,10 @@ Ext.application({
                     },
                     items: [{
                         xtype : 'pdlist',
-                        title : 'Available Parameters',
+                        title : 'Compositional Parameters',
                         width: 300,
                         parameterDetails : records,
+                        margins: '0 10 0 10',
                         plugins: [{
                             ptype : 'modeldnd',
                             ddGroup : 'set-proxy-pd',
@@ -119,16 +120,19 @@ Ext.application({
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 1',
+                            margins: '0 10 0 0',
                             id: 'setproxy-1'
                         },{
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 2',
+                            margins: '0 10 0 0',
                             id: 'setproxy-2'
                         },{
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 3',
+                            margins: '0 10 0 0',
                             id: 'setproxy-3'
                         }]
                     }]
@@ -140,7 +144,7 @@ Ext.application({
             model : 'eavl.models.ParameterDetails',
             proxy : {
                 type : 'ajax',
-                url : 'validation/getParameterDetails.do',
+                url : 'validation/getCompositionalParameterDetails.do',
                 reader : {
                     type : 'json',
                     root : 'data'
@@ -159,7 +163,7 @@ Ext.application({
 
         //Before loading
         Ext.Ajax.request({
-            url: 'setproxy/getImputationStatus.do',
+            url: 'predictor/getImputationStatus.do',
             callback: function(options, success, response) {
                 if (!success) {
                     initError();
@@ -254,7 +258,28 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 flex: 1,
                 targetChartWidth: 400,
                 targetChartHeight: 400,
-                preserveAspectRatio: true
+                preserveAspectRatio: true,
+                plugins: [{
+                    ptype : 'modeldnd',
+                    ddGroup : 'set-proxy-pd',
+                    highlightBody : false,
+                    handleDrop : function(proxypanel, pd, source) {
+                        var pdfield = proxypanel.ownerCt.down("#pdfield");
+
+                        //Swap if we already have a value
+                        if (pdfield.getValue()) {
+                            var currentValue = pdfield.getValue();
+                            source.getStore().add(currentValue);
+                        }
+                        pdfield.setValue(pd);
+
+                        proxypanel.showParameterDetails(pd);
+                    },
+                    handleDrag : function(pdfield, pd) {
+                        pdfield.reset();
+                        pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
+                    }
+                }]
             }]
         });
 
