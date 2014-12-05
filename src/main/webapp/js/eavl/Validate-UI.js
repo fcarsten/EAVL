@@ -52,20 +52,20 @@ Ext.application({
 
 
                         var ds = Ext.getCmp("trashpanel").getStore();
-                        var saveColNames = [];
-                        for (var i = 0; i < ds.getCount(); i++) {
-                            saveColNames.push(ds.getAt(i).get('name'));
-                        }
-
-                        ds = Ext.getCmp("noncomppanel").getStore();
                         var deleteColIndexes = [];
                         for (var i = 0; i < ds.getCount(); i++) {
                             deleteColIndexes.push(ds.getAt(i).get('columnIndex'));
                         }
 
+                        ds = Ext.getCmp("noncomppanel").getStore();
+                        var saveColNames = [];
+                        for (var i = 0; i < ds.getCount(); i++) {
+                            saveColNames.push(ds.getAt(i).get('name'));
+                        }
+
                         eavl.widgets.SplashScreen.showLoadingSplash("Saving Selection...");
                         Ext.Ajax.request({
-                            url: 'validation/saveValidation.do',
+                            url: 'validation/saveValidationSubmitImputation.do',
                             params : {
                                 deleteColIndex : deleteColIndexes,
                                 saveColName : saveColNames
@@ -114,7 +114,7 @@ Ext.application({
                             sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                             viewConfig : {
                                 deferEmptyText : false,
-                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a column header here to exclude it from calculations but include it in the results</div></div>'
+                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a column header here to exclude it from calculations but include it in the final results.</div></div>'
                             },
                             plugins : [{
                                 ptype : 'modeldnd',
@@ -134,12 +134,12 @@ Ext.application({
                             id : 'trashpanel',
                             xtype : 'pdlist',
                             title : 'Trashed Parameters',
-                            margin : '0 10 0 0',
+                            margin : '10 0 0 0',
                             height: 200,
                             sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                             viewConfig : {
                                 deferEmptyText : false,
-                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/trash.svg" width="100"/><br>Drag a column header here to delete</div></div>'
+                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/trash.svg" width="100"/><br>Drag a column header here to delete it.</div></div>'
                             },
                             plugins : [{
                                 ptype : 'modeldnd',
@@ -161,7 +161,6 @@ Ext.application({
                         xtype : 'pdlist',
                         title : 'Compositional Parameters',
                         width : 300,
-                        margin : '0 10 0 0',
                         parameterDetails : parameterDetails,
                         sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                         viewConfig : {

@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
+import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.server.security.oauth2.PortalUser;
@@ -19,6 +20,9 @@ import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.eavl.ParameterDetails;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
+import org.auscope.portal.server.web.service.JobTaskService;
+import org.auscope.portal.server.web.service.jobtask.ImputationCallable;
+import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -43,12 +47,16 @@ public class ValidationController extends BasePortalController {
     private FileStagingService fss;
     private CSVService csvService;
     private EAVLJobService jobService;
+    private JobTaskService jobTaskService;
+    private ConditionalProbabilityWpsClient wpsClient;
 
     @Autowired
-    public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService) {
+    public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService, JobTaskService jobTaskService, ConditionalProbabilityWpsClient wpsClient) {
         this.fss = fss;
         this.csvService = csvService;
         this.jobService = jobService;
+        this.jobTaskService = jobTaskService;
+        this.wpsClient = wpsClient;
     }
 
     /**
@@ -248,10 +256,10 @@ public class ValidationController extends BasePortalController {
         return generateJSONResponseMAV(true, null, "");
     }
 
-    @RequestMapping("/saveValidation.do")
-    public ModelAndView saveValidation(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    @RequestMapping("/saveValidationSubmitImputation.do")
+    public ModelAndView saveValidationSubmitImputation(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("deleteColIndex") Integer[] delColIndexes,
-            @RequestParam("saveColNames") String[] saveColNames) {
+            @RequestParam("saveColName") String[] saveColNames) {
 
         OutputStream os = null;
         InputStream is = null;
@@ -263,8 +271,14 @@ public class ValidationController extends BasePortalController {
             csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
             fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
 
+            JobTask newTask = new JobTask(new ImputationCallable(job, wpsClient, csvService, fss), job);
+            String taskId = jobTaskService.submit(newTask);
+
+            job.setImputationTaskId(taskId);
             job.setSavedParameters(Sets.newHashSet(saveColNames));
             jobService.save(job);
+
+            return generateJSONResponseMAV(true, taskId, "");
         } catch (Exception ex) {
             log.error("Error deleting columns: ", ex);
             return generateJSONResponseMAV(false, null, "Unable to find/replace");
@@ -272,7 +286,5 @@ public class ValidationController extends BasePortalController {
             IOUtils.closeQuietly(os);
             IOUtils.closeQuietly(is);
         }
-
-        return generateJSONResponseMAV(true, null, "");
     }
 }
