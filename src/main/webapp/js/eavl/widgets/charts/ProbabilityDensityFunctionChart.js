@@ -109,7 +109,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
             y.domain(d3.extent(data, function(d) { return d[1]; }));
 
             //Either update existing line or create new one
-            var title = Ext.util.Format.format('Probability Density Function for "{0}"', parameterDetails.get('name'));
+            var title = Ext.util.Format.format('Probability Density Function for log({0})', parameterDetails.get('name'));
             if (update) {
                 var svg = me.d3svg.transition();
 
@@ -141,7 +141,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
                     .attr("y", 6)
                     .attr("dy", ".71em")
                     .style("text-anchor", "end")
-                    .text("log(density)");
+                    .text("density");
 
                 g.append("path")
                     .datum(data)
