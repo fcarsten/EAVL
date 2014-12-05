@@ -103,7 +103,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                         disableSelection : true,
                         viewConfig : {
                             deferEmptyText : false,
-                            emptyText : '<div class="text-empty-container"><div class="text-empty-container-inner"><img src="img/check.svg" width="100"/><br>No missing or invalid values!</div></div>'
+                            emptyText : '<div class="text-empty-container"><div class="text-empty-container-inner"><img src="img/check.svg" width="100"/><br>No invalid values!</div></div>'
                         },
                         listeners : {
                             cellclick : Ext.bind(this._handleTextValueClick, this)
@@ -167,14 +167,14 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     _handleTextValueClick : function(grid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
         Ext.MessageBox.show({
             title: 'Find and Replace',
-            msg: Ext.util.Format.format('Replace <b>{0}</b> with what:', record.get('name') === '' ? '<i>(No sample)</i>' : record.get('name')),
+            msg: Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to enter a missing value', record.get('name') === '' ? '<i>(No sample)</i>' : record.get('name')),
             animateTarget: grid.getEl(),
             icon: Ext.window.MessageBox.QUESTION,
             prompt: true,
             scope : this,
             buttons : Ext.MessageBox.OK,
             fn : function(buttonId, text, opt) {
-                if (buttonId === 'ok' && text) {
+                if (buttonId === 'ok') {
                     this._handleFindReplace(record.get('name'), text);
                 }
             }
@@ -245,10 +245,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         values = parameterDetails.get('textValues');
         for (textValue in values) {
             data.push({name : textValue, total : values[textValue]});
-        }
-
-        if (parameterDetails.get('totalMissing') > 0) {
-            data.push({name : '', total : parameterDetails.get('totalMissing')});
         }
 
         this.textValuesStore.loadData(data);
