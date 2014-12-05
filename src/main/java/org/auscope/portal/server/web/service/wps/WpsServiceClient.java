@@ -53,18 +53,18 @@ public class WpsServiceClient {
 		return conProbClient.hashCode();
 	}
 
-	/**
-	 * @param nCols
-	 * @param dataStr
-	 * @return
-	 * @throws WPSClientException
-	 * @throws IOException
-	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#imputationNA(int, java.lang.String)
-	 */
-	public double[][] imputationNA(int nCols, String dataStr)
-			throws WPSClientException, IOException {
-		return conProbClient.imputationNA(nCols, dataStr);
-	}
+//	/**
+//	 * @param nCols
+//	 * @param dataStr
+//	 * @return
+//	 * @throws WPSClientException
+//	 * @throws IOException
+//	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#imputationNA(int, java.lang.String)
+//	 */
+//	public double[][] imputationNA(int nCols, String dataStr)
+//			throws WPSClientException, IOException {
+//		return conProbClient.imputationNA(nCols, dataStr);
+//	}
 
 	/**
 	 * @param data
