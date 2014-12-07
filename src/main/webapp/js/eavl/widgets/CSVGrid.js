@@ -42,6 +42,11 @@ Ext.define('eavl.widgets.CSVGrid', {
             proxyParams['file'] = config.file;
         }
 
+        //Sort our columns so that "bad" columns are first
+        if (this.sortColumns) {
+            this.parameterDetails = Ext.Array.sort(this.parameterDetails, eavl.models.ParameterDetails.sortSeverityFn);
+        }
+
         var fields = [];
         var columns = [];
         for (var i = 0; i < this.parameterDetails.length; i++) {
@@ -50,37 +55,6 @@ Ext.define('eavl.widgets.CSVGrid', {
 
             fields.push(name);
             columns.push(this.generateColumnForParameterDetails(pd));
-        }
-
-        //Sort our columns so that "bad" columns are first
-        if (this.sortColumns) {
-            columns = Ext.Array.sort(columns, function(a, b) {
-                var aVal = 2;
-                var bVal = 2;
-                if (a.text.indexOf('error.png') >= 0) {
-                    aVal = 1;
-                } else if (a.text.indexOf('exclamation.png') >= 0) {
-                    aVal = 0;
-                }
-
-                if (b.text.indexOf('error.png') >= 0) {
-                    bVal = 1;
-                } else if (b.text.indexOf('exclamation.png') >= 0) {
-                    bVal = 0;
-                }
-
-                if (aVal != bVal) {
-                    return aVal - bVal;
-                }
-
-                if (a.itemId > b.itemId) {
-                    return 1;
-                }
-                if (a.itemId < b.itemId) {
-                    return -1;
-                }
-                return 0;
-            });
         }
 
         var csvStore = Ext.create('Ext.data.Store', {
@@ -175,17 +149,17 @@ Ext.define('eavl.widgets.CSVGrid', {
     },
 
     _parameterDetailsToColHeader : function(pd) {
-        var totalDataPoints = pd.get('totalNumeric') + pd.get('totalText') + pd.get('totalMissing');
-        var percentageNumeric = (pd.get('totalNumeric') * 100) / totalDataPoints;
-        var img = 'img/tick.png';
-        var tip = 'This parameter contains more than 95% numeric values';
+        var status = pd.calculateStatus();
 
-        if (percentageNumeric < 70) {
+        var img = 'img/tick.png';
+        var tip = 'This parameter contains more than 70% numeric values';
+
+        if (status === eavl.models.ParameterDetails.STATUS_ERROR) {
             img = 'img/exclamation.png';
-            tip = 'This parameter contains less than 70% numeric values';
-        } else if (percentageNumeric < 95) {
+            tip = 'This parameter contains non numeric values.';
+        } else if (status === eavl.models.ParameterDetails.STATUS_WARNING) {
             img = 'img/error.png';
-            tip = 'This parameter contains between 70% and 95% numeric values';
+            tip = 'This parameter less than 70% numeric values.';
         }
 
         return Ext.util.Format.format('<img data-qtip="{2}" class="csv-grid-header-icon" style="vertical-align:middle;margin-bottom:4px;" src="{0}"/>{1}', img, pd.get('name'), tip);

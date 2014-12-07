@@ -49,6 +49,7 @@ public class ResultsController extends BasePortalController {
     public static final String STATUS_KDE_ERROR = "kde-error";
     public static final String STATUS_IMPUTE_ERROR = "impute-error";
     public static final String STATUS_IMPUTING = "imputing";
+    public static final String STATUS_PREDICTOR = "predictor";
     public static final String STATUS_PROXY = "proxy";
     public static final String STATUS_SUBMITTED = "submitted";
     public static final String STATUS_DONE = "done";
@@ -77,7 +78,11 @@ public class ResultsController extends BasePortalController {
         } else if (jobTaskService.isExecuting(job.getImputationTaskId())) {
             status = STATUS_IMPUTING;
         } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_CSV)) {
-            status = STATUS_PROXY;
+            if (job.getPredictionParameter() == null) {
+                status = STATUS_PREDICTOR;
+            } else {
+                status = STATUS_PROXY;
+            }
         } else if (job.getImputationTaskId() != null) {
             status = STATUS_IMPUTE_ERROR;
         } else {

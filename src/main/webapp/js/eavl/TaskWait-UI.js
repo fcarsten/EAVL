@@ -22,7 +22,7 @@ Ext.application({
         var next = urlParams.next ? urlParams.next : '';
 
         var taskName = "???";
-        if (next.endsWith("setproxy.html")) {
+        if (next.endsWith("predictor.html")) {
             taskName = "Imputing missing samples";
         } else if (next.endsWith("results.html")) {
             taskName = "Performing Calculations";

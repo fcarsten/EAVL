@@ -30,3 +30,10 @@
     -ms-user-select: none;
     user-select: none;
 }
+
+.brush-text {
+    stroke: #888888;
+    fill: #888888;
+    font-family: "Helvetica Neue",Arial,Verdana,sans-serif;
+    font-size: 24px;
+}

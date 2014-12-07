@@ -19,6 +19,10 @@ import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.eavl.ParameterDetails;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
+import org.auscope.portal.server.web.service.JobTaskService;
+import org.auscope.portal.server.web.service.WpsService;
+import org.auscope.portal.server.web.service.jobtask.ImputationCallable;
+import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -43,12 +47,16 @@ public class ValidationController extends BasePortalController {
     private FileStagingService fss;
     private CSVService csvService;
     private EAVLJobService jobService;
+    private JobTaskService jobTaskService;
+    private WpsService wpsService;
 
     @Autowired
-    public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService) {
+    public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService, JobTaskService jobTaskService, WpsService wpsService) {
         this.fss = fss;
         this.csvService = csvService;
         this.jobService = jobService;
+        this.jobTaskService = jobTaskService;
+        this.wpsService = wpsService;
     }
 
     /**
@@ -140,6 +148,37 @@ public class ValidationController extends BasePortalController {
             String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
             InputStream csvData = fss.readFile(job, fileToRead);
             return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
+        } catch (Exception ex) {
+            log.warn("Unable to get parameter details: ", ex);
+            return generateJSONResponseMAV(false, null, "Error reading file");
+        }
+    }
+
+    @RequestMapping("/getCompositionalParameterDetails.do")
+    public ModelAndView getCompositionalParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+            @RequestParam(required=false,value="file") String file,
+            @RequestParam(required=false,value="jobId") Integer jobId) {
+        try {
+            EAVLJob job;
+            if (jobId != null) {
+                job = jobService.getUserJobById(request, user, jobId);
+            } else {
+                job = jobService.getJobForSession(request, user);
+            }
+
+            String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
+            InputStream csvData = fss.readFile(job, fileToRead);
+
+            List<ParameterDetails> pds = csvService.extractParameterDetails(csvData);
+            if (job.getSavedParameters() != null) {
+                for (int i = pds.size() - 1; i >= 0; i--) {
+                    if (job.getSavedParameters().contains(pds.get(i).getName())) {
+                        pds.remove(i);
+                    }
+                }
+            }
+
+            return generateJSONResponseMAV(true, pds, "");
         } catch (Exception ex) {
             log.warn("Unable to get parameter details: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");
@@ -246,5 +285,37 @@ public class ValidationController extends BasePortalController {
         }
 
         return generateJSONResponseMAV(true, null, "");
+    }
+
+    @RequestMapping("/saveValidationSubmitImputation.do")
+    public ModelAndView saveValidationSubmitImputation(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+            @RequestParam("deleteColIndex") Integer[] delColIndexes,
+            @RequestParam("saveColName") String[] saveColNames) {
+
+        OutputStream os = null;
+        InputStream is = null;
+
+        try {
+            EAVLJob job = jobService.getJobForSession(request, user);
+            os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
+            fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+
+            JobTask newTask = new JobTask(new ImputationCallable(job, wpsService.getWpsClient(), csvService, fss), job);
+            String taskId = jobTaskService.submit(newTask);
+
+            job.setImputationTaskId(taskId);
+            job.setSavedParameters(Sets.newHashSet(saveColNames));
+            jobService.save(job);
+
+            return generateJSONResponseMAV(true, taskId, "");
+        } catch (Exception ex) {
+            log.error("Error deleting columns: ", ex);
+            return generateJSONResponseMAV(false, null, "Unable to find/replace");
+        } finally {
+            IOUtils.closeQuietly(os);
+            IOUtils.closeQuietly(is);
+        }
     }
 }

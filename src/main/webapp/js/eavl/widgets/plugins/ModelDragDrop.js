@@ -63,6 +63,9 @@ Ext.define('eavl.widgets.plugins.ModelDragDrop', {
                 }
             },
             notifyDrop: function(ddSource, e, data) {
+                if (data.source === me) {
+                    return;
+                }
                 data.source.handleDrag(data.source.component, data.draggedRecord, component);
                 me.handleDrop(component, data.draggedRecord, data.source.component);
             }
