@@ -2,7 +2,6 @@ package org.auscope.portal.server.web.controllers;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
@@ -12,13 +11,7 @@ import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
-<<<<<<< HEAD:src/main/java/org/auscope/portal/server/web/controllers/ImputationController.java
 import org.auscope.portal.server.web.service.WpsService;
-import org.auscope.portal.server.web.service.jobtask.ImputationCallable;
-import org.auscope.portal.server.web.service.jobtask.JobTask;
-import org.auscope.portal.server.web.service.wps.WpsServiceClient;
-=======
->>>>>>> upstream/master:src/main/java/org/auscope/portal/server/web/controllers/PredictorController.java
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -33,31 +26,16 @@ public class PredictorController extends BasePortalController {
     private JobTaskService jobTaskService;
     private EAVLJobService jobService;
     private FileStagingService fss;
-<<<<<<< HEAD:src/main/java/org/auscope/portal/server/web/controllers/ImputationController.java
-    private WpsService wpsService;
-
-    @Autowired
-    public ImputationController(EAVLJobService jobService,
-            JobTaskService jobTaskService, CSVService csvService,
-            FileStagingService fss, WpsService wpsService) {
-        super();
-        this.jobService = jobService;
-=======
-    private ConditionalProbabilityWpsClient wpsClient;
     private CSVService csvService;
+	private WpsService wpsService;
 
     @Autowired
-    public PredictorController(JobTaskService jobTaskService, EAVLJobService jobService, FileStagingService fss, ConditionalProbabilityWpsClient wpsClient, CSVService csvService) {
->>>>>>> upstream/master:src/main/java/org/auscope/portal/server/web/controllers/PredictorController.java
+    public PredictorController(JobTaskService jobTaskService, EAVLJobService jobService, FileStagingService fss, WpsService wpsService, CSVService csvService) {
         this.jobTaskService = jobTaskService;
         this.jobService = jobService;
         this.fss = fss;
-<<<<<<< HEAD:src/main/java/org/auscope/portal/server/web/controllers/ImputationController.java
         this.wpsService = wpsService;
-=======
-        this.wpsClient = wpsClient;
         this.csvService = csvService;
->>>>>>> upstream/master:src/main/java/org/auscope/portal/server/web/controllers/PredictorController.java
     }
 
     /**
@@ -80,14 +58,6 @@ public class PredictorController extends BasePortalController {
             job.setPredictionCutoff(predictorCutoff);
             job.setPredictionParameter(predictorName);
             job.setHoleIdParameter(holeIdName);
-<<<<<<< HEAD:src/main/java/org/auscope/portal/server/web/controllers/ImputationController.java
-            WpsServiceClient wpsClient = wpsService.getWpsClient();
-            JobTask newTask = new JobTask(new ImputationCallable(job, wpsClient, csvService, fss), job);
-            String taskId = jobTaskService.submit(newTask);
-
-            job.setImputationTaskId(taskId);
-=======
->>>>>>> upstream/master:src/main/java/org/auscope/portal/server/web/controllers/PredictorController.java
             jobService.save(job);
 
             return generateJSONResponseMAV(true, null, "");
