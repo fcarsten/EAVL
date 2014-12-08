@@ -15,17 +15,18 @@ import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 
 public class ImputationCallable implements Callable<Object> {
 
     private final Log log = LogFactory.getLog(getClass());
 
     protected EAVLJob job;
-    protected ConditionalProbabilityWpsClient wpsClient;
+    protected WpsServiceClient wpsClient;
     protected CSVService csvService;
     protected FileStagingService fss;
 
-    public ImputationCallable(EAVLJob job, ConditionalProbabilityWpsClient wpsClient, CSVService csvService, FileStagingService fss) {
+    public ImputationCallable(EAVLJob job, WpsServiceClient wpsClient, CSVService csvService, FileStagingService fss) {
         super();
         this.job = job;
         this.wpsClient = wpsClient;

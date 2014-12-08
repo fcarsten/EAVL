@@ -11,8 +11,10 @@ import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
+import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.auscope.portal.server.web.service.jobtask.KDECallable;
+import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -28,16 +30,16 @@ public class SetProxyController extends BasePortalController {
     private JobTaskService jobTaskService;
     private EAVLJobService jobService;
     private FileStagingService fss;
-    private ConditionalProbabilityWpsClient wpsClient;
+    private WpsService wpsService;
     private CSVService csvService;
 
     @Autowired
-    public SetProxyController(JobTaskService jobTaskService, EAVLJobService jobService, FileStagingService fss, ConditionalProbabilityWpsClient wpsClient, CSVService csvService) {
+    public SetProxyController(JobTaskService jobTaskService, EAVLJobService jobService, FileStagingService fss, WpsService wpsService, CSVService csvService) {
         super();
         this.jobTaskService = jobTaskService;
         this.jobService = jobService;
         this.fss = fss;
-        this.wpsClient = wpsClient;
+        this.wpsService = wpsService;
         this.csvService = csvService;
     }
 
@@ -56,6 +58,7 @@ public class SetProxyController extends BasePortalController {
 
         try {
             job.setProxyParameters(Sets.newHashSet(proxies));
+            WpsServiceClient wpsClient = wpsService.getWpsClient();
             JobTask newTask = new JobTask(new KDECallable(job, wpsClient, csvService, fss), job);
             String taskId = jobTaskService.submit(newTask);
             job.setKdeTaskId(taskId);

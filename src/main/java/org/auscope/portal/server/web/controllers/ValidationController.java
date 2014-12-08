@@ -8,7 +8,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.server.security.oauth2.PortalUser;
@@ -21,6 +20,7 @@ import org.auscope.portal.server.eavl.ParameterDetails;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
+import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.jobtask.ImputationCallable;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,15 +48,15 @@ public class ValidationController extends BasePortalController {
     private CSVService csvService;
     private EAVLJobService jobService;
     private JobTaskService jobTaskService;
-    private ConditionalProbabilityWpsClient wpsClient;
+    private WpsService wpsService;
 
     @Autowired
-    public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService, JobTaskService jobTaskService, ConditionalProbabilityWpsClient wpsClient) {
+    public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService, JobTaskService jobTaskService, WpsService wpsService) {
         this.fss = fss;
         this.csvService = csvService;
         this.jobService = jobService;
         this.jobTaskService = jobTaskService;
-        this.wpsClient = wpsClient;
+        this.wpsService = wpsService;
     }
 
     /**
@@ -302,7 +302,7 @@ public class ValidationController extends BasePortalController {
             csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
             fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
 
-            JobTask newTask = new JobTask(new ImputationCallable(job, wpsClient, csvService, fss), job);
+            JobTask newTask = new JobTask(new ImputationCallable(job, wpsService.getWpsClient(), csvService, fss), job);
             String taskId = jobTaskService.submit(newTask);
 
             job.setImputationTaskId(taskId);

@@ -11,7 +11,6 @@ import net.sf.json.JSONArray;
 
 import org.apache.commons.io.IOUtils;
 import org.auscope.eavl.wpsclient.ACF;
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.cloud.FileStagingService;
@@ -20,6 +19,8 @@ import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
+import org.auscope.portal.server.web.service.WpsService;
+import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -34,14 +35,14 @@ public class WPSController extends BasePortalController {
 
     private FileStagingService fss;
     private CSVService csvService;
-    private ConditionalProbabilityWpsClient wpsClient;
+    private WpsService wpsService;
     private EAVLJobService jobService;
 
     @Autowired
-    public WPSController(FileStagingService fss, CSVService csvService, ConditionalProbabilityWpsClient wpsClient, EAVLJobService jobService) {
+    public WPSController(FileStagingService fss, CSVService csvService, WpsService wpsService, EAVLJobService jobService) {
         this.fss = fss;
         this.csvService = csvService;
-        this.wpsClient = wpsClient;
+        this.wpsService = wpsService;
         this.jobService = jobService;
     }
 
@@ -53,17 +54,18 @@ public class WPSController extends BasePortalController {
             EAVLJob job = jobService.getJobForSession(request, user);
             InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             List<Double> columnData = csvService.getParameterValues(csvData, columnIndex, false);
-
+            WpsServiceClient wpsClient = wpsService.getWpsClient();
             double[][] response = wpsClient.logDensity(columnData.toArray(new Double[columnData.size()]));
 
             JSONArray xyPairs = new JSONArray();
-            for (int i = 0; i < response[0].length; i++) {
-                JSONArray xy = new JSONArray();
-                xy.add(response[0][i]);
-                xy.add(response[1][i]);
-                xyPairs.add(xy);
-            }
-
+			if (response.length > 0) {
+				for (int i = 0; i < response[0].length; i++) {
+					JSONArray xy = new JSONArray();
+					xy.add(response[0][i]);
+					xy.add(response[1][i]);
+					xyPairs.add(xy);
+				}
+			}
             return new ModelAndView(new JSONView(xyPairs), null);
         } catch (Exception ex) {
             log.warn("Unable to get pdf values: ", ex);
@@ -101,6 +103,7 @@ public class WPSController extends BasePortalController {
             csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             Double[][] data = csvService.getRawData(csvData, Arrays.asList(predictionColumnIndex, columnIndex));
 
+            WpsServiceClient wpsClient = wpsService.getWpsClient();
             double[][] response = wpsClient.doubleLogDensity(data, predictionCutoff);
             JSONArray xyPairs = new JSONArray();
             for (int i = 0; i < response.length; i++) {
@@ -149,6 +152,7 @@ public class WPSController extends BasePortalController {
             csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             String[][] data = csvService.getRawStringData(csvData, Arrays.asList(holeIdIndex, columnIndex), true);
 
+            WpsServiceClient wpsClient = wpsService.getWpsClient();
             ACF response = wpsClient.meanACF(data);
 
             ModelMap responseModel = new ModelMap();
