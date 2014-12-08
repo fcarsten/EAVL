@@ -3,6 +3,7 @@ package org.auscope.portal.server.web.controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -289,8 +290,8 @@ public class ValidationController extends BasePortalController {
 
     @RequestMapping("/saveValidationSubmitImputation.do")
     public ModelAndView saveValidationSubmitImputation(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
-            @RequestParam("deleteColIndex") Integer[] delColIndexes,
-            @RequestParam("saveColName") String[] saveColNames) {
+            @RequestParam(value="deleteColIndex", required=false) Integer[] delColIndexes,
+            @RequestParam(value="saveColName", required=false) String[] saveColNames) {
 
         OutputStream os = null;
         InputStream is = null;
@@ -299,14 +300,22 @@ public class ValidationController extends BasePortalController {
             EAVLJob job = jobService.getJobForSession(request, user);
             os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-            csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
-            fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+
+            if (delColIndexes != null && delColIndexes.length > 0) {
+                csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
+                fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+            }
 
             JobTask newTask = new JobTask(new ImputationCallable(job, wpsService.getWpsClient(), csvService, fss), job);
             String taskId = jobTaskService.submit(newTask);
 
             job.setImputationTaskId(taskId);
-            job.setSavedParameters(Sets.newHashSet(saveColNames));
+
+            if (saveColNames != null) {
+                job.setSavedParameters(Sets.newHashSet(saveColNames));
+            } else {
+                job.setSavedParameters(new HashSet<String>());
+            }
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");
