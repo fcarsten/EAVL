@@ -116,7 +116,7 @@ Ext.define('eavl.widgets.charts.BaseParameterDetailsChart', {
 
         //Load our data
         if (this.parameterDetails) {
-            this._loadData(this.parameterDetails);
+            this.plotParameterDetails(this.parameterDetails);
         }
     },
 
