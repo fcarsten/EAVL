@@ -56,7 +56,7 @@ Ext.define('eavl.widgets.charts.BaseParameterDetailsChart', {
         this.d3svg.select('.title').remove();
         this.d3 = null;
 
-        this._maskClear();
+        this.maskClear();
 
         if (message) {
             this.d3svg.append("text")
@@ -76,7 +76,7 @@ Ext.define('eavl.widgets.charts.BaseParameterDetailsChart', {
      */
     mask : function(message) {
         if (this._loadMask) {
-            this._maskClear();
+            this.maskClear();
         }
 
         this._loadMask = new Ext.LoadMask(this, {msg:message});
