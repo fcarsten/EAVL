@@ -289,4 +289,35 @@ public class ResultsController extends BasePortalController {
             log.warn("Error getting cloudObject data", e);
         }
     }
+
+    /**
+     * Returns a JSON Object encoding of the current session job (or other specified job).
+     *
+     * @param request
+     * @param user
+     * @return
+     */
+    @RequestMapping("getJobStatus.do")
+    public ModelAndView getJobStatus(HttpServletRequest request,
+            @AuthenticationPrincipal PortalUser user,
+            @RequestParam(value="jobId", required=false) Integer jobId) {
+
+        EAVLJob job;
+        try {
+            if (jobId == null) {
+                job = jobService.getJobForSession(request, user);
+            } else {
+                job = jobService.getUserJobById(request, user, jobId);
+            }
+        } catch (PortalServiceException ex) {
+            log.error("Unable to lookup job:", ex);
+            return generateJSONResponseMAV(false);
+        }
+
+        if (job == null) {
+            return generateJSONResponseMAV(false, null, "");
+        }
+
+        return generateJSONResponseMAV(true, jobToModel(job), "");
+    }
 }

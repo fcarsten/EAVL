@@ -14,6 +14,9 @@ Ext.application({
     //Any processing logic should be managed in dedicated classes - don't let this become a
     //monolithic 'do everything' function
     launch : function() {
+
+        var initialParams = null;
+
         //Called if the init code fails badly
         var initError = function() {
             eavl.widgets.SplashScreen.hideLoadingScreen();
@@ -25,10 +28,43 @@ Ext.application({
             eavl.widgets.SplashScreen.showErrorSplash(message + Ext.util.Format.format('<br><a href="{0}">Continue</a>', url));
         };
 
+        //Utility function for removing a parameter details object from an array
+        var extractPdById = function(pdArray, name) {
+            var matchingPd = null;
+            var index = -1;
+            Ext.each(pdArray, function(pd, i) {
+                if (pd.get('name') === name) {
+                    index = i;
+                    matchingPd = pd;
+                    return false;
+                }
+            });
+
+            if (index < 0) {
+                return null;
+            }
+
+            Ext.Array.erase(pdArray, index, 1);
+            return matchingPd;
+        };
+
         var initSuccess = function(parameterDetails) {
             eavl.widgets.SplashScreen.hideLoadingScreen();
 
             Ext.tip.QuickTipManager.init();
+
+            var holeIdValue = null;
+            var predictorValue = null;
+            var cutoffValue = null;
+            if (initialParams.holeIdParameter) {
+                holeIdValue = extractPdById(parameterDetails, initialParams.holeIdParameter);
+            }
+            if (initialParams.predictionParameter) {
+                predictorValue = extractPdById(parameterDetails, initialParams.predictionParameter);
+            }
+            if (initialParams.predictionCutoff) {
+                cutoffValue = Number(initialParams.predictionCutoff);
+            }
 
             Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
                 layout: 'border',
@@ -128,6 +164,7 @@ Ext.application({
                             emptyText : 'Drag a parameter here to select it.',
                             margins: '0 0 10 0',
                             allowBlank: false,
+                            value: holeIdValue,
                             plugins: [{
                                 ptype : 'modeldnd',
                                 ddGroup : 'set-prediction-pd',
@@ -155,6 +192,7 @@ Ext.application({
                             emptyText : 'Drag a parameter here to select it.',
                             margins: '0 0 10 0',
                             allowBlank: false,
+                            value: predictorValue,
                             plugins: [{
                                 ptype : 'modeldnd',
                                 ddGroup : 'set-prediction-pd',
@@ -184,6 +222,8 @@ Ext.application({
                             items : [{
                                 xtype: 'pdfchart',
                                 id: 'predictor-pdf-chart',
+                                parameterDetails: predictorValue,
+                                cutoffValue: cutoffValue,
                                 allowCutoffSelection : true
                             }]
                         }]
@@ -217,7 +257,7 @@ Ext.application({
 
         //Before loading
         Ext.Ajax.request({
-            url: 'predictor/getImputationStatus.do',
+            url: 'results/getJobStatus.do',
             callback: function(options, success, response) {
                 if (!success) {
                     initError();
@@ -230,27 +270,29 @@ Ext.application({
                     return;
                 }
 
-                if (responseObj.data == true) {
+                if (responseObj.data.status === eavl.models.EAVLJob.STATUS_PREDICTOR ||
+                    responseObj.data.status === eavl.models.EAVLJob.STATUS_PROXY ||
+                    responseObj.data.status === eavl.models.EAVLJob.STATUS_SUBMITTED ||
+                    responseObj.data.status === eavl.models.EAVLJob.STATUS_DONE) {
+                    initialParams = responseObj.data;
                     pdStore.load();
                     return;
                 }
 
                 //At this point imputation hasn't been run/hasn't finished
-                if (responseObj.msg === "nodata") {
+                if (responseObj.data.status === eavl.models.EAVLJob.STATUS_UNSUBMITTED) {
                     initNotReady("There's no record of an imputation task running for this job. Did you complete the validation steps?", "validate.html");
                     return;
                 }
-                if (responseObj.msg === "nojob") {
-                    initNotReady("There's no job selected. Did you upload a file?", "upload.html");
-                    return;
-                }
-                if (responseObj.msg === "failed") {
+                if (responseObj.data.status === eavl.models.EAVLJob.STATUS_IMPUTE_ERROR) {
                     initNotReady("Imputation failed. Did you remove all the non compositional parameters? You can try resubmitting.", "validate.html");
                     return;
                 }
 
                 //OK imputation is running - shift to loading page
-                window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.msg, next: 'predictor.html'});
+                if (responseObj.data.status === eavl.models.EAVLJob.STATUS_IMPUTING) {
+                    window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data.imputationTaskId, next: 'predictor.html'});
+                }
             }
         });
 

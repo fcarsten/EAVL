@@ -11,6 +11,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
      * Adds the following config
      * {
      *  allowCutoffSelection - Boolean (- If true, the chart will have a draggable cutoff slider added. Defaults to false
+     *  cutoffValue - Number - Initial value for the cutoff brush (only valid if parameterDetails is set)
      * }
      *
      * Adds the following events
@@ -21,7 +22,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
     constructor : function(config) {
 
         this.allowCutoffSelection = config.allowCutoffSelection ? true : false;
-
+        this._cutoffOverride = Ext.isNumber(config.cutoffValue) ? config.cutoffValue : null;
         this.callParent(arguments);
 
         this.addEvents(['cutoffchanged']);
@@ -46,7 +47,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
         }
 
         var value = this.d3.brush.extent()[0];
-        if (d3.event.sourceEvent) { // not a programmatic event
+        if (d3.event && d3.event.sourceEvent) { // not a programmatic event
             this.d3.brush.extent([value, this.d3.x.domain()[1]]);
         }
 
@@ -166,6 +167,14 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
                     .attr("y", 0 + (margin.top / 2) +  170)
                     .attr("class", "brush-text")
                     .text("High values");
+
+                    //Setup our initial brush position
+                    if (me._cutoffOverride !== null) {
+                        me.d3.brushgroup
+                            .call(brush.extent([me._cutoffOverride, 9999]))
+                            .call(brush.event);
+                        me._cutoffOverride = null;
+                    }
                 }
 
                 me.d3svg.append("text")
