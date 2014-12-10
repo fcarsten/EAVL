@@ -89,22 +89,12 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
 
         var menuItems = [];
         for (var i = 0; i < this.steps.length; i++) {
-
-            var href = '';
-            if (i < currentIndex) {
-                href = Ext.util.Format.format('javascript:eavl.widgets.WorkflowLocationPanel.handleAllowPrevious(\'{0}\')', this.steps[i].url);
-            } else if (i === currentIndex || currentIndex === -1) {
-                href = 'javascript:void()';
-            } else {
-                href = Ext.util.Format.format('javascript:eavl.widgets.WorkflowLocationPanel.handleAllowNext(\'{0}\')', this.steps[i].url);
-            }
-
             menuItems.push({
                 tag : 'li',
                 cls : i === currentIndex ? 'selected' : '',
                 children: [{
                     tag: 'a',
-                    href: href,
+                    href: this.steps[i].url,
                     html: this.steps[i].title
                 }]
             });
