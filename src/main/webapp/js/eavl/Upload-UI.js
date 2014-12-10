@@ -25,15 +25,19 @@ Ext.application({
                 parent.down('#csvGrid').destroy();
             }
 
+            //I've been having troubles with ExtJS layout and dynamically adding a flex component
+            //This is the workaround I'm going with...
+            var width = window.innerWidth - 120;
+
             parent.add(Ext.create('eavl.widgets.CSVGrid', {
                 itemId: 'csvGrid',
                 jobId: id,
                 readOnly: true,
                 sortColumns: false,
-                width: 1000,
-                parameterDetails : parameterDetails,
-                title: 'Double check the file has been read correctly...',
+                width: width,
                 flex: 1,
+                parameterDetails : parameterDetails,
+                title: 'If this looks correct, press the big arrow at the top of the page.',
                 margin: '0 0 10 0'
             }));
 
