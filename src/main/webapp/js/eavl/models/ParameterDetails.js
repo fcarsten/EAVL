@@ -25,6 +25,32 @@ Ext.define('eavl.models.ParameterDetails', {
             }
 
             return bStatus - aStatus;
+        },
+
+        /**
+         * Given an array of eavl.models.ParameterDetails, find an instance with matching name
+         * and remove it from the array. Return the removed element (or null) if it DNE.
+         *
+         * @param pdArray eavl.models.ParameterDetails[] Will have the first matching instance removed
+         * @param name String The name to search for
+         */
+        extractFromArray : function(pdArray, name) {
+            var matchingPd = null;
+            var index = -1;
+            Ext.each(pdArray, function(pd, i) {
+                if (pd.get('name') === name) {
+                    index = i;
+                    matchingPd = pd;
+                    return false;
+                }
+            });
+
+            if (index < 0) {
+                return null;
+            }
+
+            Ext.Array.erase(pdArray, index, 1);
+            return matchingPd;
         }
     },
 

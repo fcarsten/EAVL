@@ -28,26 +28,6 @@ Ext.application({
             eavl.widgets.SplashScreen.showErrorSplash(message + Ext.util.Format.format('<br><a href="{0}">Continue</a>', url));
         };
 
-        //Utility function for removing a parameter details object from an array
-        var extractPdById = function(pdArray, name) {
-            var matchingPd = null;
-            var index = -1;
-            Ext.each(pdArray, function(pd, i) {
-                if (pd.get('name') === name) {
-                    index = i;
-                    matchingPd = pd;
-                    return false;
-                }
-            });
-
-            if (index < 0) {
-                return null;
-            }
-
-            Ext.Array.erase(pdArray, index, 1);
-            return matchingPd;
-        };
-
         var initSuccess = function(parameterDetails) {
             eavl.widgets.SplashScreen.hideLoadingScreen();
 
@@ -57,10 +37,10 @@ Ext.application({
             var predictorValue = null;
             var cutoffValue = null;
             if (initialParams.holeIdParameter) {
-                holeIdValue = extractPdById(parameterDetails, initialParams.holeIdParameter);
+                holeIdValue = eavl.models.ParameterDetails.extractFromArray(parameterDetails, initialParams.holeIdParameter);
             }
             if (initialParams.predictionParameter) {
-                predictorValue = extractPdById(parameterDetails, initialParams.predictionParameter);
+                predictorValue = eavl.models.ParameterDetails.extractFromArray(parameterDetails, initialParams.predictionParameter);
             }
             if (initialParams.predictionCutoff) {
                 cutoffValue = Number(initialParams.predictionCutoff);
