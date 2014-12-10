@@ -82,9 +82,14 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                                     this.setTitle(storeItem.get('name') + ': ' + Math.round(storeItem.get('total') / total * 100) + '%');
                                 }
                             },
+                            highlightCfg: {
+                                segment: {
+                                    margin: 8, //workaround for extjs bug. Need to double up the margin size for the shadow
+                                }
+                            },
                             highlight: {
                                 segment: {
-                                    margin: 20
+                                    margin: 8
                                 }
                             },
                             label: {
