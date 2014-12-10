@@ -21,7 +21,7 @@ Ext.define('eavl.models.ParameterDetails', {
             var bStatus = b.calculateStatus();
 
             if (aStatus === bStatus) {
-                return a.get('name').localeCompare(b.get('name'));
+                return a.get('columnIndex') - b.get('columnIndex');
             }
 
             return bStatus - aStatus;
