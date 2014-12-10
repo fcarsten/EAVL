@@ -114,6 +114,7 @@ Ext.application({
                         title : 'Available Parameters',
                         width: 300,
                         margins: '0 10 0 10',
+                        disableSelection: true,
                         parameterDetails : parameterDetails,
                         plugins: [{
                             ptype : 'modeldnd',

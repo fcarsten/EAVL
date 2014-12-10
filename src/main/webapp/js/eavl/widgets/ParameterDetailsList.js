@@ -35,7 +35,6 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
         });
 
         Ext.apply(config, {
-            disableSelection : true,
             hideHeaders : true,
             store : store,
             columns : [{

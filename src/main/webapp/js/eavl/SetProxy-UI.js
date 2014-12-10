@@ -103,6 +103,7 @@ Ext.application({
                         title : 'Compositional Parameters',
                         width: 300,
                         parameterDetails : records,
+                        disableSelection: true,
                         margins: '0 10 0 10',
                         plugins: [{
                             ptype : 'modeldnd',
