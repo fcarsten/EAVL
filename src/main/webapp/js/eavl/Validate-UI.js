@@ -125,7 +125,7 @@ Ext.application({
                         align : 'stretch',
                         pack : 'center'
                     },
-                    bodyPadding : '10 100 50 100',
+                    bodyPadding : '10 10 10 10',
                     items: [{
                         xtype: 'container',
                         layout: {
