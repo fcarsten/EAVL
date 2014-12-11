@@ -32,8 +32,8 @@
 	</bean>
 
 
-	<bean id="vmPoolPersister"
-		class="org.auscope.portal.server.web.service.wps.FileVmPoolPersister">
+	<bean id="vmPoolPersister" class="org.auscope.portal.server.web.service.wps.FileVmPoolPersister">
+		<constructor-arg name="propertyConfigurer" ref="propertyConfigurer"/>
 	</bean>
 
 	<bean id="vmPool" class="org.auscope.portal.server.web.service.wps.VmPool">
