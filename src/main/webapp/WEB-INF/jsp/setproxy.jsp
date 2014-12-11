@@ -7,8 +7,9 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
-        <script type="text/javascript" src="js/d3/d3.min.js"></script>
+        <script type="text/javascript" src="portal-core/js/d3/d3.min.js"></script>
         
+        <script src="portal-core/js/portal/charts/BaseD3Chart.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/util/UnimplementedFunction.js" type="text/javascript"></script>
         
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">

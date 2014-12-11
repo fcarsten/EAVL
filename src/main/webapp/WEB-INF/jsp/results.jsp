@@ -35,9 +35,9 @@
 			}
         </style>
         
-        <script src="js/d3/d3.min.js" type="text/javascript" ></script>
-        <script src="js/threejs/three.min.js" type="text/javascript"></script>
-        <script src="js/threejs/controls/OrbitControls.js" type="text/javascript"></script>
+        <script src="portal-core/js/d3/d3.min.js" type="text/javascript" ></script>
+        <script src="portal-core/js/threejs/three.min.js" type="text/javascript"></script>
+        <script src="portal-core/js/threejs/controls/OrbitControls.js" type="text/javascript"></script>
         
         <script src="portal-core/js/portal/util/UnimplementedFunction.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/util/FileDownloader.js" type="text/javascript"></script>
@@ -45,6 +45,8 @@
         <script src="portal-core/js/portal/widgets/grid/column/ClickColumn.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/widgets/grid/plugin/CellTips.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/widgets/field/DataDisplayField.js" type="text/javascript"></script>
+        <script src="portal-core/js/portal/charts/BaseD3Chart.js" type="text/javascript"></script>
+        <script src="portal-core/js/portal/charts/3DScatterPlot.js" type="text/javascript"></script>
         
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/CSVGrid.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
@@ -63,7 +65,6 @@
         <script type="text/javascript" src="js/eavl/widgets/JobFileList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
-        <script type="text/javascript" src="js/eavl/widgets/charts/3DScatterPlot.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/BaseFilePreview.js"></script>
