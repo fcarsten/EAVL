@@ -8,18 +8,35 @@ import java.io.IOException;
 import net.opengis.wps.x100.CapabilitiesDocument;
 import net.opengis.wps.x100.ProcessDescriptionType;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.auscope.eavl.wpsclient.ACF;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.n52.wps.client.WPSClientException;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import com.googlecode.ehcache.annotations.Cacheable;
 
 /**
  * @author fri096
  *
  */
+@Component
+@Scope("prototype")
 public class WpsServiceClient {
+    protected final Log log = LogFactory.getLog(getClass());
 
-	private WpsVm vm;
-	private ConditionalProbabilityWpsClient conProbClient;
+//	private WpsVm vm;
+//	private ConditionalProbabilityWpsClient getWpsClient();
+	private String endpoint;
+
+	/**
+	 * @return the endpoint
+	 */
+	public String getEndpoint() {
+		return endpoint;
+	}
 
 	/**
 	 * @param data
@@ -28,9 +45,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#imputationNA(double[][])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[][] imputationNA(double[][] data) throws WPSClientException,
 			IOException {
-		return conProbClient.imputationNA(data);
+		return getWpsClient().imputationNA(data);
 	}
 
 	/**
@@ -40,9 +58,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#imputationNA(java.lang.Double[][])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[][] imputationNA(Double[][] data) throws WPSClientException,
 			IOException {
-		return conProbClient.imputationNA(data);
+		return getWpsClient().imputationNA(data);
 	}
 
 	/**
@@ -50,7 +69,7 @@ public class WpsServiceClient {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return conProbClient.hashCode();
+		return getWpsClient().hashCode();
 	}
 
 //	/**
@@ -63,7 +82,7 @@ public class WpsServiceClient {
 //	 */
 //	public double[][] imputationNA(int nCols, String dataStr)
 //			throws WPSClientException, IOException {
-//		return conProbClient.imputationNA(nCols, dataStr);
+//		return getWpsClient().imputationNA(nCols, dataStr);
 //	}
 
 	/**
@@ -73,9 +92,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#logDensity(double[])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[][] logDensity(double[] data) throws WPSClientException,
 			IOException {
-		return conProbClient.logDensity(data);
+		return getWpsClient().logDensity(data);
 	}
 
 	/**
@@ -86,9 +106,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#quantile(double[], double[])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[] quantile(double[] data, double[] q)
 			throws WPSClientException, IOException {
-		return conProbClient.quantile(data, q);
+		return getWpsClient().quantile(data, q);
 	}
 
 	/**
@@ -98,9 +119,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#logDensity(java.lang.Double[])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[][] logDensity(Double[] data) throws WPSClientException,
 			IOException {
-		return conProbClient.logDensity(data);
+		return getWpsClient().logDensity(data);
 	}
 
 	/**
@@ -110,8 +132,9 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#meanACF(java.lang.Object[][])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public ACF meanACF(Object[][] data) throws WPSClientException, IOException {
-		return conProbClient.meanACF(data);
+		return getWpsClient().meanACF(data);
 	}
 
 	/**
@@ -122,9 +145,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#doubleLogDensity(double[][], double)
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[][] doubleLogDensity(double[][] data, double v)
 			throws WPSClientException, IOException {
-		return conProbClient.doubleLogDensity(data, v);
+		return getWpsClient().doubleLogDensity(data, v);
 	}
 
 	/**
@@ -135,9 +159,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#doubleLogDensity(java.lang.Double[][], double)
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[][] doubleLogDensity(Double[][] data, double v)
 			throws WPSClientException, IOException {
-		return conProbClient.doubleLogDensity(data, v);
+		return getWpsClient().doubleLogDensity(data, v);
 	}
 
 	/**
@@ -147,9 +172,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#cenLR(double[][])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public double[][] cenLR(double[][] data) throws WPSClientException,
 			IOException {
-		return conProbClient.cenLR(data);
+		return getWpsClient().cenLR(data);
 	}
 
 	/**
@@ -160,9 +186,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(double[][], double[][])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public String hpiKdeJSON(double[][] gclr3, double[][] evalpts)
 			throws WPSClientException, IOException {
-		return conProbClient.hpiKdeJSON(gclr3, evalpts);
+		return getWpsClient().hpiKdeJSON(gclr3, evalpts);
 	}
 
 	/**
@@ -172,7 +199,7 @@ public class WpsServiceClient {
 	 */
 	public CapabilitiesDocument requestGetCapabilities()
 			throws WPSClientException {
-		return conProbClient.requestGetCapabilities();
+		return getWpsClient().requestGetCapabilities();
 	}
 
 	/**
@@ -181,9 +208,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.EavlWpsClient#requestDescribeProcess(java.lang.String)
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public ProcessDescriptionType requestDescribeProcess(String processID)
 			throws IOException {
-		return conProbClient.requestDescribeProcess(processID);
+		return getWpsClient().requestDescribeProcess(processID);
 	}
 
 	/**
@@ -194,9 +222,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(java.lang.Double[][], java.lang.Double[][])
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public String hpiKdeJSON(Double[][] gclr3, Double[][] evalpts)
 			throws WPSClientException, IOException {
-		return conProbClient.hpiKdeJSON(gclr3, evalpts);
+		return getWpsClient().hpiKdeJSON(gclr3, evalpts);
 	}
 
 	/**
@@ -208,9 +237,10 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(java.lang.Double[][], java.lang.Double[], double)
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public String hpiKdeJSON(Double[][] proxies, Double[] cutoffCol,
 			double cutoffValue) throws WPSClientException, IOException {
-		return conProbClient.hpiKdeJSON(proxies, cutoffCol, cutoffValue);
+		return getWpsClient().hpiKdeJSON(proxies, cutoffCol, cutoffValue);
 	}
 
 	/**
@@ -222,14 +252,27 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(double[][], double[], double)
 	 */
+	@Cacheable(cacheName="wpsCache")
 	public String hpiKdeJSON(double[][] proxies, double[] cutoffCol,
 			double cutoffValue) throws WPSClientException, IOException {
-		return conProbClient.hpiKdeJSON(proxies, cutoffCol, cutoffValue);
+		return getWpsClient().hpiKdeJSON(proxies, cutoffCol, cutoffValue);
 	}
 
-	public WpsServiceClient(WpsVm vm) {
-		this.vm=vm;
-		this.conProbClient = new ConditionalProbabilityWpsClient(vm.getServiceUrl());
+	private ConditionalProbabilityWpsClient getWpsClient() {
+		return new ConditionalProbabilityWpsClient(getEndpoint());
 	}
+
+	public void setEndpoting(String endpoint) {
+		this.endpoint=endpoint;
+	}
+
+	public WpsServiceClient() {
+		log.info("WpsServiceClient created");
+	}
+
+//	public WpsServiceClient(WpsVm vm) {
+//		this.vm=vm;
+//		this.getWpsClient() = new ConditionalProbabilityWpsClient(vm.getServiceUrl());
+//	}
 
 }

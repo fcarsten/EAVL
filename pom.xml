@@ -259,6 +259,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <powermock.version>1.5.5</powermock.version>
         <portal.core.version>1.2.0-SNAPSHOT</portal.core.version>
+        <slf4jVersion>1.7.5</slf4jVersion>
     </properties>
 
     <repositories>
@@ -285,7 +286,23 @@
     </repositories>
 
     <!-- Dependencies -->
-    <dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4jVersion}</version>
+		</dependency>
+		<dependency>
+			<!-- any library that uses slf4j will be directed to java.util.logging -->
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>${slf4jVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${slf4jVersion}</version>
+		</dependency>
         <dependency>
             <groupId>org.auscope.portal</groupId>
             <artifactId>portal-core</artifactId>
@@ -410,5 +427,11 @@
             <artifactId>velocity</artifactId>
             <version>1.7</version>
         </dependency>
+        		<dependency>
+			<groupId>com.googlecode.ehcache-spring-annotations</groupId>
+			<artifactId>ehcache-spring-annotations</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+
     </dependencies>
 </project>
