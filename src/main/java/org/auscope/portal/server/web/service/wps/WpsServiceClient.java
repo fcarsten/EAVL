@@ -13,10 +13,9 @@ import org.apache.commons.logging.LogFactory;
 import org.auscope.eavl.wpsclient.ACF;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.n52.wps.client.WPSClientException;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.googlecode.ehcache.annotations.Cacheable;
 
 /**
  * @author fri096
@@ -45,7 +44,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#imputationNA(double[][])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[][] imputationNA(double[][] data) throws WPSClientException,
 			IOException {
 		return getWpsClient().imputationNA(data);
@@ -58,7 +57,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#imputationNA(java.lang.Double[][])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[][] imputationNA(Double[][] data) throws WPSClientException,
 			IOException {
 		return getWpsClient().imputationNA(data);
@@ -92,7 +91,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#logDensity(double[])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[][] logDensity(double[] data) throws WPSClientException,
 			IOException {
 		return getWpsClient().logDensity(data);
@@ -106,7 +105,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#quantile(double[], double[])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[] quantile(double[] data, double[] q)
 			throws WPSClientException, IOException {
 		return getWpsClient().quantile(data, q);
@@ -119,7 +118,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#logDensity(java.lang.Double[])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[][] logDensity(Double[] data) throws WPSClientException,
 			IOException {
 		return getWpsClient().logDensity(data);
@@ -132,7 +131,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#meanACF(java.lang.Object[][])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public ACF meanACF(Object[][] data) throws WPSClientException, IOException {
 		return getWpsClient().meanACF(data);
 	}
@@ -145,7 +144,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#doubleLogDensity(double[][], double)
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[][] doubleLogDensity(double[][] data, double v)
 			throws WPSClientException, IOException {
 		return getWpsClient().doubleLogDensity(data, v);
@@ -159,7 +158,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#doubleLogDensity(java.lang.Double[][], double)
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[][] doubleLogDensity(Double[][] data, double v)
 			throws WPSClientException, IOException {
 		return getWpsClient().doubleLogDensity(data, v);
@@ -172,7 +171,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#cenLR(double[][])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public double[][] cenLR(double[][] data) throws WPSClientException,
 			IOException {
 		return getWpsClient().cenLR(data);
@@ -186,7 +185,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(double[][], double[][])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public String hpiKdeJSON(double[][] gclr3, double[][] evalpts)
 			throws WPSClientException, IOException {
 		return getWpsClient().hpiKdeJSON(gclr3, evalpts);
@@ -208,7 +207,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.EavlWpsClient#requestDescribeProcess(java.lang.String)
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public ProcessDescriptionType requestDescribeProcess(String processID)
 			throws IOException {
 		return getWpsClient().requestDescribeProcess(processID);
@@ -222,7 +221,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(java.lang.Double[][], java.lang.Double[][])
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public String hpiKdeJSON(Double[][] gclr3, Double[][] evalpts)
 			throws WPSClientException, IOException {
 		return getWpsClient().hpiKdeJSON(gclr3, evalpts);
@@ -237,7 +236,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(java.lang.Double[][], java.lang.Double[], double)
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public String hpiKdeJSON(Double[][] proxies, Double[] cutoffCol,
 			double cutoffValue) throws WPSClientException, IOException {
 		return getWpsClient().hpiKdeJSON(proxies, cutoffCol, cutoffValue);
@@ -252,7 +251,7 @@ public class WpsServiceClient {
 	 * @throws IOException
 	 * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#hpiKdeJSON(double[][], double[], double)
 	 */
-	@Cacheable(cacheName="wpsCache")
+	@Cacheable(value="wpsCache")
 	public String hpiKdeJSON(double[][] proxies, double[] cutoffCol,
 			double cutoffValue) throws WPSClientException, IOException {
 		return getWpsClient().hpiKdeJSON(proxies, cutoffCol, cutoffValue);
