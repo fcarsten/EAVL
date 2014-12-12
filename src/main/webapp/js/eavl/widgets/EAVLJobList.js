@@ -62,10 +62,10 @@ Ext.define('eavl.widgets.EAVLJobList', {
                         tip = 'This job is currently undergoing imputation.';
                         imgLink = "taskwait.html?" + Ext.Object.toQueryString({taskId: record.get('imputationTaskId'), next: 'predictor.html'});
                         break;
-                    case eavl.models.EAVLJob.STATUS_PREDICTOR:
+                    case eavl.models.EAVLJob.STATUS_THRESHOLD:
                         img = 'img/edit.png';
-                        tip = 'This has finished imputation and is awaiting predictor selection.';
-                        imgLink = "predictor.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
+                        tip = 'This has finished imputation and is awaiting threshold selection.';
+                        imgLink = "threshold.html?" + Ext.Object.toQueryString({sessionJobId: record.get('id')});
                         break;
                     case eavl.models.EAVLJob.STATUS_PROXY:
                         img = 'img/edit.png';

@@ -9,7 +9,7 @@ Ext.define('eavl.models.EAVLJob', {
         STATUS_KDE_ERROR : "kde-error",
         STATUS_IMPUTE_ERROR : "impute-error",
         STATUS_IMPUTING : "imputing",
-        STATUS_PREDICTOR : "predictor",
+        STATUS_THRESHOLD : "threshold",
         STATUS_PROXY : "proxy",
         STATUS_SUBMITTED : "submitted",
         STATUS_DONE : "done"

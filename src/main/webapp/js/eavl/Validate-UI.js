@@ -86,18 +86,11 @@ Ext.application({
                             deleteColIndexes.push(ds.getAt(i).get('columnIndex'));
                         }
 
-                        ds = Ext.getCmp("noncomppanel").getStore();
-                        var saveColNames = [];
-                        for (var i = 0; i < ds.getCount(); i++) {
-                            saveColNames.push(ds.getAt(i).get('name'));
-                        }
-
                         eavl.widgets.SplashScreen.showLoadingSplash("Saving Selection...");
                         Ext.Ajax.request({
                             url: 'validation/saveValidationSubmitImputation.do',
                             params : {
-                                deleteColIndex : deleteColIndexes,
-                                saveColName : saveColNames
+                                deleteColIndex : deleteColIndexes
                             },
                             callback : function(options, success, response) {
                                 eavl.widgets.SplashScreen.hideLoadingScreen();
@@ -136,15 +129,15 @@ Ext.application({
                         width : 300,
                         margin : '0 10 0 0',
                         items: [{
-                            id : 'noncomppanel',
+                            id : 'comppanel',
                             xtype : 'pdlist',
-                            disableSelection: true,
-                            title : 'Non Compositional Parameters',
-                            flex: 1,
+                            title : 'Compositional Parameters',
+                            parameterDetails : parameterDetails,
                             sortFn : eavl.models.ParameterDetails.sortSeverityFn,
+                            flex: 1,
                             viewConfig : {
                                 deferEmptyText : false,
-                                emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a parameter here to exclude it from calculations but include it in the final results.</div></div>'
+                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner">No parameters could be extracted. Try uploading again.</div></div>'
                             },
                             plugins : [{
                                 ptype : 'modeldnd',
@@ -159,7 +152,12 @@ Ext.application({
                                     }
                                     pdlist.getStore().remove(pd);
                                 }
-                            }]
+                            }],
+                            listeners: {
+                                select: function(pdList, pd) {
+                                    Ext.getCmp('pdpanel').showParameterDetails(pd);
+                                }
+                            }
                         },{
                             id : 'trashpanel',
                             xtype : 'pdlist',
@@ -187,36 +185,6 @@ Ext.application({
                                 }
                             }]
                         }]
-                    },{
-                        id : 'comppanel',
-                        xtype : 'pdlist',
-                        title : 'Compositional Parameters',
-                        width : 300,
-                        parameterDetails : parameterDetails,
-                        sortFn : eavl.models.ParameterDetails.sortSeverityFn,
-                        viewConfig : {
-                            deferEmptyText : false,
-                            emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner">No parameters could be extracted. Try uploading again.</div></div>'
-                        },
-                        plugins : [{
-                            ptype : 'modeldnd',
-                            ddGroup : 'validate-dnd-pd',
-                            highlightBody : false,
-                            handleDrop : function(pdlist, pd) {
-                                pdlist.getStore().add(pd);
-                            },
-                            handleDrag : function(pdlist, pd, source) {
-                                if (source == Ext.getCmp("pdpanel")) {
-                                    return;
-                                }
-                                pdlist.getStore().remove(pd);
-                            }
-                        }],
-                        listeners: {
-                            select: function(pdList, pd) {
-                                Ext.getCmp('pdpanel').showParameterDetails(pd);
-                            }
-                        }
                     },{
                         id : 'pdpanel',
                         xtype : 'pdpanel',
@@ -249,7 +217,7 @@ Ext.application({
             autoLoad : true,
             proxy : {
                 type : 'ajax',
-                url : 'validation/getParameterDetails.do',
+                url : 'validation/getCompositionalParameterDetails.do',
                 reader : {
                     type : 'json',
                     root : 'data'

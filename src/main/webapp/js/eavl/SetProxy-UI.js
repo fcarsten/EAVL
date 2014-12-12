@@ -191,7 +191,7 @@ Ext.application({
                     return;
                 }
 
-                if (responseObj.data.status === eavl.models.EAVLJob.STATUS_PREDICTOR ||
+                if (responseObj.data.status === eavl.models.EAVLJob.STATUS_THRESHOLD ||
                     responseObj.data.status === eavl.models.EAVLJob.STATUS_PROXY ||
                     responseObj.data.status === eavl.models.EAVLJob.STATUS_SUBMITTED ||
                     responseObj.data.status === eavl.models.EAVLJob.STATUS_DONE) {

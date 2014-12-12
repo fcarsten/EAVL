@@ -36,8 +36,9 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
     },
 
     steps : [{url:'upload.html', title:'Upload', help: 'Upload a CSV file for processing.'},
+             {url:'identify.html', title:'Identify', help: 'Identify what your parameters represent.'},
              {url:'validate.html', title:'Validate', help: 'Remove any non numeric values (or trash the parameter entirely)'},
-             {url:'predictor.html', title:'Predictor', help: 'Select a parameter to be predicted.'},
+             {url:'threshold.html', title:'Threshold', help: 'Select a threshold for the parameter to predict.'},
              {url:'setproxy.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
              {url:'results.html', title:'Results', help: 'Browse the results of existing jobs.'}],
 

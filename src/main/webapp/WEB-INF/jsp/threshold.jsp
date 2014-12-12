@@ -14,7 +14,7 @@
         
         
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
-        <link rel="stylesheet" type="text/css" href="js/eavl/Predictor-UI.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/Threshold-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
         
@@ -28,7 +28,7 @@
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/BaseParameterDetailsChart.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.js"></script>
-        <script type="text/javascript" src="js/eavl/Predictor-UI.js"></script>
+        <script type="text/javascript" src="js/eavl/Threshold-UI.js"></script>
     </head>
     <body>
         

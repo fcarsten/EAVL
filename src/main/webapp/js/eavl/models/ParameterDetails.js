@@ -11,7 +11,7 @@ Ext.define('eavl.models.ParameterDetails', {
         STATUS_ERROR : 2,
 
         /**
-         * Compares two parameter details based on "status"
+         * Compares two parameter details based on "status" and then on column index
          *
          * @param a eavl.models.ParameterDetails First parameter to compare
          * @param b eavl.models.ParameterDetails Second parameter to compare
@@ -25,6 +25,16 @@ Ext.define('eavl.models.ParameterDetails', {
             }
 
             return bStatus - aStatus;
+        },
+
+        /**
+         * Compares two parameter details based on "columnIndex"
+         *
+         * @param a eavl.models.ParameterDetails First parameter to compare
+         * @param b eavl.models.ParameterDetails Second parameter to compare
+         */
+        sortColIndexFn : function(a, b) {
+            return a.get('columnIndex') - b.get('columnIndex');
         },
 
         /**

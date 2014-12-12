@@ -3,7 +3,6 @@ package org.auscope.portal.server.web.controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -138,6 +137,7 @@ public class ValidationController extends BasePortalController {
     public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam(required=false,value="file") String file,
             @RequestParam(required=false,value="jobId") Integer jobId) {
+        InputStream csvData = null;
         try {
             EAVLJob job;
             if (jobId != null) {
@@ -147,11 +147,13 @@ public class ValidationController extends BasePortalController {
             }
 
             String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
-            InputStream csvData = fss.readFile(job, fileToRead);
+            csvData = fss.readFile(job, fileToRead);
             return generateJSONResponseMAV(true, csvService.extractParameterDetails(csvData), "");
         } catch (Exception ex) {
             log.warn("Unable to get parameter details: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");
+        } finally {
+            IOUtils.closeQuietly(csvData);
         }
     }
 
@@ -159,6 +161,7 @@ public class ValidationController extends BasePortalController {
     public ModelAndView getCompositionalParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam(required=false,value="file") String file,
             @RequestParam(required=false,value="jobId") Integer jobId) {
+        InputStream csvData = null;
         try {
             EAVLJob job;
             if (jobId != null) {
@@ -168,7 +171,7 @@ public class ValidationController extends BasePortalController {
             }
 
             String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
-            InputStream csvData = fss.readFile(job, fileToRead);
+            csvData = fss.readFile(job, fileToRead);
 
             List<ParameterDetails> pds = csvService.extractParameterDetails(csvData);
             if (job.getSavedParameters() != null) {
@@ -183,6 +186,8 @@ public class ValidationController extends BasePortalController {
         } catch (Exception ex) {
             log.warn("Unable to get parameter details: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");
+        } finally {
+            IOUtils.closeQuietly(csvData);
         }
     }
 
@@ -290,8 +295,7 @@ public class ValidationController extends BasePortalController {
 
     @RequestMapping("/saveValidationSubmitImputation.do")
     public ModelAndView saveValidationSubmitImputation(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
-            @RequestParam(value="deleteColIndex", required=false) Integer[] delColIndexes,
-            @RequestParam(value="saveColName", required=false) String[] saveColNames) {
+            @RequestParam(value="deleteColIndex", required=false) Integer[] delColIndexes) {
 
         OutputStream os = null;
         InputStream is = null;
@@ -310,12 +314,6 @@ public class ValidationController extends BasePortalController {
             String taskId = jobTaskService.submit(newTask);
 
             job.setImputationTaskId(taskId);
-
-            if (saveColNames != null) {
-                job.setSavedParameters(Sets.newHashSet(saveColNames));
-            } else {
-                job.setSavedParameters(new HashSet<String>());
-            }
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");

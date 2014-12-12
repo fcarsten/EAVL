@@ -20,7 +20,7 @@ public class ViewEAVLJobFactory {
     public static final String STATUS_KDE_ERROR = "kde-error";
     public static final String STATUS_IMPUTE_ERROR = "impute-error";
     public static final String STATUS_IMPUTING = "imputing";
-    public static final String STATUS_PREDICTOR = "predictor";
+    public static final String STATUS_THRESHOLD = "threshold";
     public static final String STATUS_PROXY = "proxy";
     public static final String STATUS_SUBMITTED = "submitted";
     public static final String STATUS_DONE = "done";
@@ -49,8 +49,8 @@ public class ViewEAVLJobFactory {
         } else if (jobTaskService.isExecuting(job.getImputationTaskId())) {
             status = STATUS_IMPUTING;
         } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_CSV)) {
-            if (job.getPredictionParameter() == null) {
-                status = STATUS_PREDICTOR;
+            if (job.getPredictionCutoff() == null) {
+                status = STATUS_THRESHOLD;
             } else {
                 status = STATUS_PROXY;
             }
