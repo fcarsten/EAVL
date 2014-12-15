@@ -1,5 +1,6 @@
 package org.auscope.portal.server.web.service.jobtask;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -9,12 +10,13 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 
 public class ImputationCallable implements Callable<Object> {
@@ -22,14 +24,15 @@ public class ImputationCallable implements Callable<Object> {
     private final Log log = LogFactory.getLog(getClass());
 
     protected EAVLJob job;
-    protected WpsServiceClient wpsClient;
     protected CSVService csvService;
     protected FileStagingService fss;
 
-    public ImputationCallable(EAVLJob job, WpsServiceClient wpsClient, CSVService csvService, FileStagingService fss) {
+	private WpsService wpsService;
+
+    public ImputationCallable(EAVLJob job, WpsService wpsService, CSVService csvService, FileStagingService fss) {
         super();
         this.job = job;
-        this.wpsClient = wpsClient;
+        this.wpsService = wpsService;
         this.csvService = csvService;
         this.fss = fss;
     }
@@ -64,8 +67,23 @@ public class ImputationCallable implements Callable<Object> {
             List<Integer> excludedCols = getExcludedColumns();
             in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             Double[][] rawData = csvService.getRawData(in, excludedCols, false);
-            double[][] imputedData = wpsClient.imputationNA(rawData);
+        	int retries= WPSController.MAX_RETRIES;
+        	double[][] imputedData=null;
+			while (imputedData == null && retries-- > 0) {
+				WpsServiceClient wpsClient = null;
+				try {
+					wpsClient = wpsService.getWpsClient();
+					imputedData = wpsClient.imputationNA(rawData);
+				} catch (IOException e) {
+					log.warn("Unable to get imputation values: ", e);
+					log.warn("Assuming bad VM");
+					wpsService.checkVM(wpsClient);
+				}
+			}
 
+			if(imputedData==null) {
+	            throw new PortalServiceException("Could not compute imputation data.");
+			}
             in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             this.csvService.writeRawData(in, os, imputedData, excludedCols, false);

@@ -310,7 +310,7 @@ public class ValidationController extends BasePortalController {
                 fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
             }
 
-            JobTask newTask = new JobTask(new ImputationCallable(job, wpsService.getWpsClient(), csvService, fss), job);
+            JobTask newTask = new JobTask(new ImputationCallable(job, wpsService, csvService, fss), job);
             String taskId = jobTaskService.submit(newTask);
 
             job.setImputationTaskId(taskId);

@@ -35,7 +35,7 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("wps")
 public class WPSController extends BasePortalController {
 
-    private static final int MAX_RETRIES = 3;
+    public static final int MAX_RETRIES = 3;
 	private FileStagingService fss;
     private CSVService csvService;
     private WpsService wpsService;
