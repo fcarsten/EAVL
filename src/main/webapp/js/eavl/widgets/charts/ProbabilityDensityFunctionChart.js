@@ -51,12 +51,25 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
             this.d3.brush.extent([value, this.d3.x.domain()[1]]);
         }
 
+        var valueIndex = d3.bisect(this.d3.xData, value);
+        var totalArea = 0;
+        var domain = this.d3.x.domain();
+        var range = domain[1] - domain[0];
+        var previous = this.d3.xData[valueIndex], current;
+        for (var i = valueIndex + 1; i < this.d3.xData.length; i++) {
+            current = this.d3.xData[i];
+            totalArea += this.d3.yData[i] * (current - previous);
+            previous = current;
+        }
+
         var x = this.d3.brushgroup.selectAll(".extent").attr("x");
 
         this.d3.brushgroup.selectAll(".extent").attr("width", 9999);
         this.d3.brushgroup.selectAll('.resize.w rect').attr("width", 9999);
 
-        this.d3.brushgroup.selectAll('.brush-text').attr("x", Number(x) + 100);
+
+        var text = Ext.util.Format.format("{0}% High Values", Ext.util.Format.number(totalArea * 100, '0'));
+        this.d3.brushgroup.selectAll('.brush-text').attr("x", Number(x) + 100).text(text);
 
         if (fireEvent) {
             this.fireEvent('cutoffchanged', this, value);
@@ -107,6 +120,9 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
                         .on("brush", Ext.bind(me._handleBrush, me, [true], false));
             }
 
+
+            me.d3.xData = data.map(function(d) { return d[0]});
+            me.d3.yData = data.map(function(d) { return d[1]});
             var valueline = me.d3.valueLine ? me.d3.valueLine : me.d3.valueLine = d3.svg.line()
                     .x(function(d) { return x(d[0]); })
                     .y(function(d) { return y(d[1]); });
