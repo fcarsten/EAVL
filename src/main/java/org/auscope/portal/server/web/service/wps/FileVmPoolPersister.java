@@ -24,6 +24,10 @@ public class FileVmPoolPersister implements VmPoolPersistor {
     protected final Log log = LogFactory.getLog(getClass());
     protected String baseDirectory = null;
 
+	public FileVmPoolPersister() {
+		this.baseDirectory = "";
+	}
+
 	public FileVmPoolPersister(PortalPropertyPlaceholderConfigurer propertyConfigurer) {
 	    this.baseDirectory = propertyConfigurer.resolvePlaceholder("HOST.localStageInDir");
 	    if (this.baseDirectory == null) {
