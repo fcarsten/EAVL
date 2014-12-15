@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
 import org.auscope.portal.server.web.view.ViewEAVLJobFactory;
@@ -49,17 +51,17 @@ public class ResultsController extends BasePortalController {
     private JobTaskService jobTaskService;
     private FileStagingService fss;
     private ViewEAVLJobFactory viewFactory;
+    private CSVService csvService;
 
     @Autowired
     public ResultsController(EAVLJobService jobService,
-            JobTaskService jobTaskService, FileStagingService fss, ViewEAVLJobFactory viewFactory) {
+            JobTaskService jobTaskService, FileStagingService fss, ViewEAVLJobFactory viewFactory, CSVService csvService) {
         this.jobService = jobService;
         this.jobTaskService = jobTaskService;
         this.fss = fss;
         this.viewFactory = viewFactory;
+        this.csvService = csvService;
     }
-
-
 
     /**
      * Gets the list of jobs for a particular user
@@ -276,5 +278,69 @@ public class ResultsController extends BasePortalController {
         }
 
         return generateJSONResponseMAV(true, viewFactory.toView(job), "");
+    }
+
+    /**
+     * Returns a JSON Object encoding the specified jobfiles data grouped by
+     * a particular column.
+     *
+     * Data is returned in the form
+     * {
+     *  holeid1 : [param1Value, param2Value...]
+     *  holeid2 : [param1Value, param2Value...]
+     *        ...
+     * }
+     *
+     * @param request
+     * @param user
+     * @return
+     */
+    @RequestMapping("getGroupedValues.do")
+    public ModelAndView getJobStatus(HttpServletRequest request,
+            @AuthenticationPrincipal PortalUser user,
+            @RequestParam(value="jobId", required=false) Integer jobId,
+            @RequestParam("fileName") String fileName,
+            @RequestParam("groupName") String group,
+            @RequestParam("paramName") String[] paramNames) {
+
+        EAVLJob job;
+        InputStream is = null;
+        try {
+            if (jobId == null) {
+                job = jobService.getJobForSession(request, user);
+            } else {
+                job = jobService.getUserJobById(request, user, jobId);
+            }
+
+
+            List<String> columnNames = new ArrayList<String>(paramNames.length + 1);
+            columnNames.add(group);
+            columnNames.addAll(Arrays.asList(paramNames));
+
+            is = fss.readFile(job, fileName);
+            List<Integer> indexes = csvService.columnNameToIndex(is, columnNames);
+
+            is = fss.readFile(job, fileName);
+            String[][] rawData = csvService.getRawStringData(is, indexes, true);
+
+            ModelMap response = new ModelMap();
+            for (String[] row : rawData) {
+                String holeId = row[0];
+                List<String[]> data = (List<String[]>) response.get(holeId);
+                if (data == null) {
+                    data = new ArrayList<String[]>();
+                    response.put(holeId, data);
+                }
+
+                data.add(Arrays.copyOfRange(row, 1, row.length));
+            }
+
+            return generateJSONResponseMAV(true, response, "");
+        } catch (PortalServiceException ex) {
+            log.error("Unable to lookup job:", ex);
+            return generateJSONResponseMAV(false);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
     }
 }
