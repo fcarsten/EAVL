@@ -37,4 +37,9 @@ public class WpsService {
     	return res;
     }
 
+	public void checkVM(WpsServiceClient wpsClient) {
+		vmPool.verifyVm(wpsClient);
+
+	}
+
 }

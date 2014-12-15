@@ -40,6 +40,23 @@ import com.google.common.base.Optional;
 @ThreadSafe
 public class VmPool {
 
+	/**
+	 * @author fri096
+	 *
+	 */
+	public class VerifyVmAndCheckPoolTask extends VerifyVmTask {
+
+		public VerifyVmAndCheckPoolTask(WpsVm vm) {
+			super(vm);
+		}
+		@Override
+		public Void call() throws Exception {
+			super.call();
+			checkAndFixPoolSizeAsync();
+			return null;
+		}
+	}
+
 	private int vmPoolSize = 1;
 
 	/**
@@ -222,7 +239,9 @@ public class VmPool {
 		int numNewVmsNeeded = 0;
 		ConcurrentLinkedQueue<WpsVm> badVms = new ConcurrentLinkedQueue<WpsVm>();
 
+		log.info("Checking vm pool size");
 		synchronized (vmPool) {
+			boolean poolChanged=false;
 			//
 			// sort out any VMs that have been marked as bad or decommissioned
 			//
@@ -232,11 +251,20 @@ public class VmPool {
 						|| vm.getStatus() == VmStatus.DECOMMISSIONED) {
 					badVms.add(vm);
 					iter.remove();
+					poolChanged=true;
 				}
 			}
 			currentPoolSize = vmPool.size() + numOrderedVms;
 			numNewVmsNeeded = vmPoolSize - currentPoolSize;
 			numOrderedVms += numNewVmsNeeded;
+			if(poolChanged) {
+				log.info("Removed failed or decomissioned VMs. Persisting changed VM Pool");
+				try {
+					persistor.saveVmPool(new HashSet<>(vmPool));
+				} catch (IOException e) {
+					log.error("Coudl not persist VM pool: "+e.getMessage(),e);
+				}
+			}
 		}
 
 		final int delta = numNewVmsNeeded;
@@ -325,7 +353,7 @@ public class VmPool {
 	}
 
 	private void terminateVm(WpsVm vm) {
-		// TODO Implement VmPool#terminateVm()
+		log.error("Terminating VM not implemented yet. Can't terminate: "+vm.getId());
 	}
 
 	private void retireVms(int i) {
@@ -458,6 +486,36 @@ public class VmPool {
 
 	protected void setKeypair(String keypair) {
 		this.keypair = keypair;
+	}
+
+	public void verifyVm(WpsServiceClient wpsClient) {
+		synchronized (vmPool) {
+			WpsVm vm = findVm(wpsClient.getEndpoint());
+			if(vm==null) return;
+			//
+			// Temporarily remove VM for testing
+			//
+			vmPool.remove(vm);
+			numOrderedVms++;
+			//
+			// Test VM and add again if ok
+			// If not ok, new VM will be requested automatically
+			//
+			vm.setStatus(VmStatus.UNKNOWN);
+			executor.submit(new VerifyVmAndCheckPoolTask(vm));
+		}
+
+	}
+
+	private WpsVm findVm(String endpoint) {
+		synchronized (vmPool) {
+			for (WpsVm vm : vmPool) {
+				if(endpoint.contains(vm.getServiceUrl())) {
+					return vm;
+				}
+			}
+		}
+		return null;
 	}
 
 }

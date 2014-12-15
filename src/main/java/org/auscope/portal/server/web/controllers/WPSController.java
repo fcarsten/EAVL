@@ -1,5 +1,6 @@
 package org.auscope.portal.server.web.controllers;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.auscope.eavl.wpsclient.ACF;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.server.security.oauth2.PortalUser;
+import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
@@ -33,7 +35,8 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("wps")
 public class WPSController extends BasePortalController {
 
-    private FileStagingService fss;
+    private static final int MAX_RETRIES = 3;
+	private FileStagingService fss;
     private CSVService csvService;
     private WpsService wpsService;
     private EAVLJobService jobService;
@@ -50,27 +53,49 @@ public class WPSController extends BasePortalController {
     public ModelAndView getPDFData(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
             @RequestParam("columnIndex") int columnIndex) {
 
-        try {
-            EAVLJob job = jobService.getJobForSession(request, user);
-            InputStream csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-            List<Double> columnData = csvService.getParameterValues(csvData, columnIndex, false);
-            WpsServiceClient wpsClient = wpsService.getWpsClient();
-            double[][] response = wpsClient.logDensity(columnData.toArray(new Double[columnData.size()]));
+    	int retries= MAX_RETRIES;
+    	List<Double> columnData;
+		try {
+			EAVLJob job = jobService.getJobForSession(request, user);
+			InputStream csvData = fss.readFile(job,
+					EAVLJobConstants.FILE_DATA_CSV);
+			columnData = csvService.getParameterValues(
+					csvData, columnIndex, false);
+		} catch (PortalServiceException e) {
+			log.warn("Unable to get pdf values: ", e);
+			return generateJSONResponseMAV(false, null,
+					"Error fetching pdf data");
+		}
 
-            JSONArray xyPairs = new JSONArray();
-			if (response.length > 0) {
-				for (int i = 0; i < response[0].length; i++) {
-					JSONArray xy = new JSONArray();
-					xy.add(response[0][i]);
-					xy.add(response[1][i]);
-					xyPairs.add(xy);
+		while (retries-->0) {
+			WpsServiceClient wpsClient=null;
+			try {
+				wpsClient = wpsService.getWpsClient();
+				double[][] response = wpsClient.logDensity(columnData
+						.toArray(new Double[columnData.size()]));
+
+				JSONArray xyPairs = new JSONArray();
+				if (response.length > 0) {
+					for (int i = 0; i < response[0].length; i++) {
+						JSONArray xy = new JSONArray();
+						xy.add(response[0][i]);
+						xy.add(response[1][i]);
+						xyPairs.add(xy);
+					}
 				}
+				return new ModelAndView(new JSONView(xyPairs), null);
+			} catch (IOException ex) {
+				log.warn("Unable to get pdf values: ", ex);
+				log.warn("Assuming bad VM");
+				wpsService.checkVM(wpsClient);
+			} catch (Exception ex) {
+				log.warn("Unable to get pdf values: ", ex);
+				return generateJSONResponseMAV(false, null,
+						"Error fetching pdf data");
 			}
-            return new ModelAndView(new JSONView(xyPairs), null);
-        } catch (Exception ex) {
-            log.warn("Unable to get pdf values: ", ex);
-            return generateJSONResponseMAV(false, null, "Error fetching pdf data");
-        }
+		}
+		return generateJSONResponseMAV(false, null,
+				"Error fetching pdf data");
     }
 
     @RequestMapping("/getDoublePDFData.do")
@@ -103,8 +128,25 @@ public class WPSController extends BasePortalController {
             csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             Double[][] data = csvService.getRawData(csvData, Arrays.asList(predictionColumnIndex, columnIndex));
 
-            WpsServiceClient wpsClient = wpsService.getWpsClient();
-            double[][] response = wpsClient.doubleLogDensity(data, predictionCutoff);
+        	double[][] response=null;
+        	int retries= MAX_RETRIES;
+			while (response == null && retries--> 0) {
+				WpsServiceClient wpsClient = null;
+				try {
+					wpsClient = wpsService.getWpsClient();
+					response = wpsClient.doubleLogDensity(data,
+							predictionCutoff);
+				} catch (IOException e) {
+
+					log.warn("Unable to get double pdf values: ", e);
+					log.warn("Assuming bad VM");
+					wpsService.checkVM(wpsClient);
+
+				}
+			}
+    		if(response==null) {
+                return generateJSONResponseMAV(false, null, "Error fetching double pdf data");
+    		}
             JSONArray xyPairs = new JSONArray();
             for (int i = 0; i < response.length; i++) {
                 JSONArray xyxy = new JSONArray();
@@ -152,11 +194,25 @@ public class WPSController extends BasePortalController {
             csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             String[][] data = csvService.getRawStringData(csvData, Arrays.asList(holeIdIndex, columnIndex), true);
 
-            WpsServiceClient wpsClient = wpsService.getWpsClient();
-            ACF response = wpsClient.meanACF(data);
+        	int retries= MAX_RETRIES;
+        	ACF response=null;
+			while (response == null && retries--> 0) {
+				WpsServiceClient wpsClient = null;
+				try {
+					wpsClient = wpsService.getWpsClient();
+					 response = wpsClient.meanACF(data);
 
+				} catch (IOException ex) {
+					log.warn("Unable to get pdf values: ", ex);
+					log.warn("Assuming bad VM");
+					wpsService.checkVM(wpsClient);
+				}
+			}
             ModelMap responseModel = new ModelMap();
 
+            if(response==null){
+                return generateJSONResponseMAV(false, null, "Error fetching mean ACF data");
+            }
             responseModel.put("ci", parseDouble(response.getCi()));
             List<Double> acf = new ArrayList<Double>();
             for (double d : response.getAcf()) {
@@ -167,7 +223,7 @@ public class WPSController extends BasePortalController {
             return generateJSONResponseMAV(true, responseModel, "");
         } catch (Exception ex) {
             log.warn("Unable to get mean ACF values: ", ex);
-            return generateJSONResponseMAV(false, null, "Error fetching double pdf data");
+            return generateJSONResponseMAV(false, null, "Error fetching mean ACF data");
         }
     }
 }
