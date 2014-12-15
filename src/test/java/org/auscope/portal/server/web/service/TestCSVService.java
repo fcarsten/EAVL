@@ -635,7 +635,7 @@ public class TestCSVService extends PortalTestClass{
 
         Assert.assertEquals(expected, os.toString());
     }
-    
+
     @Test
     public void testWriteRawDataColIncludes() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
@@ -654,7 +654,7 @@ public class TestCSVService extends PortalTestClass{
 
         Assert.assertEquals(expected, os.toString());
     }
-    
+
     @Test
     public void testWriteRawDataExcludes() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
@@ -692,7 +692,7 @@ public class TestCSVService extends PortalTestClass{
     @Test
     public void testColNameToIndex() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
-        Assert.assertNull(service.columnNameToIndex(is, null));
+        Assert.assertNull(service.columnNameToIndex(is, (String) null));
 
         is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
         Assert.assertNull(service.columnNameToIndex(is, "DNE"));
@@ -708,6 +708,31 @@ public class TestCSVService extends PortalTestClass{
 
         is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
         Assert.assertEquals((Integer) 4, service.columnNameToIndex(is, " data"));
+    }
+
+    @Test
+    public void testColNamesToIndex() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        Assert.assertEquals(service.columnNameToIndex(is, Arrays.asList((String) null)), Arrays.asList((Integer) null));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        Assert.assertEquals(service.columnNameToIndex(is, Arrays.asList("DNE")), Arrays.asList((Integer) null));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/empty-data.csv");
+        Assert.assertEquals(service.columnNameToIndex(is, Arrays.asList("DNE")), Arrays.asList((Integer) null));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Assert.assertEquals(service.columnNameToIndex(is, Arrays.asList("DNE")), Arrays.asList((Integer) null));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Assert.assertEquals(service.columnNameToIndex(is, Arrays.asList(" gold (au) ppm")), Arrays.asList((Integer) 1));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Assert.assertEquals(service.columnNameToIndex(is, Arrays.asList(" data")), Arrays.asList((Integer) 4));
+
+        is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Assert.assertEquals(service.columnNameToIndex(is, Arrays.asList(" data", (String) null, "DNE", " gold (au) ppm")),
+                Arrays.asList((Integer) 4, (Integer) null, (Integer) null, (Integer) 1));
     }
 
     @Test(expected=PortalServiceException.class)

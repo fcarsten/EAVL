@@ -793,7 +793,7 @@ public class CSVService {
     public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data) throws PortalServiceException {
     	writeRawData(csvData, replacedCsvData, data, null, true);
     }
-    
+
     /**
      * Reads the headers of csvData into replacedCsvData and then follows it up by writing the entirety of
      * data into replacedCsvData
@@ -900,6 +900,56 @@ public class CSVService {
             return null;
         } catch (Exception ex) {
             throw new PortalServiceException("Unable to nameToIndex for name:" + name, ex);
+        } finally {
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
+
+    /**
+     * Attempts to take a list of column header names to find out what the
+     * numerical (0 based) index of each one is. Returns a list of indexes in
+     * a list corresponding 1-1 with the specified names
+     *
+     * The return value will contain null elements if entries in column names couldn't be
+     * found.
+     *
+     * Closes InputStream before returning.
+     *
+     * @param csvData input CSV data
+     * @param name The column header name
+     * @return
+     */
+    public List<Integer> columnNameToIndex(InputStream csvData, List<String> names) throws PortalServiceException {
+        CSVReader reader = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+
+            //Copy the header line (if it exists)
+            String[] headerLine = getNextNonEmptyRow(reader);
+            boolean isHeader = isHeaderLine(headerLine);
+
+            List<Integer> indexes = new ArrayList<Integer>(names.size());
+            for (String name : names) {
+                boolean found = false;
+                if (isHeader) {
+                    for (int i = 0; i < headerLine.length; i++) {
+                        if (headerLine[i].equals(name)) {
+                            indexes.add(i);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    indexes.add(null);
+                }
+            }
+
+            return indexes;
+        } catch (Exception ex) {
+            throw new PortalServiceException("Unable to nameToIndex for names:" + names, ex);
         } finally {
             IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(csvData);
