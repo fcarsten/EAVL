@@ -21,6 +21,8 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
      */
     constructor : function(config) {
 
+        config.svgClass = 'pdf-chart-svg';
+
         this.allowCutoffSelection = config.allowCutoffSelection ? true : false;
         this._cutoffOverride = Ext.isNumber(config.cutoffValue) ? config.cutoffValue : null;
         this.callParent(arguments);
