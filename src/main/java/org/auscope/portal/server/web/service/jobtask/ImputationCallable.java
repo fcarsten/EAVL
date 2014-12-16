@@ -36,16 +36,16 @@ public class ImputationCallable implements Callable<Object> {
     protected List<Integer> getExcludedColumns() throws PortalServiceException {
         List<Integer> exclusions = new ArrayList<Integer>();
 
-        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-        Integer index = csvService.columnNameToIndex(in, job.getHoleIdParameter());
-        if (index != null) {
-            exclusions.add(index);
-        }
-
         List<String> savedParamList = new ArrayList<String>(job.getSavedParameters());
-        in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
         List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, savedParamList);
         exclusions.addAll(savedParamIndexes);
+
+        in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        Integer index = csvService.columnNameToIndex(in, job.getHoleIdParameter());
+        if (index != null && !exclusions.contains(index)) {
+            exclusions.add(index);
+        }
 
         return exclusions;
     }

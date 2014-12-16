@@ -13,7 +13,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
@@ -45,14 +44,10 @@ public class KDECallable implements Callable<Object> {
     protected List<Integer> getProxyCols() throws PortalServiceException {
         List<Integer> inclusions = new ArrayList<Integer>();
 
-        //Not the most efficient method - should't really be run that often or over many items so I doubt it will matter
-        for (String name : job.getProxyParameters()) {
-            InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            Integer index = csvService.columnNameToIndex(in, name);
-            if (index != null && !inclusions.contains(index)) {
-                inclusions.add(index);
-            }
-        }
+        List<String> proxyParamList = new ArrayList<String>(job.getProxyParameters());
+        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, proxyParamList);
+        inclusions.addAll(savedParamIndexes);
 
         return inclusions;
     }
@@ -88,7 +83,7 @@ public class KDECallable implements Callable<Object> {
             //Create a "fake" CSV file containing just the estimate data
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
-            writer.write("eavl-kde-estimate\n");
+            writer.write(EAVLJobConstants.PARAMETER_ESTIMATE + "\n");
             JSONObject json = JSONObject.fromObject(kdeJson);
             JSONObject gkde = (JSONObject) json.get("gkde");
             JSONObject estimate = (JSONObject) gkde.get("estimate");
