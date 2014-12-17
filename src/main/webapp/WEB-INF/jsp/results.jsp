@@ -38,7 +38,7 @@
         <script src="portal-core/js/d3/d3.min.js" type="text/javascript" ></script>
         <script src="portal-core/js/threejs/three.min.js" type="text/javascript"></script>
         <script src="portal-core/js/threejs/controls/OrbitControls.js" type="text/javascript"></script>
-        <script src="js/d3plugins/VirtualScroller.js" type="text/javascript" ></script>
+        <script src="js/d3plugins/d3-tip.js" type="text/javascript" ></script>
         
         <script src="portal-core/js/portal/util/UnimplementedFunction.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/util/FileDownloader.js" type="text/javascript"></script>

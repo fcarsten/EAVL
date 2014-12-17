@@ -9,8 +9,9 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
 
     data : null,
     viewport : null,
-    rowHeight: 30,
-    rowMargin: 2,
+    rowHeight: 50,
+    rowMargin: 3,
+    textWidth: 100,
 
     /**
      * Adds the following config
@@ -84,6 +85,8 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
 
         this.d3svg.attr("height", data.length * this.rowHeight);
         var width = this.viewport.attr('width');
+        var barWidth = width - this.textWidth;
+
         var estimateToColor = function(e) {
             if (e < 0.1) {
                 return '#eeeeee';
@@ -98,104 +101,39 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             }
         };
 
+        var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, -20])
+            .direction('w')
+            .html(function(d) {
+              return "<strong>Estimate:</strong> <span>" + this.getAttribute('estimate') + "</span>";
+            });
+
+        this.d3svg.call(tip);
+
         for (var i = 0; i < data.length; i++) {
             var bh = data[i];
             var bhGroup = this.d3svg.append("g")
+                .attr('class', 'bhe-group')
                 .attr("transform", "translate(0, " + i * this.rowHeight + ")");
 
-            var rectWidth = width / bh.values.length;
+            var rectWidth = barWidth / bh.values.length;
             for (var j = 0; j < bh.values.length; j++) {
                 bhGroup.append("rect")
-                     .attr('x', this.rowMargin + j * rectWidth)
+                     .attr('x', this.textWidth + this.rowMargin + j * rectWidth)
                      .attr('y', this.rowMargin)
                      .attr('width', rectWidth)
+                     .attr('estimate', bh.values[j])
                      .attr('height', this.rowHeight - this.rowMargin * 2)
+                     .on('mouseover', tip.show)
+                     .on('mouseout', tip.hide)
                      .attr('fill', estimateToColor(bh.values[j]));
+
             }
 
             bhGroup.append("text")
-                .attr("transform", "translate(10," + this.rowHeight / 2 + ")")
+                .attr("transform", "translate(10," + (this.rowHeight / 2 + 8) + ")")
                 .text(bh.group);
         }
-
-        /*var colorScale = d3.scale.category20();
-
-        var rowEnter = function(rowSelection) {
-            console.log("Enter: ", arguments);
-
-            for (var i = 0; i < data.length)
-
-            rowSelection.append("rect")
-                .attr("rx", 3)
-                .attr("ry", 3)
-                .attr("width", "250")
-                .attr("height", "24")
-                .attr("fill-opacity", 0.25)
-                .attr("stroke", "#999999")
-                .attr("stroke-width", "2px");
-            rowSelection.append("text")
-                .attr("transform", "translate(10,15)");
-        };
-        var rowUpdate = function(rowSelection) {
-            console.log("Update: ", arguments);
-            rowSelection.select("rect")
-                .attr("fill", function(d) {
-                    return colorScale(d.values[0][0]);
-                });
-            rowSelection.select("text")
-                .text(function (d) {
-                    return d.group;
-                });
-        };
-
-        var rowExit = function(rowSelection) {
-        };
-
-
-        var virtualScroller = d3.VirtualScroller()
-            .rowHeight(30)
-            .enter(rowEnter)
-            .update(rowUpdate)
-            .exit(rowExit)
-            .svg(this.d3svg)
-            .totalRows(data.length)
-            .viewport(viewport);
-
-        virtualScroller.data(data, function(d) {return d.group;});
-
-
-        var chartGroup = this.d3svg.append("g")
-            .attr("class", "chartGroup")
-            //.attr("filter", "url(#dropShadow1)"); // sometimes causes issues in chrome
-
-        chartGroup.append("rect")
-            .attr("fill", "#FFFFFF");
-
-        chartGroup.call(virtualScroller);*/
-
-        /*for (var bhName in data) {
-            var estimates = data[bhName];
-            console.log(bhName);
-            var bhGroup = parent.append("g")
-                .attr("class", "bhe-inner")
-                .attr("transform", "translate(" + innerMargin.left + "," + innerMargin.top + index * innerHeight + ")");
-
-            bhGroup.append("text")
-                .attr('x', 0)
-                .attr('y', 0)
-                .attr("width", textWidth)
-                .style("text-anchor", "left")
-                .text(bhName);
-
-            bhGroup.append("rect")
-                .attr('x', textWidth + 10)
-                .attr('y', (innerHeight - barHeight) / 2 )
-                .attr('height', barHeight)
-                .attr('width', barWidth)
-
-            index++;
-        }*/
-
-
     }
 });
