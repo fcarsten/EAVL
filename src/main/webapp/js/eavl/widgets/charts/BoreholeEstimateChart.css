@@ -1,0 +1,46 @@
+.bhe-outer {
+	
+}
+
+.bhe-inner {
+	
+}
+
+.viewport {
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 10px;
+}
+.scroll-svg {
+
+}
+.longscroll .row {
+    font-family: Arial;
+    font-size: 11px;
+    height: 19px;
+    padding: 0 8px;
+    border-bottom: solid #eee 1px;
+}
+
+.information {
+    position: absolute;
+    top: 15px;
+    left: 300px;
+    width: 350px;
+    height: 400px;
+}
+
+.info-svg {
+    fill: #2968AA;
+    overflow: visible;
+}
+
+.brace {
+    stroke: #2968AA;
+    stroke-width: 2px;
+    fill: none;
+}
+
+.infotext {
+    font-size: 20px;
+}
