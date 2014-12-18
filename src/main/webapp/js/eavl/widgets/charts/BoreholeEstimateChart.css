@@ -1,0 +1,24 @@
+.viewport {
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 10px;
+}
+
+.bhe-group rect:hover {
+	stroke: #ff0000;
+}
+
+.bhe-group text {
+	font-size: 16.5px;
+	font-weight: 700;
+    font-family: "Helvetica Neue",Arial,Verdana,sans-serif;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+}

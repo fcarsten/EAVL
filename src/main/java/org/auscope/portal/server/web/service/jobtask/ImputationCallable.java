@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
@@ -37,19 +36,15 @@ public class ImputationCallable implements Callable<Object> {
     protected List<Integer> getExcludedColumns() throws PortalServiceException {
         List<Integer> exclusions = new ArrayList<Integer>();
 
+        List<String> savedParamList = new ArrayList<String>(job.getSavedParameters());
         InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-        Integer index = csvService.columnNameToIndex(in, job.getHoleIdParameter());
-        if (index != null) {
-            exclusions.add(index);
-        }
+        List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, savedParamList);
+        exclusions.addAll(savedParamIndexes);
 
-        //Not the most efficient method - should't really be run that often or over many items so I doubt it will matter
-        for (String name : job.getSavedParameters()) {
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-            index = csvService.columnNameToIndex(in, name);
-            if (index != null && !exclusions.contains(index)) {
-                exclusions.add(index);
-            }
+        in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        Integer index = csvService.columnNameToIndex(in, job.getHoleIdParameter());
+        if (index != null && !exclusions.contains(index)) {
+            exclusions.add(index);
         }
 
         return exclusions;

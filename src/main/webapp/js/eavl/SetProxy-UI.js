@@ -194,6 +194,7 @@ Ext.application({
                 if (responseObj.data.status === eavl.models.EAVLJob.STATUS_THRESHOLD ||
                     responseObj.data.status === eavl.models.EAVLJob.STATUS_PROXY ||
                     responseObj.data.status === eavl.models.EAVLJob.STATUS_SUBMITTED ||
+                    responseObj.data.status === eavl.models.EAVLJob.STATUS_KDE_ERROR ||
                     responseObj.data.status === eavl.models.EAVLJob.STATUS_DONE) {
                     initialParams = responseObj.data;
                     pdStore.load();

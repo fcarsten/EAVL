@@ -17,6 +17,7 @@ Ext.define('eavl.widgets.JobFileList', {
      * Adds the following events
      * {
      *  preview : function(this, fileName, job)
+     *  dataview : function(this, fileName, job)
      * }
      */
     constructor : function(config) {
@@ -82,15 +83,37 @@ Ext.define('eavl.widgets.JobFileList', {
                         style: {
                             cursor: 'pointer'
                         },
+                        src: 'portal-core/img/binary.png'
+                    });
+                },
+                hasTip : true,
+                tipRenderer: function() {
+                    return "Click to view the raw file data.";
+                },
+                listeners : {
+                    columnclick : Ext.bind(this._inspectClickHandler, this)
+                }
+            },{
+                xtype: 'clickcolumn',
+                dataIndex : 'name',
+                width: 48,
+                renderer: function() {
+                    return Ext.DomHelper.markup({
+                        tag : 'img',
+                        width : 32,
+                        height : 32,
+                        style: {
+                            cursor: 'pointer'
+                        },
                         src: 'img/inspect.png'
                     });
                 },
                 hasTip : true,
                 tipRenderer: function() {
-                    return "Click to inspect this file.";
+                    return "Click to visualise this file.";
                 },
                 listeners : {
-                    columnclick : Ext.bind(this._inspectClickHandler, this)
+                    columnclick : Ext.bind(this._dataClickHandler, this)
                 }
             },{
                 dataIndex : 'name',
@@ -113,7 +136,7 @@ Ext.define('eavl.widgets.JobFileList', {
 
         this.callParent(arguments);
 
-        this.addEvents(['preview']);
+        this.addEvents(['preview', 'dataview']);
     },
 
     _downloadClickHandler :  function(value, record, column, tip) {
@@ -125,6 +148,10 @@ Ext.define('eavl.widgets.JobFileList', {
 
     _inspectClickHandler :  function(value, record, column, tip) {
         this.fireEvent('preview', this, record.get('name'), this.job);
+    },
+
+    _dataClickHandler :  function(value, record, column, tip) {
+        this.fireEvent('dataview', this, record.get('name'), this.job);
     },
 
     /**

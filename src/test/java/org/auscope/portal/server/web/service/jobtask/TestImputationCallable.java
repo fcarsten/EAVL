@@ -3,6 +3,7 @@ package org.auscope.portal.server.web.service.jobtask;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -49,9 +50,9 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);will(returnValue(mockOsTmp));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_IMPUTED_CSV);will(returnValue(mockOs));
 
-            oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1, 2))), with(false));will(returnValue(data));
-            oneOf(mockCsvService).writeRawData(with(mockIs1), with(mockOsTmp), with(imputedData), with(equal(Arrays.asList(1, 2))), with(false));
-            oneOf(mockCsvService).mergeFiles(with(mockIs1), with(mockIs2), with(mockOs), with(equal(Arrays.asList(1,2))), with(((List<Integer>) null)));
+            oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(2, 1))), with(false));will(returnValue(data));
+            oneOf(mockCsvService).writeRawData(with(mockIs1), with(mockOsTmp), with(imputedData), with(equal(Arrays.asList(2, 1))), with(false));
+            oneOf(mockCsvService).mergeFiles(with(mockIs1), with(mockIs2), with(mockOs), with(equal(Arrays.asList(2, 1))), with(((List<Integer>) null)));
 
             oneOf(mockFss).deleteStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);
 
@@ -60,8 +61,8 @@ public class TestImputationCallable extends PortalTestClass {
             allowing(mockJob).getHoleIdParameter();will(returnValue(holeIdParam));
             allowing(mockJob).getSavedParameters();will(returnValue(Sets.newHashSet(savedParam)));
 
-            oneOf(mockCsvService).columnNameToIndex(mockIs1, savedParam);will(returnValue(new Integer(2)));
             oneOf(mockCsvService).columnNameToIndex(mockIs1, holeIdParam);will(returnValue(new Integer(1)));
+            oneOf(mockCsvService).columnNameToIndex(with(mockIs1), with(Arrays.asList(savedParam)));will(returnValue(Arrays.asList(new Integer(2))));
 
             atLeast(1).of(mockIs1).close();
             atLeast(1).of(mockIs2).close();
@@ -85,6 +86,7 @@ public class TestImputationCallable extends PortalTestClass {
             allowing(mockJob).getSavedParameters();will(returnValue(new HashSet<String>()));
 
             oneOf(mockCsvService).columnNameToIndex(mockIs1, "hole-id");will(returnValue(new Integer(1)));
+            oneOf(mockCsvService).columnNameToIndex(with(mockIs1), with(new ArrayList<String>()));will(returnValue(new ArrayList<Integer>()));
 
             allowing(mockFss).readFile(mockJob, EAVLJobConstants.FILE_DATA_CSV);will(returnValue(mockIs1));
             oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1))), with(false));will(returnValue(data));
