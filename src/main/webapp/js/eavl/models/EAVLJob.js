@@ -12,7 +12,9 @@ Ext.define('eavl.models.EAVLJob', {
         STATUS_THRESHOLD : "threshold",
         STATUS_PROXY : "proxy",
         STATUS_SUBMITTED : "submitted",
-        STATUS_DONE : "done"
+        STATUS_DONE : "done",
+
+        PARAMETER_ESTIMATE : "eavl-kde-estimate"
     },
 
     fields: [

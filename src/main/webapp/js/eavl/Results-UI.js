@@ -77,8 +77,13 @@ Ext.application({
                                 preview : function(jobFileList, fileName, job) {
                                     if (fileName.endsWith(".csv")) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "csv");
-                                    } else if (fileName.endsWith(".json")) {
+                                    }
+                                },
+                                dataview : function(jobFileList, fileName, job) {
+                                    if (fileName.endsWith(".json")) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "3dscatter");
+                                    } else if (fileName.endsWith(".csv")) {
+                                        Ext.getCmp('filepreviewpanel').preview(job, fileName, "bhestimate");
                                     }
                                 }
                             }

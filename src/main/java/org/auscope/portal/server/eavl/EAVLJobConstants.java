@@ -29,4 +29,9 @@ public final class EAVLJobConstants {
      * The filename containing the kernel density estimate outputs (encoded with the CSV data)
      */
     public static final String FILE_KDE_CSV = "data-kde.csv";
+
+    /**
+     * The name of the estimate column encoded in the final results file
+     */
+    public static final String PARAMETER_ESTIMATE = "eavl-kde-estimate";
 }
