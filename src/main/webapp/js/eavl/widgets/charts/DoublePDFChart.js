@@ -15,6 +15,7 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
      *
      */
     constructor : function(config) {
+        config.svgClass = 'pdf-chart-svg';
         this.callParent(arguments);
     },
 

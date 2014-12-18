@@ -247,7 +247,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     _loadTextValueStore : function(parameterDetails) {
         var data = [];
 
-        values = parameterDetails.get('textValues');
+        var values = parameterDetails.get('textValues');
         for (textValue in values) {
             data.push({name : textValue, total : values[textValue]});
         }

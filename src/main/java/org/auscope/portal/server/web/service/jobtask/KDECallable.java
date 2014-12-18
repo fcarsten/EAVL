@@ -1,6 +1,5 @@
 package org.auscope.portal.server.web.service.jobtask;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -18,9 +17,7 @@ import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
-import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
-import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 
 /**
@@ -32,14 +29,14 @@ public class KDECallable implements Callable<Object> {
     private final Log log = LogFactory.getLog(getClass());
 
     protected EAVLJob job;
-    protected WpsService wpsService;
+    protected WpsServiceClient wpsClient;
     protected CSVService csvService;
     protected FileStagingService fss;
 
-    public KDECallable(EAVLJob job, WpsService wpsService, CSVService csvService, FileStagingService fss) {
+    public KDECallable(EAVLJob job, WpsServiceClient wpsClient, CSVService csvService, FileStagingService fss) {
         super();
         this.job = job;
-        this.wpsService = wpsService;
+        this.wpsClient = wpsClient;
         this.csvService = csvService;
         this.fss = fss;
     }
@@ -47,14 +44,10 @@ public class KDECallable implements Callable<Object> {
     protected List<Integer> getProxyCols() throws PortalServiceException {
         List<Integer> inclusions = new ArrayList<Integer>();
 
-        //Not the most efficient method - should't really be run that often or over many items so I doubt it will matter
-        for (String name : job.getProxyParameters()) {
-            InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            Integer index = csvService.columnNameToIndex(in, name);
-            if (index != null && !inclusions.contains(index)) {
-                inclusions.add(index);
-            }
-        }
+        List<String> proxyParamList = new ArrayList<String>(job.getProxyParameters());
+        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, proxyParamList);
+        inclusions.addAll(savedParamIndexes);
 
         return inclusions;
     }
@@ -77,22 +70,9 @@ public class KDECallable implements Callable<Object> {
 
             in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             List<Double> predictorData = this.csvService.getParameterValues(in, predictorIndex, true);
-        	int retries= WPSController.MAX_RETRIES;
-        	String kdeJson=null;
-			while (kdeJson == null && retries--> 0) {
-				WpsServiceClient wpsClient = null;
-				try {
-					wpsClient = wpsService.getWpsClient();
-					kdeJson = wpsClient.hpiKdeJSON(proxyData, predictorData.toArray(new Double[predictorData.size()]), job.getPredictionCutoff());
-				} catch (IOException e) {
-					log.warn("Unable to get double pdf values: ", e);
-					log.warn("Assuming bad VM");
-					wpsService.checkVM(wpsClient);
-				}
-			}
-    		if(kdeJson==null) {
-                return new PortalServiceException("Error computing kernel density estimate data");
-    		}
+
+            double[][] cenLrData = wpsClient.cenLR(proxyData);
+            String kdeJson = wpsClient.hpiKdeJSON(cenLrData, predictorData.toArray(new Double[predictorData.size()]), (double) job.getPredictionCutoff());
 
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_JSON);
             writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
@@ -104,7 +84,7 @@ public class KDECallable implements Callable<Object> {
             //Create a "fake" CSV file containing just the estimate data
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
-            writer.write("eavl-kde-estimate\n");
+            writer.write(EAVLJobConstants.PARAMETER_ESTIMATE + "\n");
             JSONObject json = JSONObject.fromObject(kdeJson);
             JSONObject gkde = (JSONObject) json.get("gkde");
             JSONObject estimate = (JSONObject) gkde.get("estimate");
@@ -122,7 +102,7 @@ public class KDECallable implements Callable<Object> {
 
             return kdeJson;
         } catch (Exception ex) {
-            log.error("Kernel Density Estimation Error: ", ex);
+            log.error("Imputation Error: ", ex);
             throw new PortalServiceException("", ex);
         } finally {
             IOUtils.closeQuietly(writer);

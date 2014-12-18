@@ -52,12 +52,14 @@ public class ThresholdController extends BasePortalController {
         InputStream csvData = null;
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
+            ModelMap response = new ModelMap();
+
 
             csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-
-            ModelMap response = new ModelMap();
+            if (csvData != null) {
+                response.put("parameterDetails", csvService.extractParameterDetails(csvData));
+            }
             response.put("job", viewFactory.toView(job));
-            response.put("parameterDetails", csvService.extractParameterDetails(csvData));
 
             return generateJSONResponseMAV(true, response, "");
         } catch (Exception ex) {

@@ -38,6 +38,7 @@
         <script src="portal-core/js/d3/d3.min.js" type="text/javascript" ></script>
         <script src="portal-core/js/threejs/three.min.js" type="text/javascript"></script>
         <script src="portal-core/js/threejs/controls/OrbitControls.js" type="text/javascript"></script>
+        <script src="js/d3plugins/d3-tip.js" type="text/javascript" ></script>
         
         <script src="portal-core/js/portal/util/UnimplementedFunction.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/util/FileDownloader.js" type="text/javascript"></script>
@@ -53,6 +54,7 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/EAVLJobList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/JobFileList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/BoreholeEstimateChart.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/FilePreviewPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/Results-UI.css">
         
@@ -63,6 +65,7 @@
         <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderDragLink.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/EAVLJobList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/JobFileList.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/charts/BoreholeEstimateChart.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
@@ -70,6 +73,7 @@
         <script type="text/javascript" src="js/eavl/widgets/preview/BaseFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/CSVFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/3DScatterPlotPreview.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/preview/BoreholeEstimatePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/FilePreviewPanel.js"></script>
         
         <script type="text/javascript" src="js/eavl/Results-UI.js"></script>

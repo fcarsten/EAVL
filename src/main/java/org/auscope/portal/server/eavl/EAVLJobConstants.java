@@ -14,6 +14,10 @@ public final class EAVLJobConstants {
      * Temporary filename for the data file (TODO - make this auto generate)
      */
     public static final String FILE_TEMP_DATA_CSV = "data-tmp.csv";
+    /**
+     * The output of the data validation (post culling, pre imputation)
+     */
+    public static final String FILE_VALIDATED_DATA_CSV = "data-validated.csv";
 
     /**
      * The filename of the data.csv AFTER it has been imputed
@@ -29,4 +33,9 @@ public final class EAVLJobConstants {
      * The filename containing the kernel density estimate outputs (encoded with the CSV data)
      */
     public static final String FILE_KDE_CSV = "data-kde.csv";
+
+    /**
+     * The name of the estimate column encoded in the final results file
+     */
+    public static final String PARAMETER_ESTIMATE = "eavl-kde-estimate";
 }

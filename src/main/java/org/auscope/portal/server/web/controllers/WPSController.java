@@ -129,21 +129,19 @@ public class WPSController extends BasePortalController {
             Double[][] data = csvService.getRawData(csvData, Arrays.asList(predictionColumnIndex, columnIndex));
 
         	double[][] response=null;
-        	int retries= MAX_RETRIES;
-			while (response == null && retries--> 0) {
-				WpsServiceClient wpsClient = null;
-				try {
-					wpsClient = wpsService.getWpsClient();
-					response = wpsClient.doubleLogDensity(data,
-							predictionCutoff);
-				} catch (IOException e) {
-
-					log.warn("Unable to get double pdf values: ", e);
-					log.warn("Assuming bad VM");
-					wpsService.checkVM(wpsClient);
-
-				}
-			}
+            int retries = MAX_RETRIES;
+            while (response == null && retries-- > 0) {
+                WpsServiceClient wpsClient = null;
+                try {
+                    wpsClient = wpsService.getWpsClient();
+                    response = wpsClient.doubleLogDensity(data,
+                            predictionCutoff);
+                } catch (IOException e) {
+                    log.warn("Unable to get double pdf values: ", e);
+                    log.warn("Assuming bad VM");
+                    wpsService.checkVM(wpsClient);
+                }
+            }
     		if(response==null) {
                 return generateJSONResponseMAV(false, null, "Error fetching double pdf data");
     		}
