@@ -76,7 +76,8 @@ public class KDECallable implements Callable<Object> {
             in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             List<Double> predictorData = this.csvService.getParameterValues(in, predictorIndex, true);
 
-            String kdeJson = wpsClient.hpiKdeJSON(proxyData, predictorData.toArray(new Double[predictorData.size()]), job.getPredictionCutoff());
+            double[][] cenLrData = wpsClient.cenLR(proxyData);
+            String kdeJson = wpsClient.hpiKdeJSON(cenLrData, predictorData.toArray(new Double[predictorData.size()]), (double) job.getPredictionCutoff());
 
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_JSON);
             writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);
