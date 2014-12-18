@@ -534,7 +534,60 @@ public class TestCSVService extends PortalTestClass{
                 {69.0, null}
         };
 
-        Double[][] actual = service.getRawData(is, Arrays.asList(0, 2, 1), false);
+        Double[][] actual = service.getRawData(is, Arrays.asList(0, 2, 1), false, false);
+        assertRawEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetRawDataColIndexesExclusion2() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        Double[][] expected = new Double[][] {
+                {0.0, 40.0, 59.0, 12.0},
+                {1.0, 42.0, 52.0, 12.0},
+                {2.0, 16.0, 6.0, 15.0},
+                {3.0, 13.0, 43.0, null},
+                {4.0, 16.0, 74.0, 16.0},
+                {5.0, 48.0, 32.0, null},
+                {6.0, 41.0, 72.0, 14.0},
+                {7.0, 11.0, 69.0, null}
+        };
+
+        Double[][] actual = service.getRawData(is, Arrays.asList(2), false, false);
+        assertRawEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetRawDataColIndexesExclusionSkipEmpty() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        Double[][] expected = new Double[][] {
+                {40.0}
+        };
+
+        Double[][] actual = service.getRawData(is, Arrays.asList(1), false, true);
+        assertRawEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetRawDataColIndexesInclusionSkipEmpty() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        Double[][] expected = new Double[][] {
+                {40.0, 40.0},
+                {42.0, null}
+        };
+
+        Double[][] actual = service.getRawData(is, Arrays.asList(1, 0), true, true);
+        assertRawEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetRawDataSkipEmpty() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        Double[][] expected = new Double[][] {
+                {40.0, 40.0},
+                {null, 42.0}
+        };
+
+        Double[][] actual = service.getRawData(is, null, true, true);
         assertRawEquals(expected, actual);
     }
 
@@ -887,6 +940,73 @@ public class TestCSVService extends PortalTestClass{
                 "'DL','DL','DL','DL'\n";
 
         Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testCullRowsColIndexesExclusion() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        String expected = "'sample',' gold (au) ppm'\n" +
+                "'40','40'\n";
+
+        service.cullEmptyRows(is, os, Arrays.asList(1), false);
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testCullRowsColIndexesInclusion() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        String expected = "'sample',' gold (au) ppm'\n" +
+                "'40','40'\n" +
+                "'','42'\n";
+
+        service.cullEmptyRows(is, os, Arrays.asList(1, 0), true);
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testCullRowsData() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        String expected = "'sample',' gold (au) ppm'\n" +
+                "'40','40'\n" +
+                "'','42'\n";
+
+        service.cullEmptyRows(is, os, null, true);
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test
+    public void testCullWhenExcludingLots() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        String expected = "'0',' 40',' D/L',' ',' 12'\n" +
+                "'1',' 42',' 102',' 52',' 12'\n" +
+                "'2',' 16',' 103',' 6',' 15'\n" +
+                "'3',' 13',' 101',' 43',' '\n" +
+                "'4',' 16',' 103',' 74',' 16'\n" +
+                "'5',' 48',' 100',' 32',' '\n" +
+                "'6',' 41',' D/L',' 72',' 14'\n" +
+                "'7',' 11',' 101',' 69',' '\n";
+
+        service.cullEmptyRows(is, os, Arrays.asList(4, 1, 2, 3), false);
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testCullEmptyClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            allowing(mockOutputStream).flush();
+
+            atLeast(1).of(mockStream).close();
+            atLeast(1).of(mockOutputStream).close();
+        }});
+
+        service.cullEmptyRows(mockStream, mockOutputStream, null, true);
     }
 }
 

@@ -14,6 +14,10 @@ public final class EAVLJobConstants {
      * Temporary filename for the data file (TODO - make this auto generate)
      */
     public static final String FILE_TEMP_DATA_CSV = "data-tmp.csv";
+    /**
+     * The output of the data validation (post culling, pre imputation)
+     */
+    public static final String FILE_VALIDATED_DATA_CSV = "data-validated.csv";
 
     /**
      * The filename of the data.csv AFTER it has been imputed

@@ -57,16 +57,24 @@ public class ImputationCallable implements Callable<Object> {
 
         try {
             List<Integer> excludedCols = getExcludedColumns();
+
+            //Start by culling any empty rows (based on compositional params)
             in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);
+            this.csvService.cullEmptyRows(in, os, excludedCols, false);
+
+            //Impute the validated data
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);
             Double[][] rawData = csvService.getRawData(in, excludedCols, false);
             double[][] imputedData = wpsClient.imputationNA(rawData);
 
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            //Write the imputed data to a temporary file
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             this.csvService.writeRawData(in, os, imputedData, excludedCols, false);
 
             //After getting the imputed data, re-insert the "excluded" columns into the imputed dataset
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);
             in2 = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             this.csvService.mergeFiles(in, in2, os, excludedCols, null);
