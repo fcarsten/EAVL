@@ -41,7 +41,6 @@ Ext.application({
 
                 //we need to find all of our parameter details (wherever they are) and update them
                 updatePdList(Ext.getCmp("trashpanel"), parameterDetails);
-                updatePdList(Ext.getCmp("noncomppanel"), parameterDetails);
                 updatePdList(Ext.getCmp("comppanel"), parameterDetails);
 
                 //Need to also update our PD panel
