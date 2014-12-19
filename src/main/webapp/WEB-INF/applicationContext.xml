@@ -1,112 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:cache="http://www.springframework.org/schema/cache"
-	xsi:schemaLocation="
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:cache="http://www.springframework.org/schema/cache"
+    xsi:schemaLocation="
       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
       http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
 
-	<bean id="propertyConfigurer"
-		class="org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer">
-		<property name="locations">
-			<list>
-				<value>classpath:config.properties</value>
-				<value>#{contextParameters['envPropertiesLocation'] ?:
-					'classpath:env.properties'}</value>
-			</list>
-		</property>
-	</bean>
+    <bean id="propertyConfigurer"
+        class="org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:config.properties</value>
+                <value>#{contextParameters['envPropertiesLocation'] ?:
+                    'classpath:env.properties'}
+                </value>
+            </list>
+        </property>
+    </bean>
 
-	<cache:annotation-driven />
-	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
+    <cache:annotation-driven />
+    <bean id="cacheManager"
+        class="org.springframework.cache.ehcache.EhCacheCacheManager"
+        p:cache-manager-ref="ehcache" />
 
-	<bean id="ehcache"
-      class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>
+    <bean id="ehcache"
+        class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+        p:config-location="ehcache.xml" />
 
-	<bean id="wpsClient" class="org.auscope.portal.server.web.service.wps.WpsServiceClient" scope="prototype" lazy-init="true"/>
+    <bean id="wpsClient"
+        class="org.auscope.portal.server.web.service.wps.WpsServiceClient"
+        scope="prototype" lazy-init="true" />
 
-	<bean id="fileStagingService"
-		class="org.auscope.portal.core.services.cloud.FileStagingService">
-		<constructor-arg name="stagingInformation">
-			<bean class="org.auscope.portal.core.cloud.StagingInformation">
-				<constructor-arg name="stageInDirectory" value="${HOST.localStageInDir}" />
-			</bean>
-		</constructor-arg>
-	</bean>
+    <bean id="fileStagingService"
+        class="org.auscope.portal.core.services.cloud.FileStagingService">
+        <constructor-arg name="stagingInformation">
+            <bean class="org.auscope.portal.core.cloud.StagingInformation">
+                <constructor-arg name="stageInDirectory"
+                    value="${HOST.localStageInDir}" />
+            </bean>
+        </constructor-arg>
+    </bean>
 
-	<bean id="multipartResolver"
-		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-	</bean>
+    <bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+    </bean>
 
 
-	<bean id="vmPoolPersister" class="org.auscope.portal.server.web.service.wps.FileVmPoolPersister">
-		<constructor-arg name="propertyConfigurer" ref="propertyConfigurer"/>
-	</bean>
+    <bean id="vmPoolPersister"
+        class="org.auscope.portal.server.web.service.wps.FileVmPoolPersister">
+        <constructor-arg name="propertyConfigurer" ref="propertyConfigurer" />
+    </bean>
 
-	<bean id="vmPool" class="org.auscope.portal.server.web.service.wps.VmPool">
-		<constructor-arg name="persistor" ref="vmPoolPersister" />
-		<constructor-arg name="accessKey" value="${env.nectar.ec2.accesskey}" />
-		<constructor-arg name="secretKey" value="${env.nectar.ec2.secretkey}" />
-		<constructor-arg name="executor" ref="executor" />
-		<property name="skippedZones">
-			<set>
-				<value>monash</value>
-				<value>monash-test</value>
-				<value>monash-01</value>
-				<value>monash-02</value>
-				<value>melbourne</value>
-				<value>melbourne-qh2</value>
-				<value>tasmania</value>
-				<value>tasmania-s</value>
-			</set>
-		</property>
-		<property name="vmPoolSize" value="2"/>
-	</bean>
+    <bean id="vmPool" class="org.auscope.portal.server.web.service.wps.VmPool">
+        <constructor-arg name="persistor" ref="vmPoolPersister" />
+        <constructor-arg name="accessKey"
+            value="${env.nectar.ec2.accesskey}" />
+        <constructor-arg name="secretKey"
+            value="${env.nectar.ec2.secretkey}" />
+        <constructor-arg name="executor" ref="executor" />
+        <property name="skippedZones">
+            <set>
+                <value>monash</value>
+                <value>monash-test</value>
+                <value>monash-01</value>
+                <value>monash-02</value>
+                <value>melbourne</value>
+                <value>melbourne-qh2</value>
+                <value>tasmania</value>
+                <value>tasmania-s</value>
+            </set>
+        </property>
+        <property name="vmPoolSize" value="2" />
+    </bean>
 
-	<bean id="wpsService" class="org.auscope.portal.server.web.service.WpsService">
-		<constructor-arg name="vmPool" ref="vmPool" />
-	</bean>
+    <bean id="wpsService" class="org.auscope.portal.server.web.service.WpsService">
+        <constructor-arg name="vmPool" ref="vmPool" />
+    </bean>
 
-	<bean name="emailListener"
-		class="org.auscope.portal.server.web.service.jobtask.EmailListener">
-		<constructor-arg name="mailSender">
-			<bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
-				<property name="host" value="${HOST.smtp.server}" />
-			</bean>
-		</constructor-arg>
-		<constructor-arg name="velocityEngine">
-			<bean class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
-				<property name="velocityProperties">
-					<value>
-						resource.loader=class
-						class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
-					</value>
-				</property>
-			</bean>
-		</constructor-arg>
-		<constructor-arg name="templateFilePath"
-			value="org/auscope/portal/server/web/service/jobtask/task-completion.tpl" />
-		<constructor-arg name="templateFileEncoding" value="UTF-8" />
-		<constructor-arg name="emailSender">
-			<value><![CDATA[EAVL Admin <noreply-cg-admin@csiro.au>]]></value>
-		</constructor-arg>
-	</bean>
+    <bean name="emailListener"
+        class="org.auscope.portal.server.web.service.jobtask.EmailListener">
+        <constructor-arg name="mailSender">
+            <bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
+                <property name="host" value="${HOST.smtp.server}" />
+            </bean>
+        </constructor-arg>
+        <constructor-arg name="velocityEngine">
+            <bean
+                class="org.springframework.ui.velocity.VelocityEngineFactoryBean">
+                <property name="velocityProperties">
+                    <value>
+                        resource.loader=class
+                        class.resource.loader.class=org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader
+                    </value>
+                </property>
+            </bean>
+        </constructor-arg>
+        <constructor-arg name="templateFilePath"
+            value="org/auscope/portal/server/web/service/jobtask/task-completion.tpl" />
+        <constructor-arg name="templateFileEncoding"
+            value="UTF-8" />
+        <constructor-arg name="emailSender">
+            <value><![CDATA[EAVL Admin <noreply-cg-admin@csiro.au>]]></value>
+        </constructor-arg>
+    </bean>
 
-	<!-- This is the core threadpool shared by object instances throughout the
-		portal -->
-	<!-- <bean id="executorFactory" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
-		<property name="corePoolSize" value="5" /> <property name="maxPoolSize" value="5"
-		/> <property name="queueCapacity" value="25" /> </bean> <bean id="executor"
-		factory-bean="executorFactory" factory-method="getObject"> </bean> -->
+    <!-- This is the core threadpool shared by object instances throughout
+        the portal -->
+    <!-- <bean id="executorFactory" class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
+        <property name="corePoolSize" value="5" /> <property name="maxPoolSize" value="5"
+        /> <property name="queueCapacity" value="25" /> </bean> <bean id="executor"
+        factory-bean="executorFactory" factory-method="getObject"> </bean> -->
 
-	<bean id="executor"
-		class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
-		<property name="corePoolSize" value="5" />
-		<property name="maxPoolSize" value="5" />
-		<property name="queueCapacity" value="25" />
-	</bean>
+    <bean id="executor"
+        class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="5" />
+        <property name="queueCapacity" value="25" />
+    </bean>
 </beans>

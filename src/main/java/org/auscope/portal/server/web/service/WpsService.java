@@ -29,16 +29,17 @@ public class WpsService {
         this.vmPool = vmPool;
     }
 
-    public WpsServiceClient getWpsClient() throws PortalServiceException  {
-    	WpsVm vm= vmPool.getFreeVm();
-    	WpsServiceClient res = (WpsServiceClient) appContext.getBean("wpsClient");
-//    	WpsServiceClient res = new WpsServiceClient();
-    	res.setEndpoting(vm.getServiceUrl());
-    	return res;
+    public WpsServiceClient getWpsClient() throws PortalServiceException {
+        WpsVm vm = vmPool.getFreeVm();
+        WpsServiceClient res = (WpsServiceClient) appContext
+                .getBean("wpsClient");
+        // WpsServiceClient res = new WpsServiceClient();
+        res.setEndpoting(vm.getServiceUrl());
+        return res;
     }
 
-	public void checkVM(WpsServiceClient wpsClient) {
-		vmPool.verifyVm(wpsClient);
-	}
+    public void checkVM(WpsServiceClient wpsClient) {
+        vmPool.verifyVm(wpsClient);
+    }
 
 }
