@@ -13,6 +13,8 @@ public class ParameterDetails implements Serializable {
     private int totalMissing;
     /** Total number of values that are NOT parseable as a number and are non empty*/
     private int totalText;
+    /** Total number of numerical values that equal 0 (exactly) */
+    private int totalZeroes;
     /** A map of every non numeric value (including null string) and their associated counts.*/
     private Map<String, Integer> textValues;
     /** The index of the column in the CSV file (0 based)*/
@@ -83,6 +85,23 @@ public class ParameterDetails implements Serializable {
     public void setTotalText(int totalText) {
         this.totalText = totalText;
     }
+
+    /**
+     * Total number of numerical values that equal 0 (exactly)
+     * @return
+     */
+    public int getTotalZeroes() {
+        return totalZeroes;
+    }
+
+    /**
+     * Total number of numerical values that equal 0 (exactly)
+     * @param totalZeroes
+     */
+    public void setTotalZeroes(int totalZeroes) {
+        this.totalZeroes = totalZeroes;
+    }
+
     /**
      * A map of every non numeric value (including null string) and their associated counts.
      * @return

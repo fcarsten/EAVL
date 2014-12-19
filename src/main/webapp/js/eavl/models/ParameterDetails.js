@@ -69,8 +69,10 @@ Ext.define('eavl.models.ParameterDetails', {
         { name: 'totalNumeric', type: 'int' }, //Total number of numeric values in this parameter
         { name: 'totalMissing', type: 'int' }, //Total number of missing values in this parameter
         { name: 'totalText', type: 'int' }, //Total number of text values in this parameter
+        { name: 'totalZeroes', type: 'int' }, //Total number of numerical 0 values in this parameter
         { name: 'columnIndex', type: 'int' }, //The index of the column in the CSV file (0 based)
         { name: 'textValues', type: 'auto' } //Hashmap of totals keyed by each text (non numeric) value in this parameter
+
     ],
 
     idProperty : 'name',
@@ -82,6 +84,10 @@ Ext.define('eavl.models.ParameterDetails', {
     calculateStatus : function() {
 
         if (this.get('totalText') > 0) {
+            return eavl.models.ParameterDetails.STATUS_ERROR;
+        }
+
+        if (this.get('totalZeroes') > 0) {
             return eavl.models.ParameterDetails.STATUS_ERROR;
         }
 

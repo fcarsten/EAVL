@@ -124,7 +124,8 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(4, details.get(4).getColumnIndex());
 
         Assert.assertEquals(0, details.get(0).getTotalText());
-        Assert.assertEquals(8, details.get(0).getTotalNumeric());
+        Assert.assertEquals(7, details.get(0).getTotalNumeric());
+        Assert.assertEquals(1, details.get(0).getTotalZeroes());
         Assert.assertEquals(0, details.get(0).getTotalMissing());
 
         Assert.assertEquals(1, details.get(2).getTotalText());
@@ -160,7 +161,8 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(4, details.get(4).getColumnIndex());
 
         Assert.assertEquals(0, details.get(0).getTotalText());
-        Assert.assertEquals(8, details.get(0).getTotalNumeric());
+        Assert.assertEquals(7, details.get(0).getTotalNumeric());
+        Assert.assertEquals(1, details.get(0).getTotalZeroes());
         Assert.assertEquals(0, details.get(0).getTotalMissing());
 
         Assert.assertEquals(2, details.get(2).getTotalText());
@@ -262,6 +264,21 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(101, data.get(7), 0.01);
     }
 
+    @Test
+    public void testFindReplaceZeroes() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-zeroes-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        Assert.assertEquals(6, service.findReplaceZeroes(is, os, 0, "ZERO_VALUE", false));
+        String expected = "'sample',' gold (au) ppm'\n" +
+                "'0.00001','40'\n" +
+                "'','42'\n" +
+                "'ZERO_VALUE','DL'\n" +
+                "'ZERO_VALUE','DLVal'\n" +
+                "'ZERO_VALUE','DL'\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
 
     @Test
     public void testFindReplace() throws Exception {

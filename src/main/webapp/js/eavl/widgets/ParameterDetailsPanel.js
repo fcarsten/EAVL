@@ -70,7 +70,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                         series: [{
                             type: 'pie',
                             field: 'total',
-                            colorSet : ['#F7977A', '#FFF79A', '#82CA9D'],
+                            colorSet : ['#F7977A', '#FFF79A', '#82CA9D', '#779ECB'],
                             tips: {
                                 trackMouse: true,
                                 renderer: function(storeItem, item, panel) {
@@ -130,7 +130,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                                             'font-size' : '170%',
                                             'font-style' : emptyString ? 'italic' : 'normal'
                                         },
-                                        html : emptyString ? '(No sample)' : value
+                                        html : emptyString ? '(Zero Values)' : value
                                     },{tag : 'br'},{tag : 'br'},{
                                         tag : 'span',
                                         style : {
@@ -172,7 +172,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     _handleTextValueClick : function(grid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
         Ext.MessageBox.show({
             title: 'Find and Replace',
-            msg: Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to enter a missing value', record.get('name') === '' ? '<i>(No sample)</i>' : record.get('name')),
+            msg: Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to enter a missing value', record.get('name') === '' ? '<i>(Zero Values)</i>' : record.get('name')),
             animateTarget: grid.getEl(),
             icon: Ext.window.MessageBox.QUESTION,
             prompt: true,
@@ -238,6 +238,12 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
             data.push({name : '', total : 0});
         }
 
+        if (parameterDetails.get('totalZeroes') > 0) {
+            data.push({name : 'Zeroes', total : parameterDetails.get('totalZeroes')});
+        } else {
+            data.push({name : '', total : 0});
+        }
+
         this.pieStore.loadData(data);
     },
 
@@ -250,6 +256,10 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         var values = parameterDetails.get('textValues');
         for (textValue in values) {
             data.push({name : textValue, total : values[textValue]});
+        }
+
+        if (parameterDetails.get('totalZeroes') > 0) {
+            data.push({name: '', total : parameterDetails.get('totalZeroes')});
         }
 
         this.textValuesStore.loadData(data);

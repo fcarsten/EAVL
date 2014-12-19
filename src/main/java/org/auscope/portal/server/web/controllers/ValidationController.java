@@ -243,7 +243,7 @@ public class ValidationController extends BasePortalController {
         OutputStream os = null;
         InputStream is = null;
 
-        //Whitespace matches should match on ANY whitespace
+        //An empty find string means search for zeroes
         if (find.trim().isEmpty()) {
             find = null;
         }
@@ -253,7 +253,11 @@ public class ValidationController extends BasePortalController {
             os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
 
-            csvService.findReplace(is, os, columnIndex, find, replace);
+            if (find == null) {
+                csvService.findReplaceZeroes(is, os, columnIndex, replace, false);
+            } else {
+                csvService.findReplace(is, os, columnIndex, find, replace);
+            }
 
             fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
         } catch (Exception ex) {
