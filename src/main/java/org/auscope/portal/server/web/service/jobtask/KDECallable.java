@@ -1,5 +1,6 @@
 package org.auscope.portal.server.web.service.jobtask;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -17,7 +18,9 @@ import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 
 /**
@@ -29,14 +32,14 @@ public class KDECallable implements Callable<Object> {
     private final Log log = LogFactory.getLog(getClass());
 
     protected EAVLJob job;
-    protected WpsServiceClient wpsClient;
+    protected WpsService wpsService;
     protected CSVService csvService;
     protected FileStagingService fss;
 
-    public KDECallable(EAVLJob job, WpsServiceClient wpsClient, CSVService csvService, FileStagingService fss) {
+    public KDECallable(EAVLJob job, WpsService wpsService, CSVService csvService, FileStagingService fss) {
         super();
         this.job = job;
-        this.wpsClient = wpsClient;
+        this.wpsService = wpsService;
         this.csvService = csvService;
         this.fss = fss;
     }
@@ -71,8 +74,25 @@ public class KDECallable implements Callable<Object> {
             in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             List<Double> predictorData = this.csvService.getParameterValues(in, predictorIndex, true);
 
-            double[][] cenLrData = wpsClient.cenLR(proxyData);
-            String kdeJson = wpsClient.hpiKdeJSON(cenLrData, predictorData.toArray(new Double[predictorData.size()]), (double) job.getPredictionCutoff());
+            int retries= WPSController.MAX_RETRIES;
+            String kdeJson=null;
+            while (kdeJson == null && retries--> 0) {
+                WpsServiceClient wpsClient = null;
+                try {
+                    wpsClient = wpsService.getWpsClient();
+                    Double[][] cenLrData = wpsClient.cenLR(proxyData);
+                    kdeJson = wpsClient.hpiKdeJSON(cenLrData, predictorData.toArray(new Double[predictorData.size()]), (double) job.getPredictionCutoff());
+//                    kdeJson = wpsClient.hpiKdeJSON(proxyData, predictorData.toArray(new Double[predictorData.size()]), job.getPredictionCutoff());
+                } catch (IOException e) {
+                    log.warn("Unable to get double pdf values: ", e);
+                    log.warn("Assuming bad VM");
+                    wpsService.checkVM(wpsClient);
+                }
+            }
+            if(kdeJson==null) {
+                return new PortalServiceException("Error computing kernel density estimate data");
+            }
+
 
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_JSON);
             writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);

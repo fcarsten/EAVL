@@ -16,7 +16,7 @@ import org.auscope.portal.core.test.PortalTestClass;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
-import org.auscope.portal.server.web.service.wps.WpsServiceClient;
+import org.auscope.portal.server.web.service.WpsService;
 import org.jmock.Expectations;
 import org.junit.Test;
 
@@ -24,7 +24,7 @@ import com.google.common.collect.Sets;
 
 public class TestImputationCallable extends PortalTestClass {
     private EAVLJob mockJob = context.mock(EAVLJob.class);
-    private WpsServiceClient mockWpsClient = context.mock(WpsServiceClient.class);
+    private WpsService mockWpsClient = context.mock(WpsService.class);
     private CSVService mockCsvService = context.mock(CSVService.class);
     private FileStagingService mockFss = context.mock(FileStagingService.class);
 
@@ -60,7 +60,7 @@ public class TestImputationCallable extends PortalTestClass {
 
             oneOf(mockFss).deleteStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);
 
-            oneOf(mockWpsClient).imputationNA(data);will(returnValue(imputedData));
+            oneOf(mockWpsClient).getWpsClient().imputationNA(data);will(returnValue(imputedData));
 
             allowing(mockJob).getHoleIdParameter();will(returnValue(holeIdParam));
             allowing(mockJob).getSavedParameters();will(returnValue(Sets.newHashSet(savedParam)));
@@ -100,7 +100,7 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);will(returnValue(mockOs));
 
             oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1))), with(false));will(returnValue(data));
-            oneOf(mockWpsClient).imputationNA(data);will(throwException(new IOException()));
+            oneOf(mockWpsClient).getWpsClient().imputationNA(data);will(throwException(new IOException()));
             oneOf(mockIs1).close();
 
             oneOf(mockCsvService).cullEmptyRows(mockIs1, mockOs, Arrays.asList(1), false);

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.auscope.portal</groupId>
-  <artifactId>EAVL-Portal</artifactId>
-  <version>0.1-SNAPSHOT</version>
-  <packaging>war</packaging>
-  <name>Early Access Virtual Laboratory</name>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.auscope.portal</groupId>
+    <artifactId>EAVL-Portal</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
+    <name>Early Access Virtual Laboratory</name>
 
-  <scm>
+    <scm>
         <connection>scm:git:https://github.com/AuScope/EAVL</connection>
         <developerConnection>scm:git:https://github.com/AuScope/EAVL</developerConnection>
         <url>https://github.com/AuScope/EAVL</url>
@@ -58,21 +57,18 @@
                 <version>2.4</version>
                 <configuration>
                     <overlays>
-                        <!--
-                            m2e consumes overlay dependencies causing the
-                            portal-core jar to be omitted when running in
-                            tomcat. Workaround is to use the sources jar
-                            for the overlay; this then has to be a provided
-                            dependency to prevent inclusion in the war.
-                        -->
+                        <!-- m2e consumes overlay dependencies causing the
+                            portal-core jar to be omitted when running in tomcat. Workaround is to use
+                            the sources jar for the overlay; this then has to be a provided dependency
+                            to prevent inclusion in the war. -->
                         <overlay>
-                               <groupId>org.auscope.portal</groupId>
-                               <artifactId>portal-core</artifactId>
-                               <classifier>sources</classifier>
-                               <type>jar</type>
-                               <includes>
-                                    <include>portal-core/**/*</include>
-                               </includes>
+                            <groupId>org.auscope.portal</groupId>
+                            <artifactId>portal-core</artifactId>
+                            <classifier>sources</classifier>
+                            <type>jar</type>
+                            <includes>
+                                <include>portal-core/**/*</include>
+                            </includes>
                         </overlay>
                     </overlays>
                     <archive>
@@ -97,7 +93,8 @@
                         <goal>manifest</goal>
                     </goals>
                 </configuration>
-                <!-- This is needed to create ${basedir}/src/main/webapp/META-INF/MANIFEST.MF file -->
+                <!-- This is needed to create ${basedir}/src/main/webapp/META-INF/MANIFEST.MF
+                    file -->
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -148,13 +145,8 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>yuicompressor-maven-plugin</artifactId>
                 <configuration>
-                    <!--
-                    <excludes>
-                        Exclude Ext JS
-                        <exclude>portal-core/**</exclude>
-                        <exclude>external/**</exclude>
-                    </excludes>
-                    -->
+                    <!-- <excludes> Exclude Ext JS <exclude>portal-core/**</exclude>
+                        <exclude>external/**</exclude> </excludes> -->
                     <includes>
                         <include>js/**</include>
                     </includes>
@@ -162,11 +154,9 @@
                 </configuration>
                 <version>1.4.0</version>
             </plugin>
-            <!--
-                This is needed for Emma Coverage to work with unit tests
-                that use PowerMock's JMock library. The latest alpha
-                version i.e. 1.0-alpha-3 will fail those unit tests.
-            -->
+            <!-- This is needed for Emma Coverage to work with unit tests
+                that use PowerMock's JMock library. The latest alpha version i.e. 1.0-alpha-3
+                will fail those unit tests. -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>emma-maven-plugin</artifactId>
@@ -197,10 +187,12 @@
                         </goals>
                         <configuration>
                             <rules>
-                                <rule implementation="org.jacoco.maven.RuleConfiguration">
+                                <rule
+                                    implementation="org.jacoco.maven.RuleConfiguration">
                                     <element>BUNDLE</element>
                                     <limits>
-                                        <limit implementation="org.jacoco.report.check.Limit">
+                                        <limit
+                                            implementation="org.jacoco.report.check.Limit">
                                             <counter>COMPLEXITY</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>0.50</minimum>
@@ -215,7 +207,8 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <!--This plugin's configuration is used to store Eclipse
+                    m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
@@ -259,6 +252,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <powermock.version>1.5.5</powermock.version>
         <portal.core.version>1.2.0-SNAPSHOT</portal.core.version>
+        <slf4jVersion>1.7.5</slf4jVersion>
     </properties>
 
     <repositories>
@@ -286,6 +280,22 @@
 
     <!-- Dependencies -->
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4jVersion}</version>
+        </dependency>
+        <dependency>
+            <!-- any library that uses slf4j will be directed to java.util.logging -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>${slf4jVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4jVersion}</version>
+        </dependency>
         <dependency>
             <groupId>org.auscope.portal</groupId>
             <artifactId>portal-core</artifactId>
@@ -362,16 +372,13 @@
             <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--
-            We depend on the EasyMock API but exclude the EasyMock dependency. The reason
-            is that PowerMock Whitebox needs a "org.powermock.reflect.spi.ProxyFramework"
-            implementation in order to work correctly. This implementation is provided by
-            the extension API:s. Since JMock uses CGLib it can reuse the
-            "org.powermock.api.extension.proxyframework.ProxyFrameworkImpl" in the
-            PowerMock EasyMock API. An alternative to depend on this class would be to simply copy
-            the class it into your code (remember that the class must be named
-            org.powermock.api.extension.proxyframework.ProxyFrameworkImpl).
-        -->
+        <!-- We depend on the EasyMock API but exclude the EasyMock dependency.
+            The reason is that PowerMock Whitebox needs a "org.powermock.reflect.spi.ProxyFramework"
+            implementation in order to work correctly. This implementation is provided
+            by the extension API:s. Since JMock uses CGLib it can reuse the "org.powermock.api.extension.proxyframework.ProxyFrameworkImpl"
+            in the PowerMock EasyMock API. An alternative to depend on this class would
+            be to simply copy the class it into your code (remember that the class must
+            be named org.powermock.api.extension.proxyframework.ProxyFrameworkImpl). -->
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-api-easymock</artifactId>
@@ -390,25 +397,33 @@
             <version>1.4</version>
         </dependency>
         <dependency>
-		    <groupId>net.sf.opencsv</groupId>
-		    <artifactId>opencsv</artifactId>
-		    <version>2.3</version>
-		</dependency>
+            <groupId>net.sf.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>2.3</version>
+        </dependency>
         <dependency>
-	        <groupId>org.auscope.eavl</groupId>
-		    <artifactId>wpsclient</artifactId>
-		    <version>0.0.1-SNAPSHOT</version>
-	    </dependency>
-	    <dependency>
-		    <groupId>com.google.guava</groupId>
-		    <artifactId>guava</artifactId>
-		    <version>18.0</version>
-		</dependency>
-		<!-- Added for email templating -->
+            <groupId>org.auscope.eavl</groupId>
+            <artifactId>wpsclient</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        <!-- Added for email templating -->
         <dependency>
             <groupId>org.apache.velocity</groupId>
             <artifactId>velocity</artifactId>
             <version>1.7</version>
         </dependency>
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <!-- <dependency> <groupId>com.googlecode.ehcache-spring-annotations</groupId>
+            <artifactId>ehcache-spring-annotations</artifactId> <version>1.2.0</version>
+            </dependency> -->
     </dependencies>
 </project>

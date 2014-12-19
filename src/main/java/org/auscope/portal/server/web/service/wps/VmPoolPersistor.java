@@ -15,7 +15,7 @@ import org.apache.http.annotation.ThreadSafe;
 @ThreadSafe
 public interface VmPoolPersistor {
 
-	Set<WpsVm> loadVmPool() throws IOException;
+    Set<WpsVm> loadVmPool() throws IOException;
 
-	void saveVmPool(Set<WpsVm> vms) throws IOException;
+    void saveVmPool(Set<WpsVm> vms) throws IOException;
 }

@@ -7,6 +7,7 @@ import org.auscope.portal.server.web.service.wps.VmPool;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.auscope.portal.server.web.service.wps.WpsVm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 /**
@@ -21,13 +22,24 @@ public class WpsService {
     private VmPool vmPool;
 
     @Autowired
+    private ApplicationContext appContext;
+
+    @Autowired
     public WpsService(VmPool vmPool) {
         this.vmPool = vmPool;
     }
 
-    public WpsServiceClient getWpsClient() throws PortalServiceException  {
-    	WpsVm vm= vmPool.getFreeVm();
-    	return new WpsServiceClient(vm);
+    public WpsServiceClient getWpsClient() throws PortalServiceException {
+        WpsVm vm = vmPool.getFreeVm();
+        WpsServiceClient res = (WpsServiceClient) appContext
+                .getBean("wpsClient");
+        // WpsServiceClient res = new WpsServiceClient();
+        res.setEndpoting(vm.getServiceUrl());
+        return res;
+    }
+
+    public void checkVM(WpsServiceClient wpsClient) {
+        vmPool.verifyVm(wpsClient);
     }
 
 }
