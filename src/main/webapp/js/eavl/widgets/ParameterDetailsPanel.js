@@ -149,6 +149,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                     itemId : 'prob-density-chart',
                     region: 'center',
                     xtype : 'pdfchart',
+                    file: eavl.models.EAVLJob.FILE_DATA_CSV,
                     targetChartWidth: 1300,
                     targetChartHeight: 400,
                     preserveAspectRatio: true

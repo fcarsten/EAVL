@@ -12,6 +12,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
      * {
      *  allowCutoffSelection - Boolean (- If true, the chart will have a draggable cutoff slider added. Defaults to false
      *  cutoffValue - Number - Initial value for the cutoff brush (only valid if parameterDetails is set)
+     *  file - String [Optional] - The file to pull numbers from. Defaults to eavl.models.EAVLJob.FILE_DATA_CSV
      * }
      *
      * Adds the following events
@@ -23,6 +24,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
 
         config.svgClass = 'pdf-chart-svg';
 
+        this.file = config.file ? config.file : eavl.models.EAVLJob.FILE_DATA_CSV;
         this.allowCutoffSelection = config.allowCutoffSelection ? true : false;
         this._cutoffOverride = Ext.isNumber(config.cutoffValue) ? config.cutoffValue : null;
         this.callParent(arguments);
@@ -91,7 +93,7 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
         this.parameterDetails = parameterDetails;
 
         this.mask(Ext.util.Format.format("Loading data for '{0}'", parameterDetails.get('name')));
-        d3.json(Ext.String.urlAppend("wps/getPDFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex')})),
+        d3.json(Ext.String.urlAppend("wps/getPDFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex'), file: this.file})),
                 function(error, data) {
             me.maskClear();
             if (error) {

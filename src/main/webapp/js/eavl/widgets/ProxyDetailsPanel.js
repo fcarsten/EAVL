@@ -54,6 +54,7 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
                 items : [{
                     xtype: 'doublepdfchart',
                     itemId: 'dpdfchart',
+                    file: eavl.models.EAVLJob.FILE_IMPUTED_CSV,
                     preserveAspectRatio : config.preserveAspectRatio,
                     parameterDetails : this.parameterDetails,
                     targetWidth: config.targetChartWidth,

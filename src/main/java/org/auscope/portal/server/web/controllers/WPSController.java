@@ -53,16 +53,15 @@ public class WPSController extends BasePortalController {
     @RequestMapping("/getPDFData.do")
     public ModelAndView getPDFData(HttpServletRequest request,
             @AuthenticationPrincipal PortalUser user,
-            @RequestParam("columnIndex") int columnIndex) {
+            @RequestParam("columnIndex") int columnIndex,
+            @RequestParam("file") String file) {
 
         int retries = MAX_RETRIES;
         List<Double> columnData;
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
-            InputStream csvData = fss.readFile(job,
-                    EAVLJobConstants.FILE_DATA_CSV);
-            columnData = csvService.getParameterValues(csvData, columnIndex,
-                    false);
+            InputStream csvData = fss.readFile(job, file);
+            columnData = csvService.getParameterValues(csvData, columnIndex, false);
         } catch (PortalServiceException e) {
             log.warn("Unable to get pdf values: ", e);
             return generateJSONResponseMAV(false, null,
@@ -102,7 +101,8 @@ public class WPSController extends BasePortalController {
     @RequestMapping("/getDoublePDFData.do")
     public ModelAndView getDoublePDFData(HttpServletRequest request,
             @AuthenticationPrincipal PortalUser user,
-            @RequestParam("columnIndex") int columnIndex) {
+            @RequestParam("columnIndex") int columnIndex,
+            @RequestParam("file") String file) {
 
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
@@ -121,8 +121,7 @@ public class WPSController extends BasePortalController {
                         "No prediction cutoff set");
             }
 
-            InputStream csvData = fss.readFile(job,
-                    EAVLJobConstants.FILE_IMPUTED_CSV);
+            InputStream csvData = fss.readFile(job, file);
             Integer predictionColumnIndex = csvService.columnNameToIndex(
                     csvData, predictionColumnName);
             if (predictionColumnIndex == null) {

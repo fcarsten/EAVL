@@ -11,11 +11,13 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
      * Adds the following config
      * {
      *  parameterDetails - eavl.models.ParameterDetails - Details to plot initially (can be null)
+     *  file - String [Optional] - The file to pull numbers from. Defaults to eavl.models.EAVLJob.FILE_DATA_CSV
      * }
      *
      */
     constructor : function(config) {
         config.svgClass = 'pdf-chart-svg';
+        this.file = config.file ? config.file : eavl.models.EAVLJob.FILE_DATA_CSV;
         this.callParent(arguments);
     },
 
@@ -32,7 +34,7 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
         this.parameterDetails = parameterDetails;
 
         this.mask(Ext.util.Format.format("Loading data for '{0}'", parameterDetails.get('name')));
-        d3.json(Ext.String.urlAppend("wps/getDoublePDFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex')})),
+        d3.json(Ext.String.urlAppend("wps/getDoublePDFData.do", Ext.Object.toQueryString({columnIndex : parameterDetails.get('columnIndex'), file: this.file})),
                 function(error, data) {
             me.maskClear();
             if (error) {
