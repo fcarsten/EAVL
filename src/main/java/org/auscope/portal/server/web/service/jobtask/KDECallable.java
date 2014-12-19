@@ -48,7 +48,7 @@ public class KDECallable implements Callable<Object> {
         List<Integer> inclusions = new ArrayList<Integer>();
 
         List<String> proxyParamList = new ArrayList<String>(job.getProxyParameters());
-        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
         List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, proxyParamList);
         inclusions.addAll(savedParamIndexes);
 
@@ -65,7 +65,7 @@ public class KDECallable implements Callable<Object> {
             job.getProxyParameters();
 
             List<Integer> includedCols = getProxyCols();
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             Double[][] proxyData = csvService.getRawData(in, includedCols, true);
 
             in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
