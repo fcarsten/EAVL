@@ -122,6 +122,7 @@ Ext.application({
                 if (responseObj.data.job.status === eavl.models.EAVLJob.STATUS_THRESHOLD ||
                     responseObj.data.job.status === eavl.models.EAVLJob.STATUS_PROXY ||
                     responseObj.data.job.status === eavl.models.EAVLJob.STATUS_SUBMITTED ||
+                    responseObj.data.job.status === eavl.models.EAVLJob.STATUS_KDE_ERROR ||
                     responseObj.data.job.status === eavl.models.EAVLJob.STATUS_DONE) {
                     var pds = [];
                     Ext.each(responseObj.data.parameterDetails, function(o) {
