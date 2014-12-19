@@ -23,6 +23,10 @@ public final class EAVLJobConstants {
      * The filename of the data.csv AFTER it has been imputed
      */
     public static final String FILE_IMPUTED_CSV = "data-imputed.csv";
+    /**
+     * The filename of the data.csv AFTER it has been imputed and centre log ratio'ed
+     */
+    public static final String FILE_IMPUTED_CENLR_CSV = "data-imputed-cenlr.csv";
 
     /**
      * The filename containing the kernel density estimate outputs

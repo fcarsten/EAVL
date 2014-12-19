@@ -44,15 +44,32 @@ public class KDECallable implements Callable<Object> {
         this.fss = fss;
     }
 
-    protected List<Integer> getProxyCols() throws PortalServiceException {
+    protected List<Integer> getProxyCols(String file) throws PortalServiceException {
         List<Integer> inclusions = new ArrayList<Integer>();
 
         List<String> proxyParamList = new ArrayList<String>(job.getProxyParameters());
-        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+        InputStream in = this.fss.readFile(job, file);
         List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, proxyParamList);
         inclusions.addAll(savedParamIndexes);
 
         return inclusions;
+    }
+
+    protected List<Integer> getExcludedColumns() throws PortalServiceException {
+        List<Integer> exclusions = new ArrayList<Integer>();
+
+        List<String> savedParamList = new ArrayList<String>(job.getSavedParameters());
+        InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+        List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, savedParamList);
+        exclusions.addAll(savedParamIndexes);
+
+        in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+        Integer index = csvService.columnNameToIndex(in, job.getHoleIdParameter());
+        if (index != null && !exclusions.contains(index)) {
+            exclusions.add(index);
+        }
+
+        return exclusions;
     }
 
     @Override
@@ -64,15 +81,7 @@ public class KDECallable implements Callable<Object> {
         try {
             job.getProxyParameters();
 
-            List<Integer> includedCols = getProxyCols();
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            Double[][] proxyData = csvService.getRawData(in, includedCols, true);
-
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            Integer predictorIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
-
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            List<Double> predictorData = this.csvService.getParameterValues(in, predictorIndex, true);
+            List<Integer> nonCompCols = getExcludedColumns();
 
             int retries= WPSController.MAX_RETRIES;
             String kdeJson=null;
@@ -80,9 +89,29 @@ public class KDECallable implements Callable<Object> {
                 WpsServiceClient wpsClient = null;
                 try {
                     wpsClient = wpsService.getWpsClient();
-                    Double[][] cenLrData = wpsClient.cenLR(proxyData);
-                    kdeJson = wpsClient.hpiKdeJSON(cenLrData, predictorData.toArray(new Double[predictorData.size()]), (double) job.getPredictionCutoff());
-//                    kdeJson = wpsClient.hpiKdeJSON(proxyData, predictorData.toArray(new Double[predictorData.size()]), job.getPredictionCutoff());
+
+                    in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    Double[][] imputedData = csvService.getRawData(in, nonCompCols, false);
+                    double[][] cenlrImputedData = wpsClient.cenLR(imputedData);
+
+                    //Write the cenlr imputed data to a temporary file
+                    in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+                    this.csvService.writeRawData(in, os, cenlrImputedData, nonCompCols, false);
+
+                    imputedData = null;
+                    cenlrImputedData = null;
+
+                    List<Integer> includedCols = getProxyCols(EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+                    in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+                    Double[][] proxyCenlrData = csvService.getRawData(in, includedCols, true);
+
+                    in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+                    Integer predictorIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
+                    in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+                    List<Double> predictorCenlrData = this.csvService.getParameterValues(in, predictorIndex, true);
+
+                    kdeJson = wpsClient.hpiKdeJSON(proxyCenlrData, predictorCenlrData.toArray(new Double[predictorCenlrData.size()]), (double) job.getPredictionCutoff());
                 } catch (IOException e) {
                     log.warn("Unable to get double pdf values: ", e);
                     log.warn("Assuming bad VM");
@@ -92,7 +121,6 @@ public class KDECallable implements Callable<Object> {
             if(kdeJson==null) {
                 return new PortalServiceException("Error computing kernel density estimate data");
             }
-
 
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_JSON);
             writer = new OutputStreamWriter(os, StandardCharsets.UTF_8);

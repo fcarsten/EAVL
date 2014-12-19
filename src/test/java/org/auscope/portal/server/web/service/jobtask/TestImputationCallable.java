@@ -17,6 +17,7 @@ import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.WpsService;
+import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.jmock.Expectations;
 import org.junit.Test;
 
@@ -41,6 +42,7 @@ public class TestImputationCallable extends PortalTestClass {
         final OutputStream mockOs = context.mock(OutputStream.class, "mockOs");
         final OutputStream mockOsTmp = context.mock(OutputStream.class, "mockOsTmp");
         final OutputStream mockOsValidate = context.mock(OutputStream.class, "mockOsValidate");
+        final WpsServiceClient mockWpsServiceClient = context.mock(WpsServiceClient.class);
 
         final Double[][] data = new Double[][] {{0.2, 0.4, null}};
         final double[][] imputedData = new double[][] {{0.2, 0.4, 0.9}};
@@ -60,7 +62,8 @@ public class TestImputationCallable extends PortalTestClass {
 
             oneOf(mockFss).deleteStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);
 
-            oneOf(mockWpsClient).getWpsClient().imputationNA(data);will(returnValue(imputedData));
+            oneOf(mockWpsClient).getWpsClient();will(returnValue(mockWpsServiceClient));
+            oneOf(mockWpsServiceClient).imputationNA(data);will(returnValue(imputedData));
 
             allowing(mockJob).getHoleIdParameter();will(returnValue(holeIdParam));
             allowing(mockJob).getSavedParameters();will(returnValue(Sets.newHashSet(savedParam)));

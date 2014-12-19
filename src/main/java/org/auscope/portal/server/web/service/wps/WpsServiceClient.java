@@ -190,7 +190,7 @@ public class WpsServiceClient {
      * @see org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient#cenLR(double[][])
      */
     @Cacheable(value = "wpsCache")
-    public Double[][] cenLR(Double[][] data) throws WPSClientException,
+    public double[][] cenLR(Double[][] data) throws WPSClientException,
             IOException {
         return getWpsClient().cenLR(data);
     }
