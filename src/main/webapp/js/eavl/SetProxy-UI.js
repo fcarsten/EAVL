@@ -160,6 +160,9 @@ Ext.application({
             proxy : {
                 type : 'ajax',
                 url : 'validation/getCompositionalParameterDetails.do',
+                extraParams: {
+                    file: eavl.models.EAVLJob.FILE_IMPUTED_CSV
+                },
                 reader : {
                     type : 'json',
                     root : 'data'
