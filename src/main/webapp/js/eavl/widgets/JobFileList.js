@@ -11,7 +11,8 @@ Ext.define('eavl.widgets.JobFileList', {
     /**
      * Adds the following config to Ext.grid.Panel
      * {
-     *
+     *  hasPreview : [Optional] function(fileName, job) - Callback to return true if the particular fileName has a previewer
+     *  hasDataView : [Optional] function(fileName, job) - Callback to return true if the particular fileName has a dataView
      * }
      *
      * Adds the following events
@@ -22,6 +23,8 @@ Ext.define('eavl.widgets.JobFileList', {
      */
     constructor : function(config) {
         this.emptyText = config.emptyText ? config.emptyText : "";
+        this.hasPreview = Ext.isFunction(config.hasPreview) ? config.hasPreview : function() {return true;};
+        this.hasDataView = Ext.isFunction(config.hasDataView) ? config.hasDataView : function() {return true;};
 
         var me = this;
         var store = Ext.create('Ext.data.Store', {
@@ -53,7 +56,7 @@ Ext.define('eavl.widgets.JobFileList', {
                 xtype: 'clickcolumn',
                 dataIndex : 'name',
                 width: 48,
-                renderer: function() {
+                renderer: Ext.bind(function(value, md, jobFile) {
                     return Ext.DomHelper.markup({
                         tag : 'img',
                         width : 32,
@@ -63,7 +66,7 @@ Ext.define('eavl.widgets.JobFileList', {
                         },
                         src: 'img/download.png'
                     });
-                },
+                }, this),
                 hasTip : true,
                 tipRenderer: function() {
                     return "Click to download this file as a ZIP";
@@ -75,7 +78,11 @@ Ext.define('eavl.widgets.JobFileList', {
                 xtype: 'clickcolumn',
                 dataIndex : 'name',
                 width: 48,
-                renderer: function() {
+                renderer: Ext.bind(function(value, md, jobFile) {
+                    if (!this.hasDataView(this.job, jobFile.get('name'))) {
+                        return '';
+                    }
+                    
                     return Ext.DomHelper.markup({
                         tag : 'img',
                         width : 32,
@@ -85,19 +92,27 @@ Ext.define('eavl.widgets.JobFileList', {
                         },
                         src: 'portal-core/img/binary.png'
                     });
-                },
+                }, this),
                 hasTip : true,
-                tipRenderer: function() {
+                tipRenderer: Ext.bind(function(value, jobFile) {
+                    if (!this.hasDataView(this.job, jobFile.get('name'))) {
+                        return "There is currently no way to visualise this data in your browser.";
+                    }
+                    
                     return "Click to view the raw file data.";
-                },
+                }, this),
                 listeners : {
-                    columnclick : Ext.bind(this._inspectClickHandler, this)
+                    columnclick : Ext.bind(this._dataClickHandler, this)
                 }
             },{
                 xtype: 'clickcolumn',
                 dataIndex : 'name',
                 width: 48,
-                renderer: function() {
+                renderer: Ext.bind(function(value, md, jobFile) {
+                    if (!this.hasPreview(this.job, jobFile.get('name'))) {
+                        return '';
+                    }
+                    
                     return Ext.DomHelper.markup({
                         tag : 'img',
                         width : 32,
@@ -107,13 +122,16 @@ Ext.define('eavl.widgets.JobFileList', {
                         },
                         src: 'img/inspect.png'
                     });
-                },
+                }, this),
                 hasTip : true,
-                tipRenderer: function() {
+                tipRenderer: Ext.bind(function(value, jobFile) {
+                    if (!this.hasPreview(this.job, jobFile.get('name'))) {
+                        return "There is currently no way to visualise this file in your browser.";
+                    }
                     return "Click to visualise this file.";
-                },
+                }, this),
                 listeners : {
-                    columnclick : Ext.bind(this._dataClickHandler, this)
+                    columnclick : Ext.bind(this._inspectClickHandler, this)
                 }
             },{
                 dataIndex : 'name',
@@ -147,11 +165,15 @@ Ext.define('eavl.widgets.JobFileList', {
     },
 
     _inspectClickHandler :  function(value, record, column, tip) {
-        this.fireEvent('preview', this, record.get('name'), this.job);
+        if (this.hasPreview(this.job, record.get('name'))) {
+            this.fireEvent('preview', this, record.get('name'), this.job);
+        }
     },
 
     _dataClickHandler :  function(value, record, column, tip) {
-        this.fireEvent('dataview', this, record.get('name'), this.job);
+        if (this.hasDataView(this.job, record.get('name'))) {
+            this.fireEvent('dataview', this, record.get('name'), this.job);
+        }
     },
 
     /**
