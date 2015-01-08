@@ -91,7 +91,7 @@ public class KDECallable implements Callable<Object> {
                     wpsClient = wpsService.getWpsClient();
 
                     in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-                    Double[][] imputedData = csvService.getRawData(in, nonCompCols, false);
+                    double[][] imputedData = csvService.getRawData(in, nonCompCols, false);
                     double[][] cenlrImputedData = wpsClient.cenLR(imputedData);
 
                     //Write the cenlr imputed data to a temporary file
@@ -104,14 +104,14 @@ public class KDECallable implements Callable<Object> {
 
                     List<Integer> includedCols = getProxyCols(EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
                     in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-                    Double[][] proxyCenlrData = csvService.getRawData(in, includedCols, true);
+                    double[][] proxyCenlrData = csvService.getRawData(in, includedCols, true);
 
                     in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
                     Integer predictorIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
                     in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-                    List<Double> predictorCenlrData = this.csvService.getParameterValues(in, predictorIndex, true);
+                    double[] predictorCenlrData = this.csvService.getParameterValues(in, predictorIndex, true);
 
-                    kdeJson = wpsClient.hpiKdeJSON(proxyCenlrData, predictorCenlrData.toArray(new Double[predictorCenlrData.size()]), (double) job.getPredictionCutoff());
+                    kdeJson = wpsClient.hpiKdeJSON(proxyCenlrData, predictorCenlrData, (double) job.getPredictionCutoff());
                 } catch (IOException e) {
                     log.warn("Unable to get double pdf values: ", e);
                     log.warn("Assuming bad VM");
