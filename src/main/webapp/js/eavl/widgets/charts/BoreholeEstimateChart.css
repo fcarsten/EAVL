@@ -1,7 +1,6 @@
 .viewport {
     overflow-y: auto;
     overflow-x: hidden;
-    margin: 10px;
 }
 
 .bhe-group rect:hover {
