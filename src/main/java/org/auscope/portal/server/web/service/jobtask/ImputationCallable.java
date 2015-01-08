@@ -70,7 +70,7 @@ public class ImputationCallable implements Callable<Object> {
             in = this.fss.readFile(job, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);
             Double[][] rawData = csvService.getRawData(in, excludedCols, false);
             int retries= WPSController.MAX_RETRIES;
-            double[][] imputedData=null;
+            double[][] imputedData= validateValues(rawData);
             while (imputedData == null && retries-- > 0) {
                 WpsServiceClient wpsClient = null;
                 try {
@@ -109,6 +109,26 @@ public class ImputationCallable implements Callable<Object> {
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(os);
         }
+    }
+
+    private double[][] validateValues(Double[][] x) {
+        double[][] res = new double[x.length][];
+        boolean needsImp = false;
+        for (int i = 0; i < x.length; i++) {
+            res[i]= new double[x[i].length];
+            for (int j = 0; j < res[i].length; j++) {
+                Double v = x[i][j];
+                if(v!=null && 0==v) throw new IllegalArgumentException("Imputation matrix may not contain '0'");
+
+                if(v==null || v.isNaN()) {
+                    res[i][j] = Double.NaN;
+                    needsImp=true;
+                }
+                else
+                    res[i][j] = x[i][j];
+            }
+        }
+        return needsImp? null:res;
     }
 
 }
