@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
+import com.google.common.primitives.Doubles;
+
 /**
  * Service for reading/writing subsets of a CSV file
  * @author Josh Vote
@@ -321,16 +323,16 @@ public class CSVService {
      * @param index
      * @return
      */
-    private Double appendNumericValueToList(List<Double> values, String[] data, int index, boolean includeNulls) {
+    private double appendNumericValueToList(List<Double> values, String[] data, int index, boolean includeNulls) {
         try {
-            Double d = new Double(Double.parseDouble(data[index]));
+            Double d =Double.parseDouble(data[index]);
             values.add(d);
             return d;
         } catch (NumberFormatException ex) {
             if (includeNulls) {
-                values.add(null);
+                values.add(Double.NaN);
             }
-            return null;
+            return Double.NaN;
         }
     }
 
@@ -338,16 +340,17 @@ public class CSVService {
      * Converts and appends an entire row of data to a list of rows. Appends nulls for doubles that don't parse
      * @return
      */
-    private Double[] appendNumericValuesToList(List<Double[]> rows, String[] data, boolean skipEmptyLines) {
+    private double[] appendNumericValuesToList(List<double[]> rows, String[] data, boolean skipEmptyLines) {
 
-        Double[] row = new Double[data.length];
+        double[] row = new double[data.length];
         boolean hasValues = false;
         for (int i = 0; i < data.length; i++) {
             try {
-                Double d = new Double(Double.parseDouble(data[i]));
-                row[i] = d;
+                row[i] = Double.parseDouble(data[i]);
                 hasValues = true;
-            } catch (NumberFormatException ex) { }
+            } catch (NumberFormatException ex) {
+                row[i]=Double.NaN;
+            }
         }
 
         if (skipEmptyLines && !hasValues) {
@@ -363,18 +366,19 @@ public class CSVService {
      * Converts and appends a subset of a row of data to a list of rows. Appends nulls for doubles that don't parse
      * @return
      */
-    private Double[] appendNumericValuesToList(List<Double[]> rows, String[] data, List<Integer> columnIndexes, boolean includeColumnIndexes, boolean skipEmptyLines) {
-        Double[] row = null;
+    private double[] appendNumericValuesToList(List<double[]> rows, String[] data, List<Integer> columnIndexes, boolean includeColumnIndexes, boolean skipEmptyLines) {
+        double[] row = null;
 
         if (includeColumnIndexes) {
             boolean hasValues = false;
-            row = new Double[columnIndexes.size()];
+            row = new double[columnIndexes.size()];
             for (int i = 0; i < row.length; i++) {
                 try {
-                    Double d = new Double(Double.parseDouble(data[columnIndexes.get(i)]));
-                    row[i] = d;
+                    row[i] = Double.parseDouble(data[columnIndexes.get(i)]);
                     hasValues = true;
-                } catch (NumberFormatException ex) { }
+                } catch (NumberFormatException ex) {
+                    row[i]=Double.NaN;
+                }
             }
 
             if (skipEmptyLines && !hasValues) {
@@ -382,7 +386,7 @@ public class CSVService {
             }
         } else {
             boolean hasValues = false;
-            row = new Double[data.length - columnIndexes.size()];
+            row = new double[data.length - columnIndexes.size()];
             int idx = 0;
 
             for (int i = 0; i < data.length; i++) {
@@ -394,7 +398,10 @@ public class CSVService {
                     Double d = new Double(Double.parseDouble(data[i]));
                     row[idx++] = d;
                     hasValues = true;
-                } catch (NumberFormatException ex) { }
+                } catch (NumberFormatException ex) {
+                    row[idx++]=Double.NaN;
+
+                }
             }
 
             if (skipEmptyLines && !hasValues) {
@@ -402,11 +409,7 @@ public class CSVService {
             }
         }
 
-        if (row == null) {
-            return null;
-        }
-
-        if (rows != null) {
+        if (rows != null && row!=null) {
             rows.add(row);
         }
         return row;
@@ -463,7 +466,7 @@ public class CSVService {
      * @return
      * @throws PortalServiceException
      */
-    public List<Double> getParameterValues(InputStream csvData, int columnIndex) throws PortalServiceException {
+    public double[] getParameterValues(InputStream csvData, int columnIndex) throws PortalServiceException {
         return this.getParameterValues(csvData, columnIndex, true);
     }
 
@@ -478,7 +481,7 @@ public class CSVService {
      * @return
      * @throws PortalServiceException
      */
-    public List<Double> getParameterValues(InputStream csvData, int columnIndex, boolean includeMissing) throws PortalServiceException {
+    public double[] getParameterValues(InputStream csvData, int columnIndex, boolean includeMissing) throws PortalServiceException {
         CSVReader reader = null;
         List<Double> values = new ArrayList<Double>();
 
@@ -487,7 +490,7 @@ public class CSVService {
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
-                return values;
+                return new double[0];
             }
 
             //Initialize the parameters (one for each column)
@@ -500,7 +503,7 @@ public class CSVService {
                 appendNumericValueToList(values, dataLine, columnIndex, includeMissing);
             }
 
-            return values;
+            return Doubles.toArray(values);
         } catch (Exception ex) {
             throw new PortalServiceException("Unable to parse parameter values", ex);
         } finally {
@@ -739,7 +742,7 @@ public class CSVService {
      * @return
      * @throws PortalServiceException
      */
-    public Double[][] getRawData(InputStream csvData) throws PortalServiceException {
+    public double[][] getRawData(InputStream csvData) throws PortalServiceException {
         return getRawData(csvData, null, true, false);
     }
 
@@ -753,7 +756,7 @@ public class CSVService {
      * @return
      * @throws PortalServiceException
      */
-    public Double[][] getRawData(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
+    public double[][] getRawData(InputStream csvData, List<Integer> columnIndexes) throws PortalServiceException {
         return getRawData(csvData, columnIndexes, true, false);
     }
 
@@ -769,7 +772,7 @@ public class CSVService {
      * @return
      * @throws PortalServiceException
      */
-    public Double[][] getRawData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes) throws PortalServiceException {
+    public double[][] getRawData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes) throws PortalServiceException {
         return getRawData(csvData, columnIndexes, includeColumnIndexes, false);
     }
 
@@ -786,16 +789,16 @@ public class CSVService {
      * @return
      * @throws PortalServiceException
      */
-    public Double[][] getRawData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes, boolean skipEmptyLines) throws PortalServiceException {
+    public double[][] getRawData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes, boolean skipEmptyLines) throws PortalServiceException {
         CSVReader reader = null;
-        List<Double[]> rows = new ArrayList<Double[]>();
+        List<double[]> rows = new ArrayList<double[]>();
 
         try {
             reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
-                return new Double[][] {};
+                return new double[][] {};
             }
             int nCols = columnIndexes == null ? headerLine.length : (includeColumnIndexes ? columnIndexes.size() : headerLine.length - columnIndexes.size());
 
@@ -818,7 +821,7 @@ public class CSVService {
                 }
             }
 
-            return rows.toArray(new Double[nCols][rows.size()]);
+            return rows.toArray(new double[nCols][rows.size()]);
         } catch (Exception ex) {
             throw new PortalServiceException("Unable to parse parameter values", ex);
         } finally {
@@ -1230,10 +1233,6 @@ public class CSVService {
             if (headerLine == null) {
                 return;
             }
-            int nCols = columnIndexes == null ? headerLine.length : (includeColumnIndexes ? columnIndexes.size() : headerLine.length - columnIndexes.size());
-            String[] row = new String[nCols];
-            Double[] numberRow = null;
-
             //Initialize the parameters (one for each column)
             if (isHeaderLine(headerLine)) {
                 writer.writeNext(headerLine);

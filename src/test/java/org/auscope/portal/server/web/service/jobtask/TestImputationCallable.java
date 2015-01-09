@@ -44,7 +44,7 @@ public class TestImputationCallable extends PortalTestClass {
         final OutputStream mockOsValidate = context.mock(OutputStream.class, "mockOsValidate");
         final WpsServiceClient mockWpsServiceClient = context.mock(WpsServiceClient.class);
 
-        final Double[][] data = new Double[][] {{0.2, 0.4, null}};
+        final double[][] data = new double[][] {{0.2, 0.4, Double.NaN}};
         final double[][] imputedData = new double[][] {{0.2, 0.4, 0.9}};
 
         context.checking(new Expectations() {{
@@ -88,7 +88,7 @@ public class TestImputationCallable extends PortalTestClass {
         final InputStream mockIs1 = context.mock(InputStream.class, "mockIs1");
         final OutputStream mockOs = context.mock(OutputStream.class, "mockOs");
 
-        final Double[][] data = new Double[][] {{0.2, 0.4, null}};
+        final double[][] data = new double[][] {{0.2, 0.4, Double.NaN}};
         final double[][] imputedData = new double[][] {{0.2, 0.4, 0.9}};
 
         context.checking(new Expectations() {{

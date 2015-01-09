@@ -191,10 +191,10 @@ public class TestCSVService extends PortalTestClass{
     public void testExtractParameterValuesEmptyInput() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/empty-data.csv");
 
-        List<Double> vals = service.getParameterValues(is, 0);
+        double[] vals = service.getParameterValues(is, 0);
 
         Assert.assertNotNull(vals);
-        Assert.assertEquals(0, vals.size());
+        Assert.assertEquals(0, vals.length);
     }
 
     @Test(expected=PortalServiceException.class)
@@ -213,55 +213,55 @@ public class TestCSVService extends PortalTestClass{
     public void testGetParameterValuesParsing() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
 
-        List<Double> data = service.getParameterValues(is, 2, true);
+        double[] data = service.getParameterValues(is, 2, true);
 
         Assert.assertNotNull(data);
-        Assert.assertEquals(8, data.size());
+        Assert.assertEquals(8, data.length);
 
-        Assert.assertEquals(100, data.get(0), 0.01);
-        Assert.assertNull(data.get(1));
-        Assert.assertEquals(103, data.get(2), 0.01);
-        Assert.assertEquals(101, data.get(3), 0.01);
-        Assert.assertEquals(103, data.get(4), 0.01);
-        Assert.assertEquals(100, data.get(5), 0.01);
-        Assert.assertNull(data.get(6));
-        Assert.assertEquals(101, data.get(7), 0.01);
+        Assert.assertEquals(100, data[0], 0.01);
+        Assert.assertEquals(Double.NaN, data[1], 0.01);
+        Assert.assertEquals(103, data[2], 0.01);
+        Assert.assertEquals(101, data[3], 0.01);
+        Assert.assertEquals(103, data[4], 0.01);
+        Assert.assertEquals(100, data[5], 0.01);
+        Assert.assertEquals(Double.NaN, data[6], 0.01);
+        Assert.assertEquals(101, data[7], 0.01);
     }
 
     @Test
     public void testGetParameterValuesNoNulls() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
 
-        List<Double> data = service.getParameterValues(is, 2, false);
+        double[] data = service.getParameterValues(is, 2, false);
 
         Assert.assertNotNull(data);
-        Assert.assertEquals(6, data.size());
+        Assert.assertEquals(6, data.length);
 
-        Assert.assertEquals(100, data.get(0), 0.01);
-        Assert.assertEquals(103, data.get(1), 0.01);
-        Assert.assertEquals(101, data.get(2), 0.01);
-        Assert.assertEquals(103, data.get(3), 0.01);
-        Assert.assertEquals(100, data.get(4), 0.01);
-        Assert.assertEquals(101, data.get(5), 0.01);
+        Assert.assertEquals(100, data[0], 0.01);
+        Assert.assertEquals(103, data[1], 0.01);
+        Assert.assertEquals(101, data[2], 0.01);
+        Assert.assertEquals(103, data[3], 0.01);
+        Assert.assertEquals(100, data[4], 0.01);
+        Assert.assertEquals(101, data[5], 0.01);
     }
 
     @Test
     public void testGetParameterValuesNoHeaders() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
 
-        List<Double> data = service.getParameterValues(is, 2);
+        double[] data = service.getParameterValues(is, 2);
 
         Assert.assertNotNull(data);
-        Assert.assertEquals(8, data.size());
+        Assert.assertEquals(8, data.length);
 
-        Assert.assertNull(data.get(0));
-        Assert.assertEquals(102, data.get(1), 0.01);
-        Assert.assertEquals(103, data.get(2), 0.01);
-        Assert.assertEquals(101, data.get(3), 0.01);
-        Assert.assertEquals(103, data.get(4), 0.01);
-        Assert.assertEquals(100, data.get(5), 0.01);
-        Assert.assertNull(data.get(6));
-        Assert.assertEquals(101, data.get(7), 0.01);
+        Assert.assertEquals(Double.NaN, data[0], 0.01);
+        Assert.assertEquals(102, data[1], 0.01);
+        Assert.assertEquals(103, data[2], 0.01);
+        Assert.assertEquals(101, data[3], 0.01);
+        Assert.assertEquals(103, data[4], 0.01);
+        Assert.assertEquals(100, data[5], 0.01);
+        Assert.assertEquals(Double.NaN, data[6], 0.01);
+        Assert.assertEquals(101, data[7], 0.01);
     }
 
     @Test
@@ -451,7 +451,7 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(expected, os.toString());
     }
 
-    private void assertRawEquals(Double[][] expected, Double[][] actual) {
+    private void assertRawEquals(double[][] expected, double[][] actual) {
         if (expected == null || actual == null) {
             Assert.assertNull(actual);
             Assert.assertNull(expected);
@@ -463,15 +463,7 @@ public class TestCSVService extends PortalTestClass{
         for (int i = 0; i < expected.length; i++) {
             Assert.assertEquals(expected[i].length, actual[i].length);
             for (int j = 0; j < expected[i].length; j++) {
-                if (expected[i][j] == null || actual[i][j] == null) {
-                    Assert.assertNull(actual[i][j]);
-                    Assert.assertNull(expected[i][j]);
-
-                } else {
                     Assert.assertEquals(expected[i][j], actual[i][j], 0.001);
-                }
-
-
             }
         }
     }
@@ -504,107 +496,107 @@ public class TestCSVService extends PortalTestClass{
     @Test
     public void testGetRawData() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
-        Double[][] expected = new Double[][] {
+        double[][] expected = new double[][] {
                 {0.0, 40.0, 100.0, 59.0, 12.0},
-                {1.0, 42.0, null, 52.0, 12.0},
+                {1.0, 42.0, Double.NaN, 52.0, 12.0},
                 {2.0, 16.0, 103.0, 6.0, 15.0},
-                {3.0, 13.0, 101.0, 43.0, null},
+                {3.0, 13.0, 101.0, 43.0, Double.NaN},
                 {4.0, 16.0, 103.0, 74.0, 16.0},
-                {5.0, 48.0, 100.0, 32.0, null},
-                {6.0, 41.0, null, 72.0, 14.0},
-                {7.0, 11.0, 101.0, 69.0, null}
+                {5.0, 48.0, 100.0, 32.0, Double.NaN},
+                {6.0, 41.0, Double.NaN, 72.0, 14.0},
+                {7.0, 11.0, 101.0, 69.0, Double.NaN}
         };
 
-        Double[][] actual = service.getRawData(is);
+        double[][] actual = service.getRawData(is);
         assertRawEquals(expected, actual);
     }
 
     @Test
     public void testGetRawDataColIndexes() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
-        Double[][] expected = new Double[][] {
+        double[][] expected = new double[][] {
                 {12.0, 59.0},
                 {12.0, 52.0},
                 {15.0, 6.0},
-                {null, 43.0},
+                {Double.NaN, 43.0},
                 {16.0, 74.0},
-                {null, 32.0},
+                {Double.NaN, 32.0},
                 {14.0, 72.0},
-                {null, 69.0}
+                {Double.NaN, 69.0}
         };
 
-        Double[][] actual = service.getRawData(is, Arrays.asList(4, 3));
+        double[][] actual = service.getRawData(is, Arrays.asList(4, 3));
         assertRawEquals(expected, actual);
     }
 
     @Test
     public void testGetRawDataColIndexesExclusion() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
-        Double[][] expected = new Double[][] {
+        double[][] expected = new double[][] {
                 {59.0, 12.0},
                 {52.0, 12.0},
                 {6.0, 15.0},
-                {43.0, null},
+                {43.0, Double.NaN},
                 {74.0, 16.0},
-                {32.0, null},
+                {32.0, Double.NaN},
                 {72.0, 14.0},
-                {69.0, null}
+                {69.0, Double.NaN}
         };
 
-        Double[][] actual = service.getRawData(is, Arrays.asList(0, 2, 1), false, false);
+        double[][] actual = service.getRawData(is, Arrays.asList(0, 2, 1), false, false);
         assertRawEquals(expected, actual);
     }
 
     @Test
     public void testGetRawDataColIndexesExclusion2() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
-        Double[][] expected = new Double[][] {
+        double[][] expected = new double[][] {
                 {0.0, 40.0, 59.0, 12.0},
                 {1.0, 42.0, 52.0, 12.0},
                 {2.0, 16.0, 6.0, 15.0},
-                {3.0, 13.0, 43.0, null},
+                {3.0, 13.0, 43.0, Double.NaN},
                 {4.0, 16.0, 74.0, 16.0},
-                {5.0, 48.0, 32.0, null},
+                {5.0, 48.0, 32.0, Double.NaN},
                 {6.0, 41.0, 72.0, 14.0},
-                {7.0, 11.0, 69.0, null}
+                {7.0, 11.0, 69.0, Double.NaN}
         };
 
-        Double[][] actual = service.getRawData(is, Arrays.asList(2), false, false);
+        double[][] actual = service.getRawData(is, Arrays.asList(2), false, false);
         assertRawEquals(expected, actual);
     }
 
     @Test
     public void testGetRawDataColIndexesExclusionSkipEmpty() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
-        Double[][] expected = new Double[][] {
+        double[][] expected = new double[][] {
                 {40.0}
         };
 
-        Double[][] actual = service.getRawData(is, Arrays.asList(1), false, true);
+        double[][] actual = service.getRawData(is, Arrays.asList(1), false, true);
         assertRawEquals(expected, actual);
     }
 
     @Test
     public void testGetRawDataColIndexesInclusionSkipEmpty() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
-        Double[][] expected = new Double[][] {
+        double[][] expected = new double[][] {
                 {40.0, 40.0},
-                {42.0, null}
+                {42.0, Double.NaN}
         };
 
-        Double[][] actual = service.getRawData(is, Arrays.asList(1, 0), true, true);
+        double[][] actual = service.getRawData(is, Arrays.asList(1, 0), true, true);
         assertRawEquals(expected, actual);
     }
 
     @Test
     public void testGetRawDataSkipEmpty() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
-        Double[][] expected = new Double[][] {
+        double[][] expected = new double[][] {
                 {40.0, 40.0},
-                {null, 42.0}
+                {Double.NaN, 42.0}
         };
 
-        Double[][] actual = service.getRawData(is, null, true, true);
+        double[][] actual = service.getRawData(is, null, true, true);
         assertRawEquals(expected, actual);
     }
 

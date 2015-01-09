@@ -57,7 +57,7 @@ public class WPSController extends BasePortalController {
             @RequestParam("file") String file) {
 
         int retries = MAX_RETRIES;
-        List<Double> columnData;
+        double[] columnData;
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
             InputStream csvData = fss.readFile(job, file);
@@ -72,8 +72,7 @@ public class WPSController extends BasePortalController {
             WpsServiceClient wpsClient = null;
             try {
                 wpsClient = wpsService.getWpsClient();
-                double[][] response = wpsClient.logDensity(columnData
-                        .toArray(new Double[columnData.size()]));
+                double[][] response = wpsClient.logDensity(columnData);
 
                 JSONArray xyPairs = new JSONArray();
                 if (response.length > 0) {
@@ -131,7 +130,7 @@ public class WPSController extends BasePortalController {
 
             IOUtils.closeQuietly(csvData);
             csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            Double[][] data = csvService.getRawData(csvData,
+            double[][] data = csvService.getRawData(csvData,
                     Arrays.asList(predictionColumnIndex, columnIndex));
 
             double[][] response = null;
