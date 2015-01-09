@@ -127,9 +127,11 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
                 rectEl.setAttributeNS(null, 'x', this.textWidth + this.rowMargin + j * rectWidth);
                 rectEl.setAttributeNS(null, 'y', this.rowMargin);
                 rectEl.setAttributeNS(null, 'width', rectWidth)
-                rectEl.setAttributeNS(null, 'estimate', bh.values[j]);
+                rectEl.setAttributeNS(null, 'estimate', bh.values[j][0]);
                 rectEl.setAttributeNS(null, 'height', this.rowHeight - this.rowMargin * 2);
-                rectEl.setAttributeNS(null, 'fill', estimateToColor(bh.values[j]));                
+                rectEl.setAttributeNS(null, 'fill', estimateToColor(bh.values[j][0]));            
+                rectEl.addEventListener('mouseover', tip.show);
+                rectEl.addEventListener('mouseout', tip.hide);
                 frag.appendChild(rectEl);
             }
             
@@ -139,12 +141,6 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             frag.appendChild(textEl);
             
             bhGroup[0][0].appendChild(frag);
-            
-            //The downside to using document fragments is that we dont inherit the D3 JS event wrappers
-            //which force us to "step back into" D3 for event handling
-            bhGroup.selectAll("rect")
-                .on('mouseover', tip.show)
-                .on('mouseout', tip.hide);
         }
     }
 });

@@ -42,7 +42,10 @@
     // Returns a tip
     tip.show = function() {
       var args = Array.prototype.slice.call(arguments)
-      if(args[args.length - 1] instanceof SVGElement) target = args.pop()
+      if(args[args.length - 1] instanceof SVGElement) 
+          target = args.pop();
+      else if(this instanceof SVGElement) 
+          target = this;
 
       var content = html.apply(this, args),
           poffset = offset.apply(this, args),
