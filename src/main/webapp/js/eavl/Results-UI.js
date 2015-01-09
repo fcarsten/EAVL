@@ -73,13 +73,19 @@ Ext.application({
                             height: 200,
                             margin: '0 0 10 0',
                             title: 'File Browser',
+                            hasDataView: function(job, fileName) {
+                                return fileName.endsWith(".csv");
+                            },
+                            hasPreview: function(job, fileName) {
+                                return fileName.endsWith(".json") || fileName.endsWith("kde.csv");
+                            },
                             listeners: {
-                                preview : function(jobFileList, fileName, job) {
+                                dataview : function(jobFileList, fileName, job) {
                                     if (fileName.endsWith(".csv")) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "csv");
                                     }
                                 },
-                                dataview : function(jobFileList, fileName, job) {
+                                preview : function(jobFileList, fileName, job) {
                                     if (fileName.endsWith(".json")) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "3dscatter");
                                     } else if (fileName.endsWith(".csv")) {
