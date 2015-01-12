@@ -137,6 +137,9 @@ Ext.application({
                                 }
                                 pdlist.getStore().remove(pd);
                             }
+                        },{
+                            ptype: 'headerhelp',
+                            text: 'These parameters will not be imputed or used in calculations. They will however be included in the final output.'
                         }]
                     },{
                         id : 'comppanel',
@@ -163,6 +166,9 @@ Ext.application({
                                 }
                                 pdlist.getStore().remove(pd);
                             }
+                        },{
+                            ptype: 'headerhelp',
+                            text: 'These parameters will be imputed and used in conditional probability calculations.'
                         }]
                     },{
                         xtype: 'container',
@@ -194,6 +200,9 @@ Ext.application({
                                 handleDrag : function(pdfield, pd) {
                                     pdfield.reset();
                                 }
+                            },{
+                                ptype: 'headerhelp',
+                                text: 'This parameter will be used to group measurements that share the same identifier.'
                             }]
                         },{
                             xtype : 'pdfield',
