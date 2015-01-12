@@ -74,12 +74,13 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
         this.data = null;
         this._onResize(this, this.viewport.attr('width'), this.viewport.attr('height'))
         this.callParent(arguments);
+        this.d3svg.select('g.bhe-group').remove();
     },
 
     plot : function(data) {
+        this.clearPlot();
         this.data = data;
         if (!data) {
-            this.clearPlot();
             return;
         }
 
