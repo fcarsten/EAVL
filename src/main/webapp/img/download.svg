@@ -1,7 +1,115 @@
-<?xml version="1.0" ?><svg clip-rule="evenodd" fill-rule="evenodd" image-rendering="optimizeQuality" shape-rendering="geometricPrecision" text-rendering="geometricPrecision" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><defs><style type="text/css"><![CDATA[
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   clip-rule="evenodd"
+   fill-rule="evenodd"
+   image-rendering="optimizeQuality"
+   shape-rendering="geometricPrecision"
+   text-rendering="geometricPrecision"
+   viewBox="0 0 500 500"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   width="100%"
+   height="100%"
+   sodipodi:docname="download.svg">
+  <metadata
+     id="metadata22">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1600"
+     inkscape:window-height="1178"
+     id="namedview20"
+     showgrid="false"
+     inkscape:zoom="0.944"
+     inkscape:cx="298.32029"
+     inkscape:cy="246.5436"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs4">
+    <style
+       type="text/css"
+       id="style6">
     .str1 {stroke:#434242;stroke-width:10}
     .str0 {stroke:#434242;stroke-width:30}
     .fil0 {fill:none}
     .fil1 {fill:#434242}
     .fil2 {fill:url(#id0)}
-   ]]></style><linearGradient gradientUnits="userSpaceOnUse" id="id0" x1="250" x2="250" y1="125.639" y2="287.919"><stop offset="0" stop-color="#008BFF"/><stop offset="1" stop-color="#0af"/></linearGradient></defs><g id="Layer_x0020_1"><circle class="fil0 str0" cx="250" cy="250" r="210"/><rect class="fil1" height="29.998" rx="10" ry="10" width="260" x="120" y="350"/><path class="fil2 str1" d="M270 320l60-60c5-5 10-10 10-20s-10-20-20-20h-40v-125c0-8-7-15-15-15h-30c-8 0-15 7-15 15v125h-40c-10 0-20 10-20 20s5 15 10 20l60 60c13 14 27 14 40 0z"/></g></svg>
+   </style>
+    <linearGradient
+       gradientUnits="userSpaceOnUse"
+       id="id0"
+       x1="250"
+       x2="250"
+       y1="125.639"
+       y2="287.919">
+      <stop
+         offset="0"
+         stop-color="#008BFF"
+         id="stop9" />
+      <stop
+         offset="1"
+         stop-color="#0af"
+         id="stop11" />
+    </linearGradient>
+  </defs>
+  <path
+     sodipodi:type="arc"
+     style="fill:#ffffff;fill-opacity:1;stroke:none"
+     id="path2999"
+     sodipodi:cx="251.05933"
+     sodipodi:cy="251.05933"
+     sodipodi:rx="217.16101"
+     sodipodi:ry="217.16103"
+     d="m 468.22034,251.05933 a 217.16101,217.16103 0 1 1 -0.003,-1.1849"
+     sodipodi:start="0"
+     sodipodi:end="6.277729"
+     sodipodi:open="true" />
+  <g
+     id="Layer_x0020_1">
+    <circle
+       class="fil0 str0"
+       cx="250"
+       cy="250"
+       r="210"
+       id="circle14" />
+    <rect
+       class="fil1"
+       height="29.998"
+       rx="10"
+       ry="10"
+       width="260"
+       x="120"
+       y="350"
+       id="rect16" />
+    <path
+       class="fil2 str1"
+       d="M270 320l60-60c5-5 10-10 10-20s-10-20-20-20h-40v-125c0-8-7-15-15-15h-30c-8 0-15 7-15 15v125h-40c-10 0-20 10-20 20s5 15 10 20l60 60c13 14 27 14 40 0z"
+       id="path18" />
+  </g>
+</svg>

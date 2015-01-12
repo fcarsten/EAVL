@@ -45,12 +45,27 @@ Ext.define('eavl.widgets.JobFileList', {
                 }
             }
         });
-
+        
         Ext.apply(config, {
             hideHeaders : true,
             store : store,
             plugins: [{
                 ptype: 'celltips'
+            },{
+                ptype: 'headericons',
+                icons: [{
+                    location: 'left',
+                    src: 'img/download.svg',
+                    tip: 'Click to download all files as a ZIP',
+                    width: 32,
+                    height: 32,
+                    style: {
+                        'cursor': 'pointer',
+                        'margin-top': '-3px',
+                        'margin-left': '-3px'
+                    },
+                    handler: Ext.bind(this._downloadAllClickHandler, this) 
+                }]
             }],
             columns : [{
                 xtype: 'clickcolumn',
@@ -157,6 +172,24 @@ Ext.define('eavl.widgets.JobFileList', {
         this.addEvents(['preview', 'dataview']);
     },
 
+    _downloadAllClickHandler : function() {
+        if (!this.job) {
+            return;
+        }
+        
+        var ds = this.getStore();
+        
+        var fileNames = [];
+        for (var i = 0; i < ds.getCount(); i++) {
+            fileNames.push(ds.getAt(i).get('name'));
+        }
+        
+        portal.util.FileDownloader.downloadFile("results/downloadFiles.do", {
+            jobId : this.job.get('id'),
+            name : fileNames
+        });
+    },
+    
     _downloadClickHandler :  function(value, record, column, tip) {
         portal.util.FileDownloader.downloadFile("results/downloadFiles.do", {
             jobId : this.job.get('id'),

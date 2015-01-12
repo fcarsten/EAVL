@@ -63,6 +63,8 @@
         <script type="text/javascript" src="js/eavl/models/JobFile.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/utils/HighlightUtil.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderDragLink.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderIcons.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderHelp.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/EAVLJobList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/JobFileList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/BoreholeEstimateChart.js"></script>
