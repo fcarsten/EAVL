@@ -208,7 +208,7 @@ Ext.application({
                             xtype : 'pdfield',
                             id : 'predictor-field',
                             width: '100%',
-                            title: 'Predictor',
+                            title: 'Element to predict',
                             height: 80,
                             emptyText : 'Drag a parameter here to select it.',
                             margins: '0 0 10 0',
