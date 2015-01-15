@@ -6,6 +6,12 @@ package org.auscope.portal.server.web.service.wps;
 import java.io.IOException;
 import java.net.ConnectException;
 
+import javax.persistence.Basic;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -17,15 +23,19 @@ import org.codehaus.jackson.annotate.JsonIgnore;
  * @author fri096
  *
  */
+@Entity
+@Table(name="wps_vm")
 public class WpsVm {
 
 	@JsonIgnore
+	@Transient
 	protected final Log log = LogFactory.getLog(getClass());
 
 	/**
 	 * Maximum time in milliseconds that we wait for VM start-up until we give up.
 	 *
 	 */
+	@Transient
 	final public int VM_STARTUP_TIMEOUT = 1000*60*10;
 	/**
 	 * @author fri096
@@ -35,11 +45,18 @@ public class WpsVm {
 		READY, UNKNOWN, STARTING, FAILED, DECOMMISSIONED
 	}
 
+	@Id
+	@Basic
 	private String id;
+
+    @Basic
 	private String ipAddress;
 
 	@JsonIgnore
+	@Transient
 	private VmStatus status = VmStatus.UNKNOWN;
+
+    @Basic
 	private long orderTime;
 
 	/**

@@ -34,6 +34,8 @@ import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
 import org.jclouds.openstack.nova.v2_0.domain.zonescoped.AvailabilityZone;
 import org.jclouds.openstack.nova.v2_0.extensions.AvailabilityZoneApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import com.google.common.base.Optional;
 
@@ -90,6 +92,9 @@ public class VmPool {
 
     private static final String groupName = "eavl-wps-r";
     private Deque<WpsVm> vmPool = new LinkedList<>();
+
+    private DbVmPoolPersister wpsVmDao;
+
     private VmPoolPersistor persistor;
     private ComputeService computeService;
 
@@ -121,8 +126,9 @@ public class VmPool {
     }
 
     @Autowired
-    public VmPool(VmPoolPersistor persistor, String accessKey,
+    public VmPool(VmPoolPersistor persistor, DbVmPoolPersister wpsVmDao, String accessKey,
             String secretKey, ThreadPoolExecutor executor) {
+        this.wpsVmDao=wpsVmDao;
         this.persistor = persistor;
         this.executor = executor;
         Properties overrides = new Properties();
@@ -144,6 +150,10 @@ public class VmPool {
             try {
                 final Set<WpsVm> peristedVms = VmPool.this.persistor
                         .loadVmPool();
+
+                for (WpsVm wpsVm : peristedVms) {
+                    wpsVmDao.save(wpsVm);
+                }
                 numOrderedVms = peristedVms.size();
 
                 executor.execute(new Runnable() {
@@ -369,10 +379,12 @@ public class VmPool {
     }
 
     public static void main(String[] arg) {
-        VmPool pool = new VmPool(new FileVmPoolPersister(),
-                "GeophysicsVL:Carsten.Friedrich@csiro.au", "",
-                new ThreadPoolExecutor(10, 20, 60, TimeUnit.SECONDS,
-                        new LinkedBlockingDeque<Runnable>()));
+        FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext("src/main/webapp/WEB-INF/applicationContext.xml");
+        VmPool pool = (VmPool) context.getBean("vmPool");
+//        VmPool pool = new VmPool(new FileVmPoolPersister(),
+//                "GeophysicsVL:Carsten.Friedrich@csiro.au", "",
+//                new ThreadPoolExecutor(10, 20, 60, TimeUnit.SECONDS,
+//                        new LinkedBlockingDeque<Runnable>()));
         try {
             WpsVm vm = pool.getFreeVm();
             vm.updateStatus();

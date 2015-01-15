@@ -9,6 +9,7 @@
                              http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
    <http entry-point-ref="oAuth2EntryPoint">
+       <s:intercept-url pattern="/*" access="ROLE_USER"/>
         <custom-filter ref="oauth2AuthFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
         <logout logout-success-url="/index.html"/>
     </http>
@@ -45,7 +46,8 @@
             <beans:map>
             </beans:map>
         </beans:constructor-arg>
-    </beans:bean>
+        <beans:constructor-arg name="dataSource" ref="dataSource"/>
+        </beans:bean>
 
     <beans:bean id="oAuth2DefaultUserInfoProvider" class="com.racquettrack.security.oauth.DefaultOAuth2UserInfoProvider">
         <beans:property name="oAuth2ServiceProperties" ref="oauth2ServiceProperties"/>

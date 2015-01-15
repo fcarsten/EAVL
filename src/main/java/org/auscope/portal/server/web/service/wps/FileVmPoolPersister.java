@@ -8,12 +8,15 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.annotation.ThreadSafe;
 import org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author fri096
@@ -23,8 +26,16 @@ import org.codehaus.jackson.type.TypeReference;
 public class FileVmPoolPersister implements VmPoolPersistor {
     protected final Log log = LogFactory.getLog(getClass());
     protected String baseDirectory = null;
+    private JdbcTemplate jdbcTemplate;
 
-	public FileVmPoolPersister() {
+    /**
+     * @param dataSource the dataSource to set
+     */
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource, true);
+    }
+
+    public FileVmPoolPersister() {
 		this.baseDirectory = "";
 	}
 
