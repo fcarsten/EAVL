@@ -23,7 +23,7 @@ Ext.define('eavl.widgets.preview.BoreholeEstimatePreview', {
         var mask = new Ext.LoadMask(me, {msg:"Please wait..."});
         mask.show();
         Ext.Ajax.request({
-            url: "results/getGroupedValues.do",
+            url: "results/getGroupedNumericValues.do",
             params: {
                 fileName: fileName,
                 jobId: job.get('id'),

@@ -38,7 +38,11 @@ Ext.application({
                 flex: 1,
                 parameterDetails : parameterDetails,
                 title: 'If this looks correct, press the big arrow at the top of the page.',
-                margin: '0 0 10 0'
+                margin: '0 0 10 0',
+                plugins: [{
+                    ptype: 'headerhelp',
+                    text: 'You will have the opportunity to correct "bad" data values at a later stage.'
+                }]
             }));
 
 

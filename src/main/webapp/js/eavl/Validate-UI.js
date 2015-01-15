@@ -182,6 +182,9 @@ Ext.application({
                                     }
                                     pdlist.getStore().remove(pd);
                                 }
+                            },{
+                                ptype: 'headerhelp',
+                                text: 'Parameters dragged here will be deleted before any imputation takes place.'
                             }]
                         }]
                     },{
@@ -198,6 +201,9 @@ Ext.application({
                             handleDrop : function(pdpanel, pd) {
                                 pdpanel.showParameterDetails(pd);
                             }
+                        },{
+                            ptype: 'headerhelp',
+                            text: 'Compositional parameters must have any non numeric and zero values replaced with either a fixed value or a missing value for future imputation.'
                         }],
                         listeners : {
                             parameterchanged : function(pdpanel, parameterDetails) {

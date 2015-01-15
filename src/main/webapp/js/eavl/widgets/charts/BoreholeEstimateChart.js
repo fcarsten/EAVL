@@ -74,12 +74,13 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
         this.data = null;
         this._onResize(this, this.viewport.attr('width'), this.viewport.attr('height'))
         this.callParent(arguments);
+        this.d3svg.select('g.bhe-group').remove();
     },
 
     plot : function(data) {
+        this.clearPlot();
         this.data = data;
         if (!data) {
-            this.clearPlot();
             return;
         }
 
@@ -127,9 +128,11 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
                 rectEl.setAttributeNS(null, 'x', this.textWidth + this.rowMargin + j * rectWidth);
                 rectEl.setAttributeNS(null, 'y', this.rowMargin);
                 rectEl.setAttributeNS(null, 'width', rectWidth)
-                rectEl.setAttributeNS(null, 'estimate', bh.values[j]);
+                rectEl.setAttributeNS(null, 'estimate', bh.values[j][0]);
                 rectEl.setAttributeNS(null, 'height', this.rowHeight - this.rowMargin * 2);
-                rectEl.setAttributeNS(null, 'fill', estimateToColor(bh.values[j]));                
+                rectEl.setAttributeNS(null, 'fill', estimateToColor(bh.values[j][0]));            
+                rectEl.addEventListener('mouseover', tip.show);
+                rectEl.addEventListener('mouseout', tip.hide);
                 frag.appendChild(rectEl);
             }
             
@@ -139,12 +142,6 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             frag.appendChild(textEl);
             
             bhGroup[0][0].appendChild(frag);
-            
-            //The downside to using document fragments is that we dont inherit the D3 JS event wrappers
-            //which force us to "step back into" D3 for event handling
-            bhGroup.selectAll("rect")
-                .on('mouseover', tip.show)
-                .on('mouseout', tip.hide);
         }
     }
 });

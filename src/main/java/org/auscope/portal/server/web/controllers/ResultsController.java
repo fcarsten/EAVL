@@ -284,7 +284,7 @@ public class ResultsController extends BasePortalController {
 
     /**
      * Returns a JSON Object encoding the specified jobfiles data grouped by
-     * a particular column.
+     * a particular column. Values are returned as Numbers
      *
      * Data is returned in the form
      * [
@@ -297,8 +297,8 @@ public class ResultsController extends BasePortalController {
      * @param user
      * @return
      */
-    @RequestMapping("getGroupedValues.do")
-    public ModelAndView getJobStatus(HttpServletRequest request,
+    @RequestMapping("getGroupedNumericValues.do")
+    public ModelAndView getGroupedNumericValues(HttpServletRequest request,
             @AuthenticationPrincipal PortalUser user,
             @RequestParam(value="jobId", required=false) Integer jobId,
             @RequestParam("fileName") String fileName,
@@ -326,16 +326,25 @@ public class ResultsController extends BasePortalController {
             String[][] rawData = csvService.getRawStringData(is, indexes, true);
 
             //Group our input data
-            Map<String, List<String[]>> groupedDataMap = new HashMap<String, List<String[]>>();
+            Map<String, List<double[]>> groupedDataMap = new HashMap<String, List<double[]>>();
             for (String[] row : rawData) {
                 String holeId = row[0];
-                List<String[]> data = groupedDataMap.get(holeId);
+                List<double[]> data = groupedDataMap.get(holeId);
                 if (data == null) {
-                    data = new ArrayList<String[]>();
+                    data = new ArrayList<double[]>();
                     groupedDataMap.put(holeId, data);
                 }
 
-                data.add(Arrays.copyOfRange(row, 1, row.length));
+                double[] doubleRow = new double[paramNames.length];
+                for (int i = 1; i < row.length; i++) {
+                    try {
+                        doubleRow[i - 1] = Double.parseDouble(row[i]);
+                    } catch (NumberFormatException ex) {
+                        doubleRow[i - 1] = Double.NaN;
+                    }
+                }
+
+                data.add(doubleRow);
             }
 
             //Convert to an array of objects

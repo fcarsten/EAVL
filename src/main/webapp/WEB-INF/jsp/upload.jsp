@@ -10,6 +10,8 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/CSVGrid.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
         
+        <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderIcons.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderHelp.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/utils/HighlightUtil.js"></script>
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>
