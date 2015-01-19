@@ -15,7 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.auscope.portal.core.cloud.VmJob;
+import org.auscope.portal.core.cloud.StagedFileOwner;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 
 /**
@@ -24,7 +24,7 @@ import org.auscope.portal.server.security.oauth2.EavlUser;
  *
  */
 @Entity
-public class EAVLJob implements VmJob {
+public class EAVLJob implements StagedFileOwner {
 
     @Basic
     private Double predictionCutoff;
