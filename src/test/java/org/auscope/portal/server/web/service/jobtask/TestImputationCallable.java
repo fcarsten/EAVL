@@ -103,7 +103,7 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);will(returnValue(mockOs));
 
             oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1))), with(false));will(returnValue(data));
-            oneOf(mockWpsClient).getWpsClient().imputationNA(data);will(throwException(new IOException()));
+            oneOf(mockWpsClient).getWpsClient().imputationNA(data);will(throwException(new PortalServiceException("")));
             oneOf(mockIs1).close();
 
             oneOf(mockCsvService).cullEmptyRows(mockIs1, mockOs, Arrays.asList(1), false);
