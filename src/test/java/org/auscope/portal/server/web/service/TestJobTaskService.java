@@ -12,9 +12,8 @@ import junit.framework.Assert;
 
 import org.auscope.portal.core.test.PortalTestClass;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
-import org.auscope.portal.server.web.service.jobtask.JobTaskId;
 import org.auscope.portal.server.web.service.jobtask.JobTaskListener;
-import org.auscope.portal.server.web.service.jobtask.JobTaskPersistor;
+import org.auscope.portal.server.web.service.jobtask.JobTaskRepository;
 import org.jmock.Expectations;
 import org.junit.After;
 import org.junit.Test;
@@ -28,7 +27,7 @@ public class TestJobTaskService extends PortalTestClass {
     private long TASK3_TIME = 100; //Hacky way to ensure thread timing
 
     private JobTaskService service;
-    private JobTaskPersistor mockPersistor = context.mock(JobTaskPersistor.class);
+    private JobTaskRepository mockPersistor = context.mock(JobTaskRepository.class);
     private JobTaskListener mockListener = context.mock(JobTaskListener.class);
     private ExecutorService executor;
     private JobTask mockTask1 = context.mock(JobTask.class, "mockTask1");
@@ -51,14 +50,14 @@ public class TestJobTaskService extends PortalTestClass {
     public void testNormalOperation() throws Exception {
         executor = Executors.newFixedThreadPool(1);
         context.checking(new Expectations() {{
-            oneOf(mockPersistor).getPersistedJobs();will(returnValue(new ArrayList<JobTask>()));
+            oneOf(mockPersistor).findAll();will(returnValue(new ArrayList<JobTask>()));
         }});
         service = new JobTaskService(executor, mockListener, mockPersistor);
 
         context.checking(new Expectations() {{
-            oneOf(mockPersistor).persist(with(any(String.class)), with(mockTask1));
-            oneOf(mockPersistor).persist(with(any(String.class)), with(mockTask2));
-            oneOf(mockPersistor).persist(with(any(String.class)), with(mockTask3));
+            oneOf(mockPersistor).saveAndFlush(mockTask1);
+            oneOf(mockPersistor).saveAndFlush(mockTask2);
+            oneOf(mockPersistor).saveAndFlush(mockTask3);
 
             oneOf(mockTask1).run();will(delayReturnValue(TASK1_TIME, ""));
             oneOf(mockTask2).run();will(delayReturnValue(TASK2_TIME, ""));
@@ -67,7 +66,7 @@ public class TestJobTaskService extends PortalTestClass {
 
         final String guid1 = service.submit(mockTask1);
         context.checking(new Expectations() {{
-            oneOf(mockPersistor).forget(guid1);
+            oneOf(mockPersistor).delete(guid1);
             oneOf(mockListener).handleTaskFinish(guid1, mockTask1);
         }});
         Assert.assertTrue(service.isExecuting(guid1));
@@ -75,14 +74,14 @@ public class TestJobTaskService extends PortalTestClass {
 
         final String guid2 = service.submit(mockTask2);
         context.checking(new Expectations() {{
-            oneOf(mockPersistor).forget(guid2);
+            oneOf(mockPersistor).delete(guid2);
             oneOf(mockListener).handleTaskFinish(guid2, mockTask2);
         }});
         Assert.assertTrue(service.isExecuting(guid2));
 
         final String guid3 = service.submit(mockTask3);
         context.checking(new Expectations() {{
-            oneOf(mockPersistor).forget(guid3);
+            oneOf(mockPersistor).delete(guid3);
             oneOf(mockListener).handleTaskFinish(guid3, mockTask3);
         }});
         Assert.assertTrue(service.isExecuting(guid3));
@@ -131,7 +130,7 @@ public class TestJobTaskService extends PortalTestClass {
     public void testNullGuids() throws Exception {
         executor = Executors.newFixedThreadPool(1);
         context.checking(new Expectations() {{
-            oneOf(mockPersistor).getPersistedJobs();will(returnValue(new ArrayList<JobTask>()));
+            oneOf(mockPersistor).findAll();will(returnValue(new ArrayList<JobTask>()));
         }});
         service = new JobTaskService(executor, mockListener, mockPersistor);
 
@@ -299,11 +298,11 @@ public class TestJobTaskService extends PortalTestClass {
         final String guid3 = "shadlsahlsda";
 
         context.checking(new Expectations() {{
-            oneOf(mockPersistor).getPersistedJobs();will(returnValue(Arrays.asList(new JobTaskId(mockTask1, guid1), new JobTaskId(mockTask2, guid2), new JobTaskId(mockTask3, guid3))));
+            oneOf(mockPersistor).findAll();will(returnValue(Arrays.asList(mockTask1, mockTask2, mockTask3)));
 
-            oneOf(mockPersistor).forget(guid1);
-            oneOf(mockPersistor).forget(guid2);
-            oneOf(mockPersistor).forget(guid3);
+            oneOf(mockPersistor).delete(guid1);
+            oneOf(mockPersistor).delete(guid2);
+            oneOf(mockPersistor).delete(guid3);
 
             oneOf(mockListener).handleTaskFinish(guid1, mockTask1);
             oneOf(mockListener).handleTaskFinish(guid2, mockTask2);

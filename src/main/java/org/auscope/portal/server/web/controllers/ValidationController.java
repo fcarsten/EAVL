@@ -10,13 +10,13 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.eavl.ParameterDetails;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
@@ -71,14 +71,14 @@ public class ValidationController extends BasePortalController {
      */
     @RequestMapping("/uploadFile.do")
     public ModelAndView uploadFile(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="jobId") Integer jobId) {
 
 
         EAVLJob job;
         try {
             if (jobId == null) {
-                job = jobService.createJobForSession(request);
+                job = jobService.createJobForSession(request, user);
             } else {
                 job = jobService.getUserJobById(request, user, jobId);
             }
@@ -134,7 +134,7 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/getParameterDetails.do")
-    public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="file") String file,
             @RequestParam(required=false,value="jobId") Integer jobId) {
         InputStream csvData = null;
@@ -158,7 +158,7 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/getCompositionalParameterDetails.do")
-    public ModelAndView getCompositionalParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView getCompositionalParameterDetails(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="file") String file,
             @RequestParam(required=false,value="jobId") Integer jobId) {
         InputStream csvData = null;
@@ -192,7 +192,7 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/getParameterValues.do")
-    public ModelAndView getParameterValues(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView getParameterValues(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam("columnIndex") int columnIndex) {
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
@@ -206,7 +206,7 @@ public class ValidationController extends BasePortalController {
 
 
     @RequestMapping("/streamRows.do")
-    public ModelAndView streamRows(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView streamRows(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam("limit") Integer limit,
             @RequestParam("page") Integer page,
             @RequestParam("start") Integer start,
@@ -235,7 +235,7 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/findReplace.do")
-    public ModelAndView findReplace(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView findReplace(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam("find") String find,
             @RequestParam("replace") String replace,
             @RequestParam("columnIndex") int columnIndex) {
@@ -272,7 +272,7 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/deleteParameters.do")
-    public ModelAndView deleteParameters(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView deleteParameters(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam("columnIndex") Integer[] columnIndexes) {
 
         OutputStream os = null;
@@ -298,7 +298,7 @@ public class ValidationController extends BasePortalController {
     }
 
     @RequestMapping("/saveValidationSubmitImputation.do")
-    public ModelAndView saveValidationSubmitImputation(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView saveValidationSubmitImputation(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(value="deleteColIndex", required=false) Integer[] delColIndexes) {
 
         OutputStream os = null;
@@ -314,7 +314,8 @@ public class ValidationController extends BasePortalController {
                 fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
             }
 
-            JobTask newTask = new JobTask(new ImputationCallable(job, wpsService, csvService, fss), job);
+            JobTask newTask = new JobTask(job);
+            newTask.setTask(new ImputationCallable(job, wpsService, csvService, fss));
             String taskId = jobTaskService.submit(newTask);
 
             job.setImputationTaskId(taskId);

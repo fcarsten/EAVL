@@ -4,10 +4,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
@@ -45,7 +45,7 @@ public class SetProxyController extends BasePortalController {
 
     @RequestMapping("saveAndSubmitProxySelection.do")
     public ModelAndView saveAndSubmitProxySelection(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam("proxy") String[] proxies) {
 
         EAVLJob job;
@@ -58,7 +58,8 @@ public class SetProxyController extends BasePortalController {
 
         try {
             job.setProxyParameters(Sets.newHashSet(proxies));
-            JobTask newTask = new JobTask(new KDECallable(job, wpsService, csvService, fss), job);
+            JobTask newTask = new JobTask(job);
+            newTask.setTask(new KDECallable(job, wpsService, csvService, fss));
             String taskId = jobTaskService.submit(newTask);
             job.setKdeTaskId(taskId);
             jobService.save(job);

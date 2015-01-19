@@ -6,10 +6,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.view.ViewEAVLJobFactory;
@@ -47,7 +47,7 @@ public class ThresholdController extends BasePortalController {
      * @return
      */
     @RequestMapping("getConfig.do")
-    public ModelAndView getConfig(HttpServletRequest request, @AuthenticationPrincipal PortalUser user) {
+    public ModelAndView getConfig(HttpServletRequest request, @AuthenticationPrincipal EavlUser user) {
 
         InputStream csvData = null;
         try {
@@ -79,7 +79,7 @@ public class ThresholdController extends BasePortalController {
      * @return
      */
     @RequestMapping("saveConfig.do")
-    public ModelAndView saveConfig(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView saveConfig(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam("predictorCutoff") Double predictorCutoff) {
 
         try {

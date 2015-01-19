@@ -7,10 +7,10 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
@@ -54,7 +54,7 @@ public class IdentifyController extends BasePortalController {
     }
 
     @RequestMapping("/getConfig.do")
-    public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="jobId") Integer jobId) {
 
         InputStream csvData = null;
@@ -93,7 +93,7 @@ public class IdentifyController extends BasePortalController {
      * @return
      */
     @RequestMapping("/saveConfig.do")
-    public ModelAndView saveConfig(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView saveConfig(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="jobId") Integer jobId,
             @RequestParam("holeIdName") String holeIdName,
             @RequestParam("predictorName") String predictorName,

@@ -1,6 +1,5 @@
 package org.auscope.portal.server.web.service.wps;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;

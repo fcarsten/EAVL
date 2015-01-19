@@ -15,9 +15,9 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -106,7 +106,7 @@ public class MenuController {
     * @throws IOException
     */
    @RequestMapping("/*.html")
-   public ModelAndView handleHtmlToView(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal PortalUser user) throws IOException {
+   public ModelAndView handleHtmlToView(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal EavlUser user) throws IOException {
        //Detect whether this is a new session or not...
        HttpSession session = request.getSession();
        boolean isNewSession = session.getAttribute("existingSession") == null;

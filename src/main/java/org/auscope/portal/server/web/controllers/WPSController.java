@@ -13,12 +13,12 @@ import net.sf.json.JSONArray;
 import org.apache.commons.io.IOUtils;
 import org.auscope.eavl.wpsclient.ACF;
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.WpsService;
@@ -52,7 +52,7 @@ public class WPSController extends BasePortalController {
 
     @RequestMapping("/getPDFData.do")
     public ModelAndView getPDFData(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam("columnIndex") int columnIndex,
             @RequestParam("file") String file) {
 
@@ -99,7 +99,7 @@ public class WPSController extends BasePortalController {
 
     @RequestMapping("/getDoublePDFData.do")
     public ModelAndView getDoublePDFData(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam("columnIndex") int columnIndex,
             @RequestParam("file") String file) {
 
@@ -181,7 +181,7 @@ public class WPSController extends BasePortalController {
 
     @RequestMapping("/getMeanACFData.do")
     public ModelAndView getMeanACFData(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam("columnIndex") int columnIndex) {
         try {
             EAVLJob job = jobService.getJobForSession(request, user);

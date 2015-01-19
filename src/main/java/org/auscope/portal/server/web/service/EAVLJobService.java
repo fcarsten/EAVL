@@ -1,20 +1,18 @@
 package org.auscope.portal.server.web.service;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.security.oauth2.EavlUser;
+import org.auscope.portal.server.web.service.jobtask.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.common.collect.Sets;
 
 /**
  * Service class for reading/writing instances of EAVLJob objects from a persistent store
@@ -28,39 +26,22 @@ public class EAVLJobService {
 
     protected final Log log = LogFactory.getLog(getClass());
 
-    private List<EAVLJob> debugJobSingleton; // TODO: This is a horrible in memory store for debug purposes
-    private volatile int debugIdCounter = 1; // TODO: This is a horrible in memory store for debug purposes
+//    private List<EAVLJob> debugJobSingleton; // TODO: This is a horrible in memory store for debug purposes
+//    private volatile int debugIdCounter = 1; // TODO: This is a horrible in memory store for debug purposes
+
+    @Autowired
+    private JobRepository persistor;
 
     @Autowired
     public EAVLJobService(FileStagingService fss) {
-
-        log.error("This is debug code - ITS NOT A PROPER IMPLEMENTATION");
-
-        debugJobSingleton = new CopyOnWriteArrayList<EAVLJob>();
-        EAVLJob job = new EAVLJob(debugIdCounter);
-        try {
-            while (fss.stageInDirectoryExists(job)) {
-                job.setName("file-" + job.getId() + ".csv");
-                job.setProxyParameters(Sets.newHashSet("Sb_ppm", "Cr_ppm", "Rb_ppm"));
-                debugJobSingleton.add(job);
-                job = new EAVLJob(++debugIdCounter);
-            }
-        } catch (PortalServiceException e) {
-
-        }
     }
 
-    private EAVLJob debugGetById(Integer id) {
+    private EAVLJob getJobById(Integer id) {
         if (id == null) {
             return null;
         }
-        for (EAVLJob j : debugJobSingleton) {
-            if (j.getId() == id) {
-                return j;
-            }
-        }
 
-        return null;
+        return persistor.findOne(id);
     }
 
     /**
@@ -69,14 +50,12 @@ public class EAVLJobService {
      * @param request Used to identify session
      * @return
      */
-    public EAVLJob createJobForSession(HttpServletRequest request) throws PortalServiceException {
-        log.warn("TODO - createJobForSession");
+    public EAVLJob createJobForSession(HttpServletRequest request, EavlUser user) throws PortalServiceException {
+        EAVLJob newJob = new EAVLJob();
+        newJob.setUser(user);
+        persistor.saveAndFlush(newJob);
 
-        EAVLJob newJob = new EAVLJob(debugIdCounter++);
         request.getSession().setAttribute(SESSION_ATTR_ID, newJob.getId());
-
-        debugJobSingleton.add(newJob);
-
         return newJob;
     }
 
@@ -87,13 +66,12 @@ public class EAVLJobService {
      * @param user Owner of the session
      * @return
      */
-    public EAVLJob getJobForSession(HttpServletRequest request, PortalUser user) throws PortalServiceException {
+    public EAVLJob getJobForSession(HttpServletRequest request, EavlUser user) throws PortalServiceException {
         log.warn("TODO - getJobForSession");
 
         Integer id = (Integer) request.getSession().getAttribute(SESSION_ATTR_ID);
 
-
-        return debugGetById(id);
+        return getJobById(id);
     }
 
     /**
@@ -106,18 +84,8 @@ public class EAVLJobService {
      * @return
      * @throws PortalServiceException
      */
-    public void setSessionJob(EAVLJob job, HttpServletRequest request, PortalUser user) throws PortalServiceException {
+    public void setSessionJob(EAVLJob job, HttpServletRequest request, EavlUser user) throws PortalServiceException {
         request.getSession().setAttribute(SESSION_ATTR_ID, job == null ? null : job.getId());
-    }
-
-    /**
-     * Gets an EAVLJob with a particular ID (no checks made against permissions). If the job DNE this will return null
-     * @see getUserJobById
-     * @param id
-     * @return
-     */
-    public EAVLJob getJobById(Integer id) throws PortalServiceException {
-        return debugGetById(id);
     }
 
     /**
@@ -127,8 +95,8 @@ public class EAVLJobService {
      * @param id
      * @return
      */
-    public EAVLJob getUserJobById(HttpServletRequest request, PortalUser user, Integer id) throws PortalServiceException {
-        return debugGetById(id);
+    public EAVLJob getUserJobById(HttpServletRequest request, EavlUser user, Integer id) throws PortalServiceException {
+        return getJobById(id);
     }
 
     /**
@@ -137,7 +105,7 @@ public class EAVLJobService {
      * @throws PortalServiceException
      */
     public void delete(EAVLJob job) throws PortalServiceException {
-        debugJobSingleton.remove(job);
+        persistor.delete(job);
     }
 
     /**
@@ -147,8 +115,7 @@ public class EAVLJobService {
      * @throws PortalServiceException
      */
     public void save(EAVLJob job) throws PortalServiceException {
-        //TODO - save job
-        log.warn("TODO - save job");
+        persistor.saveAndFlush(job);
     }
 
     /**
@@ -157,7 +124,8 @@ public class EAVLJobService {
      * @param user The authenticated user object
      * @return
      */
-    public List<EAVLJob> getJobsForUser(HttpServletRequest request, PortalUser user) throws PortalServiceException {
-        return debugJobSingleton;
+    public List<EAVLJob> getJobsForUser(HttpServletRequest request, EavlUser user) throws PortalServiceException {
+        List<EAVLJob> res = persistor.findByUser(user);
+        return res;
     }
 }
