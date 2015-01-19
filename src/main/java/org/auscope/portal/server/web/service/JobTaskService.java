@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
@@ -57,7 +59,10 @@ public class JobTaskService {
     public JobTaskService(ExecutorService executor, JobTaskListener listener) {
         this.executor = MoreExecutors.listeningDecorator(executor);
         this.listener = listener;
+    }
 
+    @PostConstruct
+    public void initService() {
         if (this.persistor != null) {
             List<JobTask> jobs = persistor.findAll();
             for (JobTask jt : jobs) {
@@ -65,14 +70,6 @@ public class JobTaskService {
             }
         }
     }
-
-
-    public JobTaskService(ExecutorService e,
-            JobTaskListener m, JobTaskRepository persistor) {
-        this(e, m);
-        this.persistor=persistor;
-    }
-
 
     /**
      * Submits a task for execution. Returns a GUID for identifying this submission.
