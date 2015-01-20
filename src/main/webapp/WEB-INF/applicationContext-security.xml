@@ -9,6 +9,7 @@
                              http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
    <http entry-point-ref="oAuth2EntryPoint">
+       <s:intercept-url pattern="/*" access="ROLE_USER"/>
         <custom-filter ref="oauth2AuthFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
         <logout logout-success-url="/index.html"/>
     </http>
@@ -39,7 +40,7 @@
         <beans:constructor-arg name="clientSecret" value="${env.oauth2.google.clientsecret}"/>
     </beans:bean>
 
-    <beans:bean id="simpleUserLoader" class="org.auscope.portal.core.server.security.oauth2.GoogleOAuth2UserDetailsLoader">
+    <beans:bean id="simpleUserLoader" class="org.auscope.portal.server.security.oauth2.GoogleOAuth2UserDetailsLoader">
         <beans:constructor-arg name="defaultRole" value="ROLE_USER"/>
         <beans:constructor-arg name="rolesByUser">
             <beans:map>

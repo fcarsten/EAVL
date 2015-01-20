@@ -3,7 +3,7 @@ package org.auscope.portal.server.web.controllers;
 import javax.servlet.http.HttpServletRequest;
 
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.JobTaskService;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class TaskWaitController extends BasePortalController {
     public ModelAndView setEmailNotification(HttpServletRequest request,
             @RequestParam("notify") boolean notify,
             @RequestParam("taskId") String taskId,
-            @AuthenticationPrincipal PortalUser user) {
+            @AuthenticationPrincipal EavlUser user) {
 
         String email = null;
         if (!notify) {
@@ -54,7 +54,7 @@ public class TaskWaitController extends BasePortalController {
     @RequestMapping("isExecuting.do")
     public ModelAndView setEmailNotification(HttpServletRequest request,
             @RequestParam("taskId") String taskId,
-            @AuthenticationPrincipal PortalUser user) {
+            @AuthenticationPrincipal EavlUser user) {
 
         return generateJSONResponseMAV(true, jobTaskService.isExecuting(taskId), "");
     }

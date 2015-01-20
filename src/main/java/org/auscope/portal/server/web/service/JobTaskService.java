@@ -1,15 +1,16 @@
 package org.auscope.portal.server.web.service;
 
-import java.util.UUID;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
-import org.auscope.portal.server.web.service.jobtask.JobTaskId;
 import org.auscope.portal.server.web.service.jobtask.JobTaskListener;
-import org.auscope.portal.server.web.service.jobtask.JobTaskPersistor;
+import org.auscope.portal.server.web.service.jobtask.JobTaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,26 +34,42 @@ public class JobTaskService {
 
     private ListeningExecutorService executor;
     private JobTaskListener listener;
-    private JobTaskPersistor persistor;
-    private ConcurrentHashMap<String, ExecutingTask> activeTasks = new ConcurrentHashMap<String, ExecutingTask>();
-
-    public JobTaskService(ExecutorService executor, JobTaskListener listener) {
-        this(executor, listener, null);
-    }
 
     @Autowired
-    public JobTaskService(ExecutorService executor, JobTaskListener listener, JobTaskPersistor persistor) {
+    private JobTaskRepository persistor;
+    /**
+     * @return the persistor
+     */
+    public JobTaskRepository getPersistor() {
+        return persistor;
+    }
+
+
+    /**
+     * @param persistor the persistor to set
+     */
+    public void setPersistor(JobTaskRepository persistor) {
+        this.persistor = persistor;
+    }
+
+
+    private ConcurrentHashMap<String, ExecutingTask> activeTasks = new ConcurrentHashMap<String, ExecutingTask>();
+
+    @Autowired
+    public JobTaskService(ExecutorService executor, JobTaskListener listener) {
         this.executor = MoreExecutors.listeningDecorator(executor);
         this.listener = listener;
-        this.persistor = persistor;
+    }
 
+    @PostConstruct
+    public void initService() {
         if (this.persistor != null) {
-            for (JobTaskId jt : this.persistor.getPersistedJobs()) {
-                this.submit(jt.getJobTask(), jt.getId(), false);
+            List<JobTask> jobs = persistor.findAll();
+            for (JobTask jt : jobs) {
+                this.submit(jt, false);
             }
         }
     }
-
 
     /**
      * Submits a task for execution. Returns a GUID for identifying this submission.
@@ -65,7 +82,7 @@ public class JobTaskService {
      * @return
      */
     public String submit(JobTask task)  {
-        return submit(task, null, true);
+        return submit(task, true);
     }
 
     /**
@@ -108,32 +125,31 @@ public class JobTaskService {
         return et.jobTask;
     }
 
-    private String submit(JobTask task, String guid, boolean persist)  {
-        if (guid == null) {
-            guid = UUID.randomUUID().toString();
-        }
+    private String submit(JobTask task, boolean persist)  {
 
         if (persistor != null && persist) {
-            persistor.persist(guid, task);
+            persistor.saveAndFlush(task);
+//            persistor.persist(guid, task);
         }
 
-        final ExecutingTask et = new ExecutingTask(guid, task, executor.submit(task));
+        final ExecutingTask et = new ExecutingTask(task.getId(), task, executor.submit(task.getTask()));
         final JobTaskListener l = listener;
         final ConcurrentHashMap<String, ExecutingTask> a = this.activeTasks;
-        final JobTaskPersistor p = persistor;
+//        final JobRepository p = persistor;
         et.future.addListener(new Runnable() {
             @Override
             public void run() {
                 if (persistor != null) {
-                    p.forget(et.id);
+                    persistor.delete(et.id);
+//                    p.forget(et.id);
                 }
                 a.remove(et.id);
                 l.handleTaskFinish(et.id, et.jobTask);
             }
         }, MoreExecutors.directExecutor());
-        activeTasks.put(guid, et);
+        activeTasks.put(task.getId(), et);
 
-        return guid;
+        return task.getId();
     }
 
 

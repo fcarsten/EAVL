@@ -24,10 +24,10 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.server.security.oauth2.PortalUser;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
@@ -72,7 +72,7 @@ public class ResultsController extends BasePortalController {
      * @return
      */
     @RequestMapping("getJobsForUser.do")
-    public ModelAndView getJobsForUser(HttpServletRequest request, @AuthenticationPrincipal PortalUser user) {
+    public ModelAndView getJobsForUser(HttpServletRequest request, @AuthenticationPrincipal EavlUser user) {
         try {
             List<EAVLJob> jobs = jobService.getJobsForUser(request, user);
             List<ModelMap> jobModels = new ArrayList<ModelMap>(jobs.size());
@@ -94,7 +94,7 @@ public class ResultsController extends BasePortalController {
      * @return
      */
     @RequestMapping("getFilesForJob.do")
-    public ModelAndView getFilesForJob(HttpServletRequest request, @AuthenticationPrincipal PortalUser user,
+    public ModelAndView getFilesForJob(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam("jobId") Integer jobId) {
         try {
             EAVLJob job = jobService.getUserJobById(request, user, jobId);
@@ -120,7 +120,7 @@ public class ResultsController extends BasePortalController {
 
     @RequestMapping("getKDEGeometry.do")
     public ModelAndView getKDEGeometry(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam("jobId") Integer jobId,
             @RequestParam("name") String fileName) {
 
@@ -187,7 +187,7 @@ public class ResultsController extends BasePortalController {
     @RequestMapping("downloadFiles.do")
     public void downloadFiles(HttpServletRequest request,
             HttpServletResponse response,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam("jobId") Integer jobId,
             @RequestParam("name") String[] fileNames) throws Exception {
 
@@ -260,7 +260,7 @@ public class ResultsController extends BasePortalController {
      */
     @RequestMapping("getJobStatus.do")
     public ModelAndView getJobStatus(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam(value="jobId", required=false) Integer jobId) {
 
         EAVLJob job;
@@ -299,7 +299,7 @@ public class ResultsController extends BasePortalController {
      */
     @RequestMapping("getGroupedNumericValues.do")
     public ModelAndView getGroupedNumericValues(HttpServletRequest request,
-            @AuthenticationPrincipal PortalUser user,
+            @AuthenticationPrincipal EavlUser user,
             @RequestParam(value="jobId", required=false) Integer jobId,
             @RequestParam("fileName") String fileName,
             @RequestParam("groupName") String groupName,

@@ -1,7 +1,7 @@
 package org.auscope.portal.server.web.service.wps;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -13,9 +13,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,6 +34,7 @@ import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
 import org.jclouds.openstack.nova.v2_0.domain.zonescoped.AvailabilityZone;
 import org.jclouds.openstack.nova.v2_0.extensions.AvailabilityZoneApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import com.google.common.base.Optional;
 
@@ -58,6 +59,9 @@ public class VmPool {
         }
     }
 
+    /**
+     * Target VM pool size. VM pool will adapt to this number.
+     */
     private int vmPoolSize = 1;
 
     /**
@@ -89,8 +93,16 @@ public class VmPool {
     private static final String INSTANCE_TYPE = "Melbourne/1";
 
     private static final String groupName = "eavl-wps-r";
+
+    /**
+     * Holds all VMs that are assumed to be ready for work. Does not contain VMs just being created or while
+     * being verified
+     */
     private Deque<WpsVm> vmPool = new LinkedList<>();
-    private VmPoolPersistor persistor;
+
+    @Autowired
+    WpsVmRepository wpsVmRepository;
+
     private ComputeService computeService;
 
     private String keypair = null;
@@ -120,10 +132,32 @@ public class VmPool {
         this.skippedZones = skippedZones;
     }
 
+    private boolean initComlete=false;;
+
+    @PostConstruct
+    public void postInit() {
+        if (wpsVmRepository != null) {
+            final Collection<WpsVm> peristedVms = wpsVmRepository.findAll();
+
+            numOrderedVms = peristedVms.size();
+
+            executor.execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    verifyVmPool(peristedVms);
+                    initComlete = true;
+                    checkAndFixPoolSizeAsync();
+                }
+            });
+        } else {
+            initComlete=true;
+            checkAndFixPoolSizeAsync();
+        }
+    }
+
     @Autowired
-    public VmPool(VmPoolPersistor persistor, String accessKey,
-            String secretKey, ThreadPoolExecutor executor) {
-        this.persistor = persistor;
+    public VmPool(String accessKey, String secretKey, ThreadPoolExecutor executor) {
         this.executor = executor;
         Properties overrides = new Properties();
 
@@ -131,34 +165,11 @@ public class VmPool {
                 .endpoint(CLOUD_ENDPOINT).overrides(overrides)
                 .credentials(accessKey, secretKey);
 
-        // if (apiVersion != null) {
-        // b.apiVersion(apiVersion);
-        // }
-
         ComputeServiceContext context = b
                 .buildView(ComputeServiceContext.class);
         this.computeService = context.getComputeService();
         this.lowLevelApi = b.buildApi(NovaApi.class);
 
-        if (persistor != null) {
-            try {
-                final Set<WpsVm> peristedVms = VmPool.this.persistor
-                        .loadVmPool();
-                numOrderedVms = peristedVms.size();
-
-                executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        verifyVmPool(peristedVms);
-                        checkAndFixPoolSizeAsync();
-                    }
-                });
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
-        } else {
-            checkAndFixPoolSizeAsync();
-        }
     }
 
     /**
@@ -199,7 +210,7 @@ public class VmPool {
         }
     }
 
-    private void verifyVmPool(Set<WpsVm> set) {
+    private void verifyVmPool(Collection<WpsVm> set) {
         ArrayList<Future<Void>> futures = new ArrayList<Future<Void>>(
                 set.size());
         for (WpsVm wpsVm : set) {
@@ -238,17 +249,20 @@ public class VmPool {
 
     /**
      * Only access within synchronized (vmPool) {}
+     * Number of VMs currently outstanding: Either being created or being verified.
      */
     private int numOrderedVms = 0;
 
     private void checkAndFixPoolSizeAsync() {
+        if(!initComlete) return;
+
         int currentPoolSize = 0;
         int numNewVmsNeeded = 0;
         ConcurrentLinkedQueue<WpsVm> badVms = new ConcurrentLinkedQueue<WpsVm>();
 
         log.info("Checking vm pool size");
         synchronized (vmPool) {
-            boolean poolChanged = false;
+//            boolean poolChanged = false;
             //
             // sort out any VMs that have been marked as bad or decommissioned
             //
@@ -257,21 +271,22 @@ public class VmPool {
                 if (vm.getStatus() == VmStatus.FAILED
                         || vm.getStatus() == VmStatus.DECOMMISSIONED) {
                     badVms.add(vm);
+                    wpsVmRepository.delete(vm);
                     iter.remove();
-                    poolChanged = true;
+//                    poolChanged = true;
                 }
             }
             currentPoolSize = vmPool.size() + numOrderedVms;
             numNewVmsNeeded = vmPoolSize - currentPoolSize;
             numOrderedVms += numNewVmsNeeded;
-            if (poolChanged) {
-                log.info("Removed failed or decomissioned VMs. Persisting changed VM Pool");
-                try {
-                    persistor.saveVmPool(new HashSet<>(vmPool));
-                } catch (IOException e) {
-                    log.error("Coudl not persist VM pool: " + e.getMessage(), e);
-                }
-            }
+//            if (poolChanged) {
+//                log.info("Removed failed or decomissioned VMs. Persisting changed VM Pool");
+//                try {
+//                    persistor.saveVmPool(new HashSet<>(vmPool));
+//                } catch (IOException e) {
+//                    log.error("Coudl not persist VM pool: " + e.getMessage(), e);
+//                }
+//            }
         }
 
         final int delta = numNewVmsNeeded;
@@ -336,16 +351,8 @@ public class VmPool {
                 log.info(" VM " + vm.getId() + " (" + vm.getIpAddress()
                         + ") ready for use. Adding to VM pool.");
                 vmPool.add(vm);
+                wpsVmRepository.saveAndFlush(vm);
                 numOrderedVms--;
-                if (persistor != null) {
-                    try {
-                        log.info("Persisting VMPool state...");
-                        persistor.saveVmPool(new HashSet<>(vmPool));
-                    } catch (IOException e) {
-                        log.error(e.getMessage(), e);
-                    }
-
-                }
             }
             break;
         }
@@ -362,6 +369,7 @@ public class VmPool {
     private void terminateVm(WpsVm vm) {
         log.error("Terminating VM not implemented yet. Can't terminate: "
                 + vm.getId());
+        wpsVmRepository.delete(vm);
     }
 
     private void retireVms(int i) {
@@ -369,10 +377,12 @@ public class VmPool {
     }
 
     public static void main(String[] arg) {
-        VmPool pool = new VmPool(new FileVmPoolPersister(),
-                "GeophysicsVL:Carsten.Friedrich@csiro.au", "",
-                new ThreadPoolExecutor(10, 20, 60, TimeUnit.SECONDS,
-                        new LinkedBlockingDeque<Runnable>()));
+        FileSystemXmlApplicationContext context = new FileSystemXmlApplicationContext("src/main/webapp/WEB-INF/applicationContext.xml");
+        VmPool pool = (VmPool) context.getBean("vmPool");
+//        VmPool pool = new VmPool(new FileVmPoolPersister(),
+//                "GeophysicsVL:Carsten.Friedrich@csiro.au", "",
+//                new ThreadPoolExecutor(10, 20, 60, TimeUnit.SECONDS,
+//                        new LinkedBlockingDeque<Runnable>()));
         try {
             WpsVm vm = pool.getFreeVm();
             vm.updateStatus();
