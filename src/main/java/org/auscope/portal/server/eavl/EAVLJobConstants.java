@@ -31,7 +31,8 @@ public final class EAVLJobConstants {
     /**
      * The filename containing the kernel density estimate outputs
      */
-    public static final String FILE_KDE_JSON = "data-kde.json";
+    public static final String FILE_KDE_JSON_ALL = "data-kde-all.json";
+    public static final String FILE_KDE_JSON_HIGH = "data-kde-high.json";
 
     /**
      * The filename containing the kernel density estimate outputs (encoded with the CSV data)

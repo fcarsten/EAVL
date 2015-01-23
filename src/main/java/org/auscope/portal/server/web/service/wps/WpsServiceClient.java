@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.eavl.wpsclient.ACF;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
+import org.auscope.eavl.wpsclient.HpiKdeJSON;
 import org.n52.wps.client.WPSClientException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Scope;
@@ -189,7 +190,7 @@ public class WpsServiceClient {
      *      double[], double)
      */
     @Cacheable(value = "wpsCache")
-    public String hpiKdeJSON(double[][] proxies, double[] cutoffCol,
+    public HpiKdeJSON hpiKdeJSON(double[][] proxies, double[] cutoffCol,
             double cutoffValue) throws WPSClientException, IOException {
         return getWpsClient().hpiKdeJSON(proxies, cutoffCol, cutoffValue);
     }
