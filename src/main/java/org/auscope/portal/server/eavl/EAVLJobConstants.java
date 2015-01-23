@@ -20,7 +20,7 @@ public final class EAVLJobConstants {
     public static final String FILE_VALIDATED_DATA_CSV = "data-validated.csv";
 
     /**
-     * The filename of the data.csv AFTER it has been imputed
+     * The filename of the data.csv AFTER it has been culled and imputed
      */
     public static final String FILE_IMPUTED_CSV = "data-imputed.csv";
     /**
@@ -37,6 +37,11 @@ public final class EAVLJobConstants {
      * The filename containing the kernel density estimate outputs (encoded with the CSV data)
      */
     public static final String FILE_KDE_CSV = "data-kde.csv";
+
+    /**
+     * The parameter details cache suffix
+     */
+    public static final String PD_CACHE_SUFFIX = ".pdcache.json";
 
     /**
      * The name of the estimate column encoded in the final results file

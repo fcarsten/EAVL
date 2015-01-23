@@ -1,10 +1,7 @@
 package org.auscope.portal.server.web.controllers;
 
-import java.io.InputStream;
-
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
@@ -12,6 +9,7 @@ import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
+import org.auscope.portal.server.web.service.ParameterDetailsService;
 import org.auscope.portal.server.web.view.ViewEAVLJobFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -29,13 +27,15 @@ public class ThresholdController extends BasePortalController {
     private FileStagingService fss;
     private CSVService csvService;
 	private ViewEAVLJobFactory viewFactory;
+	private ParameterDetailsService pdService;
 
     @Autowired
-    public ThresholdController(EAVLJobService jobService, FileStagingService fss, CSVService csvService, ViewEAVLJobFactory viewFactory) {
+    public ThresholdController(EAVLJobService jobService, FileStagingService fss, CSVService csvService, ViewEAVLJobFactory viewFactory, ParameterDetailsService pdService) {
         this.jobService = jobService;
         this.fss = fss;
         this.csvService = csvService;
         this.viewFactory = viewFactory;
+        this.pdService = pdService;
     }
 
     /**
@@ -49,15 +49,14 @@ public class ThresholdController extends BasePortalController {
     @RequestMapping("getConfig.do")
     public ModelAndView getConfig(HttpServletRequest request, @AuthenticationPrincipal EavlUser user) {
 
-        InputStream csvData = null;
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
             ModelMap response = new ModelMap();
 
 
-            csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            if (csvData != null) {
-                response.put("parameterDetails", csvService.extractParameterDetails(csvData));
+
+            if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_CSV)) {
+                response.put("parameterDetails", pdService.getParameterDetails(job, EAVLJobConstants.FILE_IMPUTED_CSV));
             }
             response.put("job", viewFactory.toView(job));
 
@@ -65,8 +64,6 @@ public class ThresholdController extends BasePortalController {
         } catch (Exception ex) {
             log.error("Unable to save imputation config", ex);
             return generateJSONResponseMAV(false);
-        } finally {
-            IOUtils.closeQuietly(csvData);
         }
     }
 

@@ -1,20 +1,15 @@
 package org.auscope.portal.server.web.controllers;
 
-import java.io.InputStream;
 import java.util.HashSet;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.IOUtils;
 import org.auscope.portal.core.server.controllers.BasePortalController;
-import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.security.oauth2.EavlUser;
-import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
-import org.auscope.portal.server.web.service.JobTaskService;
-import org.auscope.portal.server.web.service.WpsService;
+import org.auscope.portal.server.web.service.ParameterDetailsService;
 import org.auscope.portal.server.web.view.ViewEAVLJobFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -35,29 +30,20 @@ import com.google.common.collect.Sets;
 @RequestMapping("identify")
 public class IdentifyController extends BasePortalController {
 
-    private FileStagingService fss;
-    private CSVService csvService;
     private EAVLJobService jobService;
-    private JobTaskService jobTaskService;
-    private WpsService wpsService;
     private ViewEAVLJobFactory viewFactory;
+    private ParameterDetailsService pdService;
 
     @Autowired
-    public IdentifyController(FileStagingService fss, CSVService csvService, EAVLJobService jobService,
-            JobTaskService jobTaskService, WpsService wpsService, ViewEAVLJobFactory viewFactory) {
-        this.fss = fss;
-        this.csvService = csvService;
+    public IdentifyController(EAVLJobService jobService, ViewEAVLJobFactory viewFactory, ParameterDetailsService pdService) {
         this.jobService = jobService;
-        this.jobTaskService = jobTaskService;
-        this.wpsService = wpsService;
         this.viewFactory = viewFactory;
+        this.pdService = pdService;
     }
 
     @RequestMapping("/getConfig.do")
     public ModelAndView getParameterDetails(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="jobId") Integer jobId) {
-
-        InputStream csvData = null;
         try {
             EAVLJob job;
             if (jobId != null) {
@@ -66,18 +52,14 @@ public class IdentifyController extends BasePortalController {
                 job = jobService.getJobForSession(request, user);
             }
 
-            csvData = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-
             ModelMap response = new ModelMap();
-            response.put("parameterDetails", csvService.extractParameterDetails(csvData));
+            response.put("parameterDetails", pdService.getParameterDetails(job, EAVLJobConstants.FILE_DATA_CSV));
             response.put("job", viewFactory.toView(job));
 
             return generateJSONResponseMAV(true, response, "");
         } catch (Exception ex) {
             log.warn("Unable to get parameter details: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");
-        } finally {
-            IOUtils.closeQuietly(csvData);
         }
     }
 
