@@ -66,7 +66,8 @@ public class JobTaskService {
         if (this.persistor != null) {
             List<JobTask> jobs = persistor.findAll();
             for (JobTask jt : jobs) {
-                this.submit(jt, false);
+                log.error("TODO: Not implemented. Should restart task: "+ jt.getId());
+//                this.submit(jt, false);
             }
         }
     }
