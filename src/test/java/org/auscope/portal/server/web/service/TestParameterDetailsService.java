@@ -76,7 +76,6 @@ public class TestParameterDetailsService extends PortalTestClass {
     public void testCacheRead() throws Exception {
         final String file = "example-file.csv";
         final ParameterDetails pd = new ParameterDetails("col-0", 0);
-        pd.setUom("u-o-m");
         final List<ParameterDetails> expectedPds = Arrays.asList(pd);
 
         context.checking(new Expectations() {{
@@ -92,14 +91,12 @@ public class TestParameterDetailsService extends PortalTestClass {
         Assert.assertEquals(expectedPds.size(), cachedList.size());
         Assert.assertEquals(expectedPds.get(0).getName(), cachedList.get(0).getName());
         Assert.assertEquals(expectedPds.get(0).getColumnIndex(), cachedList.get(0).getColumnIndex());
-        Assert.assertEquals(expectedPds.get(0).getUom(), cachedList.get(0).getUom());
     }
 
     @Test
     public void testCachePurge() throws Exception {
         final String file = "example-file.csv";
         final ParameterDetails pd = new ParameterDetails("col-0", 0);
-        pd.setUom("u-o-m");
         final List<ParameterDetails> expectedPds = Arrays.asList(pd);
 
         context.checking(new Expectations() {{
@@ -120,16 +117,13 @@ public class TestParameterDetailsService extends PortalTestClass {
         Assert.assertEquals(expectedPds.size(), cachedList.size());
         Assert.assertEquals(expectedPds.get(0).getName(), cachedList.get(0).getName());
         Assert.assertEquals(expectedPds.get(0).getColumnIndex(), cachedList.get(0).getColumnIndex());
-        Assert.assertEquals(expectedPds.get(0).getUom(), cachedList.get(0).getUom());
     }
 
     @Test
     public void testCacheWrite() throws Exception {
         final String file = "example-file.csv";
         final ParameterDetails pd = new ParameterDetails("col-0", 0);
-        pd.setUom("u-o-m");
         final ParameterDetails pd2 = new ParameterDetails("col-99", 99);
-        pd2.setUom("unit of measure");
         final List<ParameterDetails> expectedPds = Arrays.asList(pd);
 
         context.checking(new Expectations() {{
@@ -146,16 +140,13 @@ public class TestParameterDetailsService extends PortalTestClass {
         Assert.assertEquals(expectedPds.size(), cachedList.size());
         Assert.assertEquals(pd2.getName(), cachedList.get(0).getName());
         Assert.assertEquals(pd2.getColumnIndex(), cachedList.get(0).getColumnIndex());
-        Assert.assertEquals(pd2.getUom(), cachedList.get(0).getUom());
     }
 
     @Test
     public void testEmptyCacheWrite() throws Exception {
         final String file = "example-file.csv";
         final ParameterDetails pd = new ParameterDetails("col-0", 0);
-        pd.setUom("u-o-m");
         final ParameterDetails pd2 = new ParameterDetails("col-99", 99);
-        pd2.setUom("unit of measure");
         final List<ParameterDetails> expectedPds = Arrays.asList(pd);
 
         context.checking(new Expectations() {{
@@ -168,6 +159,5 @@ public class TestParameterDetailsService extends PortalTestClass {
         Assert.assertEquals(expectedPds.size(), cachedList.size());
         Assert.assertEquals(pd2.getName(), cachedList.get(0).getName());
         Assert.assertEquals(pd2.getColumnIndex(), cachedList.get(0).getColumnIndex());
-        Assert.assertEquals(pd2.getUom(), cachedList.get(0).getUom());
     }
 }
