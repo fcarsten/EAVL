@@ -6,6 +6,9 @@ Ext.define('eavl.models.ParameterDetails', {
     extend: 'Ext.data.Model',
 
     statics : {
+        UOM_PPM : 'ppm',
+        UOM_PCT : 'pct',
+        
         STATUS_GOOD : 0,
         STATUS_WARNING : 1,
         STATUS_ERROR : 2,
@@ -71,7 +74,21 @@ Ext.define('eavl.models.ParameterDetails', {
         { name: 'totalText', type: 'int' }, //Total number of text values in this parameter
         { name: 'totalZeroes', type: 'int' }, //Total number of numerical 0 values in this parameter
         { name: 'columnIndex', type: 'int' }, //The index of the column in the CSV file (0 based)
-        { name: 'textValues', type: 'auto' } //Hashmap of totals keyed by each text (non numeric) value in this parameter
+        { name: 'textValues', type: 'auto' }, //Hashmap of totals keyed by each text (non numeric) value in this parameter
+        { name: 'displayName', type: 'string', convert: function(v, data) { //The name of this ParameterDetails with any edits applied by the user
+            return data.get('name');
+        }},
+        { name: 'uom', type: 'string', convert: function(v, data) { //The unit of measure (or null)
+            //Generate the uom from the layer name by guessing
+            var lowerName = data.get('name').toLowerCase();
+            if (lowerName.contains('ppm')) {
+                return eavl.models.ParameterDetails.UOM_PPM;
+            } else if (lowerName.contains('pct') || lowerName.contains('percent')) {
+                return eavl.models.ParameterDetails.UOM_PCT;
+            }
+            
+            return null;
+        }} 
 
     ],
 
@@ -88,6 +105,10 @@ Ext.define('eavl.models.ParameterDetails', {
         }
 
         if (this.get('totalZeroes') > 0) {
+            return eavl.models.ParameterDetails.STATUS_ERROR;
+        }
+        
+        if (this.get('uom') !== eavl.models.ParameterDetails.UOM_PPM) {
             return eavl.models.ParameterDetails.STATUS_ERROR;
         }
 

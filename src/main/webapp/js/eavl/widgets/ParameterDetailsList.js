@@ -9,6 +9,7 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
     /**
      * Adds the following config to Ext.grid.Panel
      * {
+     *  showUom : Boolean [Optional] - Whether the unit of measure for this PD should display. Defaults false
      *  parameterDetails : eavl.model.ParameterDetails[] [Optional] The set of parameter details to initialise this list with
      *  sortFn : function(a,b) - Sorter to apply to this list
      * }
@@ -20,7 +21,8 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
      */
     constructor : function(config) {
         this.emptyText = config.emptyText ? config.emptyText : "";
-
+        this.showUom = config.showUom === true ? true : false;
+        
         var sorters = [];
         if (config.sortFn) {
             sorters.push({
@@ -33,45 +35,63 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
             data : config.parameterDetails ? config.parameterDetails : [],
             sorters: sorters
         });
+        
+        var cols = [{
+            dataIndex : 'displayName',
+            flex : 1,
+            renderer : function(value, md, record) {
+                var emptyString = value === '';
+                var status = record.calculateStatus();
+
+                var img = 'img/tick.png';
+                var tip = 'This parameter contains more than 70% numeric values';
+                if (status === eavl.models.ParameterDetails.STATUS_ERROR) {
+                    img = 'img/exclamation.png';
+                    tip = 'This parameter contains non numeric values.';
+                } else if (status === eavl.models.ParameterDetails.STATUS_WARNING) {
+                    img = 'img/error.png';
+                    tip = 'This parameter less than 70% numeric values.';
+                }
+
+                return Ext.DomHelper.markup({
+                    tag : 'div',
+                    style : {
+                        cursor: 'pointer',
+                        display: 'table'
+                    },
+                    children : [{
+                        tag: 'img',
+                        'data-qtip' : tip,
+                        src : img,
+                        cls: 'pdl-row-img'
+                    },{
+                        tag : 'span',
+                        cls : 'pdl-row-text',
+                        html : value
+                    }]});
+            }
+        }];
+        if (this.showUom) {
+            cols.push({
+                dataIndex : 'uom',
+                width: 50,
+                renderer: function(value, md, record) {
+                    var text = value ? value : '???';
+                    var cls = value === eavl.models.ParameterDetails.UOM_PPM ? 'pdl-uom-parent-ok' : 'pdl-uom-parent-action';
+                    
+                    return Ext.DomHelper.markup({
+                        tag: 'div',
+                        cls: 'pdl-uom-parent ' + cls,
+                        html: text
+                    });
+                }
+            });
+        }
 
         Ext.apply(config, {
             hideHeaders : true,
             store : store,
-            columns : [{
-                dataIndex : 'name',
-                flex : 1,
-                renderer : function(value, md, record) {
-                    var emptyString = value === '';
-                    var status = record.calculateStatus();
-
-                    var img = 'img/tick.png';
-                    var tip = 'This parameter contains more than 70% numeric values';
-                    if (status === eavl.models.ParameterDetails.STATUS_ERROR) {
-                        img = 'img/exclamation.png';
-                        tip = 'This parameter contains non numeric values.';
-                    } else if (status === eavl.models.ParameterDetails.STATUS_WARNING) {
-                        img = 'img/error.png';
-                        tip = 'This parameter less than 70% numeric values.';
-                    }
-
-                    return Ext.DomHelper.markup({
-                        tag : 'div',
-                        style : {
-                            cursor: 'pointer',
-                            display: 'table'
-                        },
-                        children : [{
-                            tag: 'img',
-                            'data-qtip' : tip,
-                            src : img,
-                            cls: 'pdl-row-img'
-                        },{
-                            tag : 'span',
-                            cls : 'pdl-row-text',
-                            html : value
-                        }]});
-                }
-            }]
+            columns : cols
         });
 
         this.callParent(arguments);
