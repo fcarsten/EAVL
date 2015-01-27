@@ -37,10 +37,11 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
         });
         
         var cols = [{
-            dataIndex : 'displayName',
+            dataIndex : 'uom',
             flex : 1,
             renderer : function(value, md, record) {
-                var emptyString = value === '';
+                var name = record.get('displayName');
+                var emptyString = name === '';
                 var status = record.calculateStatus();
 
                 var img = 'img/tick.png';
@@ -67,7 +68,7 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
                     },{
                         tag : 'span',
                         cls : 'pdl-row-text',
-                        html : value
+                        html : name
                     }]});
             }
         }];

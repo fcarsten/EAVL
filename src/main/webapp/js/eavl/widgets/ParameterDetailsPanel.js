@@ -368,7 +368,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                             xtype: 'numberfield',
                             flex: 1,
                             itemId: 'scalefactor',
-                            value: 123.45,
+                            value: '1.0',
                             hideTrigger: true,
                             decimalPrecision: 16
                         }]
@@ -403,12 +403,37 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
     },
     
     _afterRender : function() {
-        this.down('#edit-container').getEl().down('.pdp-convert-container img').on('click', function() {
-            console.log('TODO: convert click');
-        });
+        this.down('#edit-container').getEl().down('.pdp-convert-container img').on('click', this._handleConvert, this);
+    },
+    
+    _handleConvert : function() {
+        var editContainer = this.down('#edit-container');
+        var scaleCmp = editContainer.down('#scalefactor');
+        var nameCmp = editContainer.down('#editname');
+        
+        this.pd.set('displayName', nameCmp.getValue());
+        this.pd.set('uom', eavl.models.ParameterDetails.UOM_PPM);
+        this.pd.set('scaleFactor', scaleCmp.getValue());
+        
+        this.showParameterDetails(this.pd);
+    },
+    
+    _generateNewName : function(name) {
+        name = name.replace(/pct/i, eavl.models.ParameterDetails.UOM_PPM);
+        name = name.replace(/percentage/i, eavl.models.ParameterDetails.UOM_PPM);
+        name = name.replace(/percent/i, eavl.models.ParameterDetails.UOM_PPM);
+        name = name.replace(/perc/i, eavl.models.ParameterDetails.UOM_PPM);
+        
+        if (!name.contains(eavl.models.ParameterDetails.UOM_PPM)) {
+            name += ' [' + eavl.models.ParameterDetails.UOM_PPM + ']';
+        }
+        
+        return name;
     },
 
     showParameterDetails : function(pd) {
+        this.pd = pd;
+        
         var uomContainer = this.down('#uom-container');
         var editContainer = this.down('#edit-container');
         
@@ -417,6 +442,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         
         //update title container
         var spanEl = uomContainer.getEl().down('.pdp-uom-container span');
+        var imgEl = uomContainer.getEl().down('.pdp-uom-container img');
         if (uomName) {
             spanEl.setStyle('font-size', '');
             spanEl.setStyle('font-style', '');
@@ -427,14 +453,24 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
             spanEl.setStyle('font-style', 'italic');
             spanEl.setStyle('margin-top', '-70px');
         }
-        uomContainer.getEl().down('.pdp-uom-container img').set({'src' : valid ? 'img/check.svg' : 'img/exclamation.svg'});
         spanEl.setHTML(uomName);
+        
+        if (valid) {
+            imgEl.set({'src': 'img/check.svg'});
+            imgEl.set({'data-qtip': 'The parameter has the correct unit of measure.'});
+        } else {
+            imgEl.set({'src': 'img/exclamation.svg'});
+            imgEl.set({'data-qtip': 'All compositional parameters must have \'ppm\' as the unit of measure.'});
+        }
         
         //Update edit container
         editContainer.setVisible(!valid);
         if (!valid) {
+            
             editContainer.down('#scalefactor').setValue(0);
-            editContainer.down('#editname').setValue(pd.get('name'));
+            console.log('TODO: lookup scale factor');
+
+            editContainer.down('#editname').setValue( this._generateNewName(pd.get('name')));
         }
     }
 });

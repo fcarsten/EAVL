@@ -75,10 +75,18 @@ Ext.define('eavl.models.ParameterDetails', {
         { name: 'totalZeroes', type: 'int' }, //Total number of numerical 0 values in this parameter
         { name: 'columnIndex', type: 'int' }, //The index of the column in the CSV file (0 based)
         { name: 'textValues', type: 'auto' }, //Hashmap of totals keyed by each text (non numeric) value in this parameter
+        { name: 'scaleFactor', type: 'double'}, //Will not be sent by the backend, but will be entered by the user
         { name: 'displayName', type: 'string', convert: function(v, data) { //The name of this ParameterDetails with any edits applied by the user
-            return data.get('name');
+            if (!v) {
+                return data.get('name');
+            }
+            return v;
         }},
         { name: 'uom', type: 'string', convert: function(v, data) { //The unit of measure (or null)
+            if (v) {
+                return v;
+            }
+            
             //Generate the uom from the layer name by guessing
             var lowerName = data.get('name').toLowerCase();
             if (lowerName.contains('ppm')) {
