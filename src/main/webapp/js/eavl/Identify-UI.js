@@ -145,7 +145,6 @@ Ext.application({
                         id : 'comppanel',
                         xtype : 'pdlist',
                         title : 'Compositional Parameters',
-                        showUom : true,
                         width : 300,
                         margins: '0 10 10 10',
                         parameterDetails : parameterDetails,

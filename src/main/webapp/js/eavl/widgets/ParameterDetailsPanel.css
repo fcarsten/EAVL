@@ -32,3 +32,62 @@
 .pdp-empty-container-inner img {
 	margin-bottom: 5px;
 }
+
+.pdp-uom-container {
+    width: 99%;
+    position:absolute;
+    height: 99%;
+    text-align: center;
+}
+
+.pdp-uom-container-inner {
+    text-align: center;
+    height : 160px;
+    position:relative;
+    top:50%;
+    margin-top:-50px;
+}
+
+.pdp-uom-container-inner span {
+	display: inline-block;
+	font-size: 300%;
+	font-weight: bold;
+	margin-top: -80px;
+	margin-right: 15px;
+}
+
+.pdp-uom-container-inner img {
+    display: inline-block;
+}
+
+
+.pdp-convert-container {
+    width: 99%;
+    position:absolute;
+    height: 99%;
+    text-align: center;
+}
+
+.pdp-convert-container-inner {
+    text-align: center;
+    position:relative;
+    top:50%;
+    margin-top:-25px;
+    
+}
+
+.pdp-convert-container-inner img {
+	cursor: pointer;
+}
+
+.uom-edit-text label {
+	font-size: 150%;
+}
+
+.uom-edit-text .x-field {
+	margin-left: 12px;
+}
+
+.uom-edit-text .x-field .x-form-field {
+	font-size: 18px;
+}

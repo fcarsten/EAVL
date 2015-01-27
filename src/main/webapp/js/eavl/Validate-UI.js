@@ -131,6 +131,7 @@ Ext.application({
                             id : 'comppanel',
                             xtype : 'pdlist',
                             title : 'Compositional Parameters',
+                            showUom : true,
                             parameterDetails : parameterDetails,
                             sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                             flex: 1,

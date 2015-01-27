@@ -47,18 +47,22 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
             },{
                 itemId : 'card-inspect',
                 layout : {
-                    type : 'border',
+                    type : 'border'
                 },
                 items : [{
                     xtype : 'container',
                     region : 'north',
-                    height : 300,
+                    height: 300,
                     layout : {
                         type : 'hbox',
                         pack : 'center',
                         align : 'stretch'
                     },
                     items : [{
+                        xtype: 'pduompanel',
+                        itemId : 'pduompanel',
+                        width: 440
+                    },{
                         itemId : 'valuespie',
                         xtype : 'chart',
                         animate: true,
@@ -282,6 +286,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
 
         this._loadPieStore(parameterDetails);
         this._loadTextValueStore(parameterDetails);
+        this.down('#pduompanel').showParameterDetails(parameterDetails);
         this.down('#prob-density-chart').plotParameterDetails(parameterDetails);
 
         this.setTitle(Ext.util.Format.format('Comparing numeric and text values for "{0}"', parameterDetails.get('name')));
@@ -302,3 +307,135 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this.setTitle('No parameter selected');
     }
 });
+
+/**
+ * Panel extension for rendering the unit of measure info for a ParameterDetails instance.
+ */
+Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
+    extend: 'Ext.form.Panel',
+
+    alias: 'widget.pduompanel',
+
+    /**
+     * Adds the following config to Ext.grid.Panel
+     * {
+     *  
+     * }
+     *
+     * Adds the following events
+     * {
+     *
+     * }
+     */
+    constructor : function(config) {
+
+        Ext.apply(config, {
+            layout : {
+                type: 'vbox',
+                align: 'center',
+                pack: 'center'
+            },
+            items : [{
+                xtype: 'container',
+                itemId: 'uom-container',
+                width: '100%',
+                height: 100,
+                html: '<div class="pdp-uom-container"><div class="pdp-uom-container-inner"><span>uom</span><img src="img/exclamation.svg" width="100"/></div></div>'
+            },{
+                xtype: 'container',
+                itemId: 'edit-container',
+                height: 100,
+                layout: {
+                    type: 'hbox',
+                    pack: 'center',
+                    align: 'middle'
+                },
+                items :[{
+                    xtype: 'container',
+                    flex: 1,
+                    cls: 'uom-edit-text',
+                    items: [{
+                        xtype: 'container',
+                        layout: {
+                            type: 'hbox',
+                            pack: 'center',
+                            align: 'middle'
+                        },
+                        items: [{
+                            xtype: 'label',
+                            text: 'Scale to ppm by '
+                        },{
+                            xtype: 'numberfield',
+                            flex: 1,
+                            itemId: 'scalefactor',
+                            value: 123.45,
+                            hideTrigger: true,
+                            decimalPrecision: 16
+                        }]
+                    },{
+                        xtype: 'container',
+                        layout: {
+                            type: 'hbox',
+                            pack: 'center',
+                            align: 'middle'
+                        },
+                        items: [{
+                            xtype: 'label',
+                            text: 'Change name to '
+                        },{
+                            xtype: 'textfield',
+                            flex: 1,
+                            itemId: 'editname',
+                            value: 'Au_Assay_ppm'
+                        }]
+                    }]
+                },{
+                    xtype: 'container',
+                    width: 60,
+                    html: '<div class="pdp-convert-container"><div class="pdp-convert-container-inner"><img data-qtip="Convert all numerical values in this parameter to ppm using the specified scaling factor" src="img/convert-ppm.svg" width="50"/></div></div>'
+                }]
+            }]
+        });
+
+        this.callParent(arguments);
+        
+        this.on('afterrender', this._afterRender, this);
+    },
+    
+    _afterRender : function() {
+        this.down('#edit-container').getEl().down('.pdp-convert-container img').on('click', function() {
+            console.log('TODO: convert click');
+        });
+    },
+
+    showParameterDetails : function(pd) {
+        var uomContainer = this.down('#uom-container');
+        var editContainer = this.down('#edit-container');
+        
+        var uomName = pd.get('uom');
+        var valid = uomName === eavl.models.ParameterDetails.UOM_PPM;
+        
+        //update title container
+        var spanEl = uomContainer.getEl().down('.pdp-uom-container span');
+        if (uomName) {
+            spanEl.setStyle('font-size', '');
+            spanEl.setStyle('font-style', '');
+            spanEl.setStyle('margin-top', '');
+        } else {
+            uomName = 'Unknown unit of measure';
+            spanEl.setStyle('font-size', '200%');
+            spanEl.setStyle('font-style', 'italic');
+            spanEl.setStyle('margin-top', '-70px');
+        }
+        uomContainer.getEl().down('.pdp-uom-container img').set({'src' : valid ? 'img/check.svg' : 'img/exclamation.svg'});
+        spanEl.setHTML(uomName);
+        
+        //Update edit container
+        editContainer.setVisible(!valid);
+        if (!valid) {
+            editContainer.down('#scalefactor').setValue(0);
+            editContainer.down('#editname').setValue(pd.get('name'));
+        }
+    }
+});
+
