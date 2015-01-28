@@ -21,6 +21,8 @@ import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
 import org.auscope.portal.server.web.service.ParameterDetailsService;
+import org.auscope.portal.server.web.service.UomService;
+import org.auscope.portal.server.web.service.UomService.TraceElementConversion;
 import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.jobtask.ImputationCallable;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
@@ -51,16 +53,18 @@ public class ValidationController extends BasePortalController {
     private JobTaskService jobTaskService;
     private WpsService wpsService;
     private ParameterDetailsService pdService;
+    private UomService uomService;
 
     @Autowired
     public ValidationController(FileStagingService fss, CSVService csvService, EAVLJobService jobService,
-            JobTaskService jobTaskService, WpsService wpsService, ParameterDetailsService pdService) {
+            JobTaskService jobTaskService, WpsService wpsService, ParameterDetailsService pdService, UomService uomService) {
         this.fss = fss;
         this.csvService = csvService;
         this.jobService = jobService;
         this.jobTaskService = jobTaskService;
         this.wpsService = wpsService;
         this.pdService = pdService;
+        this.uomService = uomService;
     }
 
     /**
@@ -323,5 +327,32 @@ public class ValidationController extends BasePortalController {
             IOUtils.closeQuietly(os);
             IOUtils.closeQuietly(is);
         }
+    }
+
+    /**
+     * Attempts to lookup the scale factor for converting a given ParameterDetail in pct
+     * to ppm based on the chemical name.
+     *
+     * This is not designed to be an exact match and is not guaranteed to succeed (or even be correct)
+     *
+     * @param request
+     * @param user
+     * @param name
+     * @return
+     */
+    @RequestMapping("/oxidePctToTracePpm.do")
+    public ModelAndView oxidePctToTracePpm(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
+            @RequestParam("name") String name) {
+
+        TraceElementConversion conversion = uomService.oxidePctToTracePpm(name);
+        if (conversion == null) {
+            return generateJSONResponseMAV(false, null, "Lookup failed");
+        }
+
+        ModelMap response = new ModelMap();
+        response.put("element", conversion.getTraceElement());
+        response.put("conversion", conversion.getConversion());
+
+        return generateJSONResponseMAV(true, response, "");
     }
 }

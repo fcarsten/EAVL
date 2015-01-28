@@ -368,8 +368,8 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                             xtype: 'numberfield',
                             flex: 1,
                             itemId: 'scalefactor',
-                            value: '1.0',
                             hideTrigger: true,
+                            allowBlank: false,
                             decimalPrecision: 16
                         }]
                     },{
@@ -411,6 +411,10 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         var scaleCmp = editContainer.down('#scalefactor');
         var nameCmp = editContainer.down('#editname');
         
+        if (!scaleCmp.isValid()) {
+            return;
+        }
+        
         this.pd.set('displayName', nameCmp.getValue());
         this.pd.set('uom', eavl.models.ParameterDetails.UOM_PPM);
         this.pd.set('scaleFactor', scaleCmp.getValue());
@@ -429,6 +433,38 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         }
         
         return name;
+    },
+    
+    _lookupUomConversion : function(editContainer) {
+        
+        var loadMask = new Ext.LoadMask(editContainer, {msg:"Please wait..."});
+        loadMask.show();
+        Ext.Ajax.request({
+            url: 'validation/oxidePctToTracePpm.do',
+            params: {
+                name: this.pd.get('name')
+            },
+            scope: this,
+            callback: function(options, success, response) {
+                loadMask.hide();
+                loadMask.destroy();
+                if (!success) {
+                    editContainer.down('#scalefactor').setValue(null);
+                    editContainer.down('#editname').setValue( this._generateNewName(this.pd.get('name')));
+                    return;
+                }
+                
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (!responseObj.success) {
+                    editContainer.down('#scalefactor').setValue(null);
+                    editContainer.down('#editname').setValue( this._generateNewName(this.pd.get('name')));
+                    return;
+                }
+                
+                editContainer.down('#scalefactor').setValue(responseObj.data.conversion);
+                editContainer.down('#editname').setValue(responseObj.data.element + '_' + eavl.models.ParameterDetails.UOM_PPM);
+            }
+        });
     },
 
     showParameterDetails : function(pd) {
@@ -466,11 +502,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         //Update edit container
         editContainer.setVisible(!valid);
         if (!valid) {
-            
-            editContainer.down('#scalefactor').setValue(0);
-            console.log('TODO: lookup scale factor');
-
-            editContainer.down('#editname').setValue( this._generateNewName(pd.get('name')));
+            this._lookupUomConversion(editContainer);
         }
     }
 });
