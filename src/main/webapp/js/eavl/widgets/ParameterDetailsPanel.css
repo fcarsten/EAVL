@@ -1,16 +1,16 @@
 .text-empty-container {
-    width: 99%;
+    width: 90%;
     position:absolute;
-    height: 99%;
+    height: 90%;
+    text-align: center;
 }
 
 .text-empty-container-inner {
     text-align: center;
     height : 160px;
-    position:absolute;
+    position:relative;
     top:50%;
-    margin-left: 40px;
-    margin-top:-80px;
+    margin-top:-50px;
 }
 
 

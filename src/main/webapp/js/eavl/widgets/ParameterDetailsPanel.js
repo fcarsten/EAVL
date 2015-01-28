@@ -46,28 +46,27 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                 html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
             },{
                 itemId : 'card-inspect',
-                layout : {
-                    type : 'border'
-                },
+                layout : 'fit',
                 items : [{
                     xtype : 'container',
                     region : 'north',
-                    height: 300,
                     layout : {
                         type : 'hbox',
                         pack : 'center',
-                        align : 'stretch'
+                        align : 'middle'
                     },
                     items : [{
                         xtype: 'pduompanel',
                         itemId : 'pduompanel',
-                        width: 440
+                        width: 440,
+                        height: 400,
                     },{
                         itemId : 'valuespie',
                         xtype : 'chart',
                         animate: true,
                         store: this.pieStore,
                         flex: 1,
+                        height: 400,
                         style: {
                             background : 'white'
                         },
@@ -106,10 +105,12 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                     },{
                         itemId : 'textlist',
                         flex: 1,
+                        height: 400,
                         xtype : 'grid',
                         store : this.textValuesStore,
                         hideHeaders : true,
                         disableSelection : true,
+                        maxHeight: 400,
                         viewConfig : {
                             deferEmptyText : false,
                             emptyText : '<div class="text-empty-container"><div class="text-empty-container-inner"><img src="img/check.svg" width="100"/><br>No invalid values!</div></div>'
@@ -149,14 +150,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                             }
                         }]
                     }]
-                },{
-                    itemId : 'prob-density-chart',
-                    region: 'center',
-                    xtype : 'pdfchart',
-                    file: eavl.models.EAVLJob.FILE_DATA_CSV,
-                    targetChartWidth: 1300,
-                    targetChartHeight: 400,
-                    preserveAspectRatio: true
                 }]
             }]
         });
@@ -287,7 +280,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this._loadPieStore(parameterDetails);
         this._loadTextValueStore(parameterDetails);
         this.down('#pduompanel').showParameterDetails(parameterDetails);
-        this.down('#prob-density-chart').plotParameterDetails(parameterDetails);
 
         this.setTitle(Ext.util.Format.format('Comparing numeric and text values for "{0}"', parameterDetails.get('name')));
 
@@ -363,7 +355,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                         },
                         items: [{
                             xtype: 'label',
-                            text: 'Scale to ppm by '
+                            text: 'Convert to ppm by '
                         },{
                             xtype: 'numberfield',
                             flex: 1,
