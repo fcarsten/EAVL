@@ -117,6 +117,7 @@ public class ValidationController extends BasePortalController {
             inputCsv = fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             outputCsv = fss.writeFile(job, EAVLJobConstants.FILE_DATA_CSV);
             csvService.findReplace(inputCsv, outputCsv, 0, null, null, true); //This just culls empty lines and autogenerates a header (if missing)
+            pdService.purgeCache(job, EAVLJobConstants.FILE_DATA_CSV); //just in case
 
             IOUtils.closeQuietly(inputCsv);
             IOUtils.closeQuietly(outputCsv);
@@ -258,6 +259,7 @@ public class ValidationController extends BasePortalController {
             }
 
             fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+            pdService.purgeCache(job, EAVLJobConstants.FILE_DATA_CSV);
         } catch (Exception ex) {
             log.error("Error replacing within file: ", ex);
             return generateJSONResponseMAV(false, null, "Unable to find/replace");
@@ -284,6 +286,7 @@ public class ValidationController extends BasePortalController {
             csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(columnIndexes)));
 
             fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+            pdService.purgeCache(job, EAVLJobConstants.FILE_DATA_CSV);
         } catch (Exception ex) {
             log.error("Error deleting columns: ", ex);
             return generateJSONResponseMAV(false, null, "Unable to find/replace");
@@ -310,6 +313,7 @@ public class ValidationController extends BasePortalController {
             if (delColIndexes != null && delColIndexes.length > 0) {
                 csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
                 fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+                pdService.purgeCache(job, EAVLJobConstants.FILE_DATA_CSV);
             }
 
             JobTask newTask = new JobTask(job);
