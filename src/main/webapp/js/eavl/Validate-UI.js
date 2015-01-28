@@ -80,6 +80,20 @@ Ext.application({
                             return;
                         }
 
+                        var uomNames = [];
+                        var uomChangedNames = [];
+                        var uomScales = [];
+                        
+                        cp.getStore().each(function(pd) {
+                            var oldName = pd.get('name');
+                            var newName = pd.get('displayName');
+                            var sf = pd.get('scaleFactor'); 
+                            if (newName !== oldName || sf > 0) {
+                                uomNames.push(oldName);
+                                uomChangedNames.push(newName);
+                                uomScales.push(sf);
+                            }
+                        });
 
                         var ds = Ext.getCmp("trashpanel").getStore();
                         var deleteColIndexes = [];
@@ -91,7 +105,10 @@ Ext.application({
                         Ext.Ajax.request({
                             url: 'validation/saveValidationSubmitImputation.do',
                             params : {
-                                deleteColIndex : deleteColIndexes
+                                deleteColIndex : deleteColIndexes,
+                                uomNameKey : uomNames,
+                                uomChangedName : uomChangedNames,
+                                uomScaleFactor : uomScales
                             },
                             callback : function(options, success, response) {
                                 eavl.widgets.SplashScreen.hideLoadingScreen();

@@ -3,6 +3,7 @@ package org.auscope.portal.server.web.controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -300,17 +301,48 @@ public class ValidationController extends BasePortalController {
 
     @RequestMapping("/saveValidationSubmitImputation.do")
     public ModelAndView saveValidationSubmitImputation(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
-            @RequestParam(value="deleteColIndex", required=false) Integer[] delColIndexes) {
+            @RequestParam(value="deleteColIndex", required=false) Integer[] delColIndexes,
+            @RequestParam(value="uomNameKey", required=false) String[] uomNameKeys,
+            @RequestParam(value="uomChangedName", required=false) String[] uomChangedNames,
+            @RequestParam(value="uomScaleFactor", required=false) Double[] uomScaleFactors) {
 
         OutputStream os = null;
         InputStream is = null;
 
+        //Error checking on uom inputs
+        if (uomNameKeys != null) {
+            if (uomChangedNames == null || uomScaleFactors == null) {
+                return generateJSONResponseMAV(false, null, "uom values set incorrectly");
+            }
+
+            if (uomNameKeys.length != uomChangedNames.length && uomNameKeys.length != uomScaleFactors.length) {
+                return generateJSONResponseMAV(false, null, "uom lengths differ");
+            }
+        }
+
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
-            os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-            is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+
+            if (uomNameKeys != null && uomNameKeys.length > 0) {
+                is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+                List<Integer> colIndexes = csvService.columnNameToIndex(is, Arrays.asList(uomNameKeys));
+                is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+                os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+                csvService.scaleColumns(is, os, colIndexes, Arrays.asList(uomScaleFactors), Arrays.asList(uomChangedNames));
+                fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
+                pdService.purgeCache(job, EAVLJobConstants.FILE_DATA_CSV);
+
+                //If our element to predict had a name change, update the job too
+                int index = Arrays.asList(uomNameKeys).indexOf(job.getPredictionParameter());
+                if (!uomChangedNames[index].equals(job.getPredictionParameter())) {
+                    job.setPredictionParameter(uomChangedNames[index]);
+                    jobService.save(job);
+                }
+            }
 
             if (delColIndexes != null && delColIndexes.length > 0) {
+                os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+                is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
                 csvService.deleteColumns(is, os, Sets.newHashSet(new ArrayIterator<Integer>(delColIndexes)));
                 fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
                 pdService.purgeCache(job, EAVLJobConstants.FILE_DATA_CSV);
@@ -326,7 +358,7 @@ public class ValidationController extends BasePortalController {
             return generateJSONResponseMAV(true, taskId, "");
         } catch (Exception ex) {
             log.error("Error deleting columns: ", ex);
-            return generateJSONResponseMAV(false, null, "Unable to find/replace");
+            return generateJSONResponseMAV(false, null, "Unable to save");
         } finally {
             IOUtils.closeQuietly(os);
             IOUtils.closeQuietly(is);
