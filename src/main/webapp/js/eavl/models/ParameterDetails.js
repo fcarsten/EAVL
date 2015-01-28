@@ -128,5 +128,19 @@ Ext.define('eavl.models.ParameterDetails', {
         }
 
         return eavl.models.ParameterDetails.STATUS_GOOD;
+    },
+    
+    /**
+     * Copies across all "additional" parameters from pd into this instance.
+     * 
+     * Additional parameters are the parameters NOT sent by the backend and are
+     * instead modified by the user.
+     */
+    mergeAdditionalParams : function(pd) {
+        this.set({
+            uom: pd.get('uom'),
+            scaleFactor: pd.get('scaleFactor'),
+            displayName: pd.get('displayName')
+        });
     }
 });

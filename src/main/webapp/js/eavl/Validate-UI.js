@@ -33,6 +33,7 @@ Ext.application({
                     Ext.Array.each(parameterDetails, function(pd) {
                         var existingPd = ds.getById(pd.get("name"));
                         if (existingPd) {
+                            pd.mergeAdditionalParams(existingPd);
                             ds.remove(existingPd);
                             ds.add(pd);
                         }
@@ -48,6 +49,7 @@ Ext.application({
                 var name = pdPanel.parameterDetails.get("name");
                 Ext.Array.each(parameterDetails, function(pd) {
                     if (pd.get("name") === name) {
+                        pd.mergeAdditionalParams(pdPanel.parameterDetails);
                         pdPanel.showParameterDetails(pd);
                         return false;
                     }
