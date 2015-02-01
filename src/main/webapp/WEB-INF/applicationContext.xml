@@ -131,8 +131,8 @@
         class="org.springframework.jdbc.datasource.DriverManagerDataSource"
         p:driverClassName="${HOST.db.driver}"
         p:url="${HOST.db.url}"
-        p:username="${HOST.db.username}"
-        p:password="${HOST.db.password}" />
+        p:username="${env.db.username}"
+        p:password="${env.db.password}" />
 
 
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
