@@ -88,7 +88,7 @@ public class VmPool {
     private static final String TYPE_STRING = "openstack-nova";
     private static final String CLOUD_ENDPOINT = "https://keystone.rc.nectar.org.au:5000/v2.0";
 
-    private static final String VM_ID = "Melbourne/d0792e91-ceee-4be9-b3b7-ce941dae2fa7";
+    private static final String VM_ID = "Melbourne/132b7591-613f-4922-aee5-5039a6919297";
 
     private static final String INSTANCE_TYPE = "Melbourne/1";
 
