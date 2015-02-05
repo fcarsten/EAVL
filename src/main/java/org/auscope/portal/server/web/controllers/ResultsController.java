@@ -27,6 +27,7 @@ import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
@@ -105,6 +106,10 @@ public class ResultsController extends BasePortalController {
 
             List<ModelMap> files = new ArrayList<ModelMap>();
             for (StagedFile file : fss.listStageInDirectoryFiles(job)) {
+                if (file.getName().endsWith(EAVLJobConstants.PD_CACHE_SUFFIX)) {
+                    continue;
+                }
+
                 ModelMap m = new ModelMap();
                 m.put("name", file.getName());
                 m.put("size", file.getFile().length());
