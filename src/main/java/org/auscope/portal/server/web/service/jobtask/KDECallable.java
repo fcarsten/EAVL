@@ -15,8 +15,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
-import org.auscope.eavl.wpsclient.EavlWpsClient;
-import org.auscope.eavl.wpsclient.HpiKde;
 import org.auscope.eavl.wpsclient.HpiKdeJSON;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
@@ -26,7 +24,6 @@ import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
-import org.hibernate.result.NoMoreReturnsException;
 import org.n52.wps.client.WPSClientException;
 
 /**
@@ -87,7 +84,7 @@ public class KDECallable implements Callable<Object> {
         return exclusions;
     }
 
-    public HpiKdeJSON hpiKde(List<Integer> nonCompCols, double cutOff)
+    private HpiKdeJSON hpiKde(List<Integer> nonCompCols, double cutOff)
             throws PortalServiceException, WPSClientException {
 
         InputStream in = null;
@@ -116,6 +113,9 @@ public class KDECallable implements Callable<Object> {
                 try {
                     wpsClient = wpsService.getWpsClient();
 
+                    checkDataBeforeKde(proxyCenlrData);
+                    checkDataBeforeKde(predictorCenlrData);
+
                     kdeJson = wpsClient.hpiKdeJSON(proxyCenlrData,
                             predictorCenlrData,
                             cutOff);
@@ -132,6 +132,14 @@ public class KDECallable implements Callable<Object> {
         return kdeJson;
     }
 
+    private void checkDataBeforeKde(double[] ds) {
+        for (double d : ds) {
+            if (Double.isNaN(d))
+                throw new IllegalArgumentException(
+                        "Input to centered log ratio function can't be NaN");
+        }
+    }
+
     @Override
     public Object call() throws Exception {
         InputStream in = null, in2 = null;
@@ -143,10 +151,10 @@ public class KDECallable implements Callable<Object> {
 
             List<Integer> nonCompCols = getExcludedColumns();
 
-            centredLogRation(nonCompCols);
+            centredLogRatio(nonCompCols);
 
             HpiKdeJSON kdeJsonHigh = hpiKde(nonCompCols, (double) job.getPredictionCutoff());
-            HpiKdeJSON kdeJsonAll = hpiKde(nonCompCols, 0);
+            HpiKdeJSON kdeJsonAll = hpiKde(nonCompCols, Double.NEGATIVE_INFINITY);
 
             if (kdeJsonHigh == null || kdeJsonAll==null) {
                 return new PortalServiceException(
@@ -215,7 +223,7 @@ public class KDECallable implements Callable<Object> {
         return res;
     }
 
-    private void centredLogRation(List<Integer> nonCompCols) throws PortalServiceException, WPSClientException {
+    private void centredLogRatio(List<Integer> nonCompCols) throws PortalServiceException, WPSClientException {
         InputStream in = null;
         OutputStream os = null;
 
@@ -223,6 +231,8 @@ public class KDECallable implements Callable<Object> {
             in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
             double[][] imputedData = csvService.getRawData(in, nonCompCols,
                     false);
+
+            checkDataBeforeCLR(imputedData);
 
             int retries = WPSController.MAX_RETRIES;
             while (retries-- > 0) {
@@ -239,6 +249,7 @@ public class KDECallable implements Callable<Object> {
                             EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
                     this.csvService.writeRawData(in, os, cenlrImputedData,
                             nonCompCols, false);
+                    return;
                 } catch (IOException e) {
                     log.warn("Unable to get double pdf values: ", e);
                     log.warn("Assuming bad VM");
@@ -251,4 +262,23 @@ public class KDECallable implements Callable<Object> {
         }
     }
 
+    private void checkDataBeforeCLR(double[][] imputedData) {
+        for (double[] ds : imputedData) {
+            for (double d : ds) {
+                if(Double.isNaN(d))
+                    throw new IllegalArgumentException("Input to centered log ratio function can't be NaN");
+                else if (d<=0)
+                    throw new IllegalArgumentException("Input to centered log ratio function can't be 0");
+            }
+        }
+    }
+
+    private void checkDataBeforeKde(double[][] imputedData) {
+        for (double[] ds : imputedData) {
+            for (double d : ds) {
+                if(Double.isNaN(d))
+                    throw new IllegalArgumentException("Input to centered log ratio function can't be NaN");
+            }
+        }
+    }
 }
