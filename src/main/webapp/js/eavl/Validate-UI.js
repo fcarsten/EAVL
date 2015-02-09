@@ -33,6 +33,7 @@ Ext.application({
                     Ext.Array.each(parameterDetails, function(pd) {
                         var existingPd = ds.getById(pd.get("name"));
                         if (existingPd) {
+                            pd.mergeAdditionalParams(existingPd);
                             ds.remove(existingPd);
                             ds.add(pd);
                         }
@@ -48,6 +49,7 @@ Ext.application({
                 var name = pdPanel.parameterDetails.get("name");
                 Ext.Array.each(parameterDetails, function(pd) {
                     if (pd.get("name") === name) {
+                        pd.mergeAdditionalParams(pdPanel.parameterDetails);
                         pdPanel.showParameterDetails(pd);
                         return false;
                     }
@@ -78,6 +80,20 @@ Ext.application({
                             return;
                         }
 
+                        var uomNames = [];
+                        var uomChangedNames = [];
+                        var uomScales = [];
+                        
+                        cp.getStore().each(function(pd) {
+                            var oldName = pd.get('name');
+                            var newName = pd.get('displayName');
+                            var sf = pd.get('scaleFactor'); 
+                            if (newName !== oldName || sf > 0) {
+                                uomNames.push(oldName);
+                                uomChangedNames.push(newName);
+                                uomScales.push(sf);
+                            }
+                        });
 
                         var ds = Ext.getCmp("trashpanel").getStore();
                         var deleteColIndexes = [];
@@ -89,7 +105,10 @@ Ext.application({
                         Ext.Ajax.request({
                             url: 'validation/saveValidationSubmitImputation.do',
                             params : {
-                                deleteColIndex : deleteColIndexes
+                                deleteColIndex : deleteColIndexes,
+                                uomNameKey : uomNames,
+                                uomChangedName : uomChangedNames,
+                                uomScaleFactor : uomScales
                             },
                             callback : function(options, success, response) {
                                 eavl.widgets.SplashScreen.hideLoadingScreen();
@@ -131,6 +150,7 @@ Ext.application({
                             id : 'comppanel',
                             xtype : 'pdlist',
                             title : 'Compositional Parameters',
+                            showUom : true,
                             parameterDetails : parameterDetails,
                             sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                             flex: 1,

@@ -10,3 +10,18 @@
     display: table-cell;
     vertical-align: middle;
 }
+
+.pdl-uom-parent {
+	cursor: pointer;
+	margin-top: 10px;
+}
+
+.pdl-uom-parent-ok {
+    color: #aaaaaa;
+}
+
+.pdl-uom-parent-action {
+    color: #ff0000;
+    font-weight: bold;
+    text-decoration: underline;
+}

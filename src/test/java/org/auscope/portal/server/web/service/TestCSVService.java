@@ -1017,5 +1017,40 @@ public class TestCSVService extends PortalTestClass{
 
         service.cullEmptyRows(mockStream, mockOutputStream, null, true);
     }
+
+    @Test
+    public void testScaleCols() throws Exception {
+        InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data.csv");
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        service.scaleColumns(is, os, Arrays.asList(2, 0), Arrays.asList(2.0, 10.0), Arrays.asList("newcol1", "newcol2"));
+
+        String expected = "'newcol2',' gold (au) ppm','newcol1','',' data'\n" +
+                "'0.0',' 40','200.0',' 59',' 12'\n" +
+                "'10.0',' 42','',' 52',' 12'\n" +
+                "'20.0',' 16','206.0',' 6',' 15'\n" +
+                "'30.0',' 13','202.0',' 43',' '\n" +
+                "'40.0',' 16','206.0',' 74',' 16'\n" +
+                "'50.0',' 48','200.0',' 32',' '\n" +
+                "'60.0',' 41',' D/L',' 72',' 14'\n" +
+                "'70.0',' 11','202.0',' 69',' '\n";
+
+        Assert.assertEquals(expected, os.toString());
+    }
+
+    @Test(expected=PortalServiceException.class)
+    public void testScaleColsClosesStream() throws Exception {
+        context.checking(new Expectations() {{
+            allowing(mockStream).read(with(any(byte[].class)), with(any(Integer.class)), with(any(Integer.class)));
+            will(throwException(new IOException()));
+
+            allowing(mockOutputStream).flush();
+
+            atLeast(1).of(mockStream).close();
+            atLeast(1).of(mockOutputStream).close();
+        }});
+
+        service.scaleColumns(mockStream, mockOutputStream, Arrays.asList(2, 0), Arrays.asList(2.0, 10.0), Arrays.asList("newcol1", "newcol2"));
+    }
 }
 

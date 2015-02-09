@@ -46,24 +46,27 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                 html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
             },{
                 itemId : 'card-inspect',
-                layout : {
-                    type : 'border',
-                },
+                layout : 'fit',
                 items : [{
                     xtype : 'container',
                     region : 'north',
-                    height : 300,
                     layout : {
                         type : 'hbox',
                         pack : 'center',
-                        align : 'stretch'
+                        align : 'middle'
                     },
                     items : [{
+                        xtype: 'pduompanel',
+                        itemId : 'pduompanel',
+                        width: 440,
+                        height: 400,
+                    },{
                         itemId : 'valuespie',
                         xtype : 'chart',
                         animate: true,
                         store: this.pieStore,
                         flex: 1,
+                        height: 400,
                         style: {
                             background : 'white'
                         },
@@ -102,10 +105,12 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                     },{
                         itemId : 'textlist',
                         flex: 1,
+                        height: 400,
                         xtype : 'grid',
                         store : this.textValuesStore,
                         hideHeaders : true,
                         disableSelection : true,
+                        maxHeight: 400,
                         viewConfig : {
                             deferEmptyText : false,
                             emptyText : '<div class="text-empty-container"><div class="text-empty-container-inner"><img src="img/check.svg" width="100"/><br>No invalid values!</div></div>'
@@ -145,14 +150,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                             }
                         }]
                     }]
-                },{
-                    itemId : 'prob-density-chart',
-                    region: 'center',
-                    xtype : 'pdfchart',
-                    file: eavl.models.EAVLJob.FILE_DATA_CSV,
-                    targetChartWidth: 1300,
-                    targetChartHeight: 400,
-                    preserveAspectRatio: true
                 }]
             }]
         });
@@ -282,7 +279,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
 
         this._loadPieStore(parameterDetails);
         this._loadTextValueStore(parameterDetails);
-        this.down('#prob-density-chart').plotParameterDetails(parameterDetails);
+        this.down('#pduompanel').showParameterDetails(parameterDetails);
 
         this.setTitle(Ext.util.Format.format('Comparing numeric and text values for "{0}"', parameterDetails.get('name')));
 
@@ -302,3 +299,203 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         this.setTitle('No parameter selected');
     }
 });
+
+/**
+ * Panel extension for rendering the unit of measure info for a ParameterDetails instance.
+ */
+Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
+    extend: 'Ext.form.Panel',
+
+    alias: 'widget.pduompanel',
+
+    /**
+     * Adds the following config to Ext.grid.Panel
+     * {
+     *  
+     * }
+     *
+     * Adds the following events
+     * {
+     *
+     * }
+     */
+    constructor : function(config) {
+
+        Ext.apply(config, {
+            layout : {
+                type: 'vbox',
+                align: 'center',
+                pack: 'center'
+            },
+            items : [{
+                xtype: 'container',
+                itemId: 'uom-container',
+                width: '100%',
+                height: 100,
+                html: '<div class="pdp-uom-container"><div class="pdp-uom-container-inner"><span>uom</span><img src="img/exclamation.svg" width="100"/></div></div>'
+            },{
+                xtype: 'container',
+                itemId: 'edit-container',
+                height: 100,
+                layout: {
+                    type: 'hbox',
+                    pack: 'center',
+                    align: 'middle'
+                },
+                items :[{
+                    xtype: 'container',
+                    flex: 1,
+                    cls: 'uom-edit-text',
+                    items: [{
+                        xtype: 'container',
+                        layout: {
+                            type: 'hbox',
+                            pack: 'center',
+                            align: 'middle'
+                        },
+                        items: [{
+                            xtype: 'label',
+                            text: 'Convert to ppm by '
+                        },{
+                            xtype: 'numberfield',
+                            flex: 1,
+                            itemId: 'scalefactor',
+                            hideTrigger: true,
+                            allowBlank: false,
+                            decimalPrecision: 16
+                        }]
+                    },{
+                        xtype: 'container',
+                        layout: {
+                            type: 'hbox',
+                            pack: 'center',
+                            align: 'middle'
+                        },
+                        items: [{
+                            xtype: 'label',
+                            text: 'Change name to '
+                        },{
+                            xtype: 'textfield',
+                            flex: 1,
+                            itemId: 'editname',
+                            value: 'Au_Assay_ppm'
+                        }]
+                    }]
+                },{
+                    xtype: 'container',
+                    width: 60,
+                    html: '<div class="pdp-convert-container"><div class="pdp-convert-container-inner"><img data-qtip="Convert all numerical values in this parameter to ppm using the specified scaling factor" src="img/convert-ppm.svg" width="50"/></div></div>'
+                }]
+            }]
+        });
+
+        this.callParent(arguments);
+        
+        this.on('afterrender', this._afterRender, this);
+    },
+    
+    _afterRender : function() {
+        this.down('#edit-container').getEl().down('.pdp-convert-container img').on('click', this._handleConvert, this);
+    },
+    
+    _handleConvert : function() {
+        var editContainer = this.down('#edit-container');
+        var scaleCmp = editContainer.down('#scalefactor');
+        var nameCmp = editContainer.down('#editname');
+        
+        if (!scaleCmp.isValid()) {
+            return;
+        }
+        
+        this.pd.set('displayName', nameCmp.getValue());
+        this.pd.set('uom', eavl.models.ParameterDetails.UOM_PPM);
+        this.pd.set('scaleFactor', scaleCmp.getValue());
+        
+        this.showParameterDetails(this.pd);
+    },
+    
+    _generateNewName : function(name) {
+        name = name.replace(/pct/i, eavl.models.ParameterDetails.UOM_PPM);
+        name = name.replace(/percentage/i, eavl.models.ParameterDetails.UOM_PPM);
+        name = name.replace(/percent/i, eavl.models.ParameterDetails.UOM_PPM);
+        name = name.replace(/perc/i, eavl.models.ParameterDetails.UOM_PPM);
+        
+        if (!name.contains(eavl.models.ParameterDetails.UOM_PPM)) {
+            name += ' [' + eavl.models.ParameterDetails.UOM_PPM + ']';
+        }
+        
+        return name;
+    },
+    
+    _lookupUomConversion : function(editContainer) {
+        
+        var loadMask = new Ext.LoadMask(editContainer, {msg:"Please wait..."});
+        loadMask.show();
+        Ext.Ajax.request({
+            url: 'validation/oxidePctToTracePpm.do',
+            params: {
+                name: this.pd.get('name')
+            },
+            scope: this,
+            callback: function(options, success, response) {
+                loadMask.hide();
+                loadMask.destroy();
+                if (!success) {
+                    editContainer.down('#scalefactor').setValue(null);
+                    editContainer.down('#editname').setValue( this._generateNewName(this.pd.get('name')));
+                    return;
+                }
+                
+                var responseObj = Ext.JSON.decode(response.responseText);
+                if (!responseObj.success) {
+                    editContainer.down('#scalefactor').setValue(null);
+                    editContainer.down('#editname').setValue( this._generateNewName(this.pd.get('name')));
+                    return;
+                }
+                
+                editContainer.down('#scalefactor').setValue(responseObj.data.conversion);
+                editContainer.down('#editname').setValue(responseObj.data.element + '_' + eavl.models.ParameterDetails.UOM_PPM);
+            }
+        });
+    },
+
+    showParameterDetails : function(pd) {
+        this.pd = pd;
+        
+        var uomContainer = this.down('#uom-container');
+        var editContainer = this.down('#edit-container');
+        
+        var uomName = pd.get('uom');
+        var valid = uomName === eavl.models.ParameterDetails.UOM_PPM;
+        
+        //update title container
+        var spanEl = uomContainer.getEl().down('.pdp-uom-container span');
+        var imgEl = uomContainer.getEl().down('.pdp-uom-container img');
+        if (uomName) {
+            spanEl.setStyle('font-size', '');
+            spanEl.setStyle('font-style', '');
+            spanEl.setStyle('margin-top', '');
+        } else {
+            uomName = 'Unknown unit of measure';
+            spanEl.setStyle('font-size', '200%');
+            spanEl.setStyle('font-style', 'italic');
+            spanEl.setStyle('margin-top', '-70px');
+        }
+        spanEl.setHTML(uomName);
+        
+        if (valid) {
+            imgEl.set({'src': 'img/check.svg'});
+            imgEl.set({'data-qtip': 'The parameter has the correct unit of measure.'});
+        } else {
+            imgEl.set({'src': 'img/exclamation.svg'});
+            imgEl.set({'data-qtip': 'All compositional parameters must have \'ppm\' as the unit of measure.'});
+        }
+        
+        //Update edit container
+        editContainer.setVisible(!valid);
+        if (!valid) {
+            this._lookupUomConversion(editContainer);
+        }
+    }
+});
+

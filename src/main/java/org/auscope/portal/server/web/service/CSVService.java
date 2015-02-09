@@ -395,7 +395,7 @@ public class CSVService {
                 }
 
                 try {
-                    Double d = new Double(Double.parseDouble(data[i]));
+                    double d = Double.parseDouble(data[i]);
                     row[idx++] = d;
                     hasValues = true;
                 } catch (NumberFormatException ex) {
@@ -1269,5 +1269,84 @@ public class CSVService {
             IOUtils.closeQuietly(culledCsvData);
             IOUtils.closeQuietly(csvData);
         }
+    }
+
+    /**
+     * Stream csvData into scaledData. Each column whose index is in columnIndexes
+     * will have their numerical values multiplied by the corresponding value in scalingFactors (if non null)
+     * and header replaced with the name in newColumnNames (if non null)
+     *
+     * There must be a 1-1-1 correspondence between values in columnIndexes, scalingFactors and newColumnNames
+     *
+     * Closes InputStream/OutputStream before returning.
+     *
+     * @param csvData Wi
+     * @param scaledData
+     * @param columnIndexes
+     * @param scalingFactors
+     * @param newColumnNames
+     * @throws PortalServiceException
+     */
+    public void scaleColumns(InputStream csvData, OutputStream scaledData, List<Integer> columnIndexes, List<Double> scalingFactors, List<String> newColumnNames) throws PortalServiceException {
+       CSVReader reader = null;
+       CSVWriter writer = null;
+
+       try {
+           if (columnIndexes.size() != scalingFactors.size() || columnIndexes.size() != newColumnNames.size()) {
+               throw new IllegalArgumentException();
+          }
+
+           reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+           writer = new CSVWriter(new OutputStreamWriter(scaledData), ',', '\'');
+
+           String[] dataLine = getNextNonEmptyRow(reader);
+           if (dataLine == null) {
+               return;
+           }
+
+           //Rewrite header line
+           if (isHeaderLine(dataLine)) {
+               for (int i = 0; i < columnIndexes.size(); i++) {
+                   String newName = newColumnNames.get(i);
+                   if (newName != null && !newName.isEmpty()) {
+                       dataLine[columnIndexes.get(i)] = newName;
+                   }
+               }
+
+               //Read until we hit a data line
+               writer.writeNext(dataLine);
+               dataLine = getNextNonEmptyRow(reader);
+               if (dataLine == null) {
+                   return;
+               }
+           }
+
+           do {
+               //scale our numeric values
+               for (int i = 0; i < columnIndexes.size(); i++) {
+                   Double sf = scalingFactors.get(i);
+                   if (sf == null) {
+                       continue;
+                   }
+
+                   int index = columnIndexes.get(i);
+                   try {
+                       double unscaledValue = Double.parseDouble(dataLine[index].trim());
+                       dataLine[index] = Double.toString(unscaledValue * sf);
+                   } catch (NumberFormatException ex) {
+                       continue;
+                   }
+               }
+
+               writer.writeNext(dataLine);
+           } while ((dataLine = getNextNonEmptyRow(reader)) != null);
+       } catch (Exception ex) {
+           throw new PortalServiceException("Unable to scale columns ", ex);
+       } finally {
+           IOUtils.closeQuietly(reader);
+           IOUtils.closeQuietly(writer);
+           IOUtils.closeQuietly(scaledData);
+           IOUtils.closeQuietly(csvData);
+       }
     }
 }
