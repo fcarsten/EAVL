@@ -40,7 +40,8 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
             return null;
         }
 
-        return this.d3.brush.extent()[0];
+        var logValue = this.d3.brush.extent()[0];
+        return Math.pow(10, logValue); //inverse log to get the actual cutoff value
     },
 
     _handleBrush : function(fireEvent) {
