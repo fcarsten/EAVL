@@ -14,6 +14,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.eavl.wpsclient.HpiKdeJSON;
 import org.auscope.portal.core.services.PortalServiceException;
@@ -84,7 +85,7 @@ public class KDECallable implements Callable<Object> {
         return exclusions;
     }
 
-    private HpiKdeJSON hpiKde(List<Integer> nonCompCols, double cutOff)
+    private HpiKdeJSON hpiKde(List<Integer> nonCompCols, double percentile)
             throws PortalServiceException, WPSClientException {
 
         InputStream in = null;
@@ -116,6 +117,12 @@ public class KDECallable implements Callable<Object> {
                     checkDataBeforeKde(proxyCenlrData);
                     checkDataBeforeKde(predictorCenlrData);
 
+                    double cutOff = percentile;
+                    if(cutOff != Double.NEGATIVE_INFINITY) {
+                        Percentile p = new Percentile(100-percentile);
+                        p.setData(predictorCenlrData);
+                        cutOff = p.evaluate();
+                    }
                     kdeJson = wpsClient.hpiKdeJSON(proxyCenlrData,
                             predictorCenlrData,
                             cutOff);
