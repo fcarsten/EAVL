@@ -89,9 +89,9 @@ Ext.define('eavl.models.ParameterDetails', {
             
             //Generate the uom from the layer name by guessing
             var lowerName = data.get('name').toLowerCase();
-            if (lowerName.contains('ppm')) {
+            if (lowerName.indexOf('ppm') >= 0) {
                 return eavl.models.ParameterDetails.UOM_PPM;
-            } else if (lowerName.contains('pct') || lowerName.contains('percent')) {
+            } else if (lowerName.indexOf('pct') >= 0 || lowerName.indexOf('percent')  >= 0) {
                 return eavl.models.ParameterDetails.UOM_PCT;
             }
             
