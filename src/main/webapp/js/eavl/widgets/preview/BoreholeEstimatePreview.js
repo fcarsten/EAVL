@@ -19,6 +19,8 @@ Ext.define('eavl.widgets.preview.BoreholeEstimatePreview', {
     },
 
     preview: function(job, fileName) {
+        var paramsToGroup = [eavl.models.EAVLJob.PARAMETER_ESTIMATE, job.get('predictionParameter')];
+        
         var me = this;
         var mask = new Ext.LoadMask(me, {msg:"Please wait..."});
         mask.show();
@@ -28,7 +30,7 @@ Ext.define('eavl.widgets.preview.BoreholeEstimatePreview', {
                 fileName: fileName,
                 jobId: job.get('id'),
                 groupName : job.get('holeIdParameter'),
-                paramName : eavl.models.EAVLJob.PARAMETER_ESTIMATE
+                paramName : paramsToGroup
             },
             callback: function(options, success, response) {
                 mask.hide();
