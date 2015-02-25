@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -151,7 +152,9 @@ public class KDECallable implements Callable<Object> {
 
             List<Integer> nonCompCols = getExcludedColumns();
 
-            centredLogRatio(nonCompCols);
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            Integer predictionIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
+            centredLogRatio(nonCompCols, predictionIndex);
 
             HpiKdeJSON kdeJsonHigh = hpiKde(nonCompCols, (double) job.getPredictionCutoff());
             HpiKdeJSON kdeJsonAll = hpiKde(nonCompCols, Double.NEGATIVE_INFINITY);
@@ -223,14 +226,16 @@ public class KDECallable implements Callable<Object> {
         return res;
     }
 
-    private void centredLogRatio(List<Integer> nonCompCols) throws PortalServiceException, WPSClientException {
-        InputStream in = null;
+    private void centredLogRatio(List<Integer> nonCompCols, Integer predictionColumnIndex) throws PortalServiceException, WPSClientException {
+        InputStream in1 = null, in2 = null;
         OutputStream os = null;
 
+        List<Integer> excludedColumns = new ArrayList<Integer>(nonCompCols);
+        excludedColumns.add(predictionColumnIndex);
+
         try {
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
-            double[][] imputedData = csvService.getRawData(in, nonCompCols,
-                    false);
+            in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            double[][] imputedData = csvService.getRawData(in1, excludedColumns, false);
 
             checkDataBeforeCLR(imputedData);
 
@@ -243,13 +248,16 @@ public class KDECallable implements Callable<Object> {
                     double[][] cenlrImputedData = wpsClient.cenLR(imputedData);
 
                     // Write the cenlr imputed data to a temporary file
-                    in = this.fss.readFile(job,
-                            EAVLJobConstants.FILE_IMPUTED_CSV);
-                    os = this.fss.writeFile(job,
-                            EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-                    this.csvService.writeRawData(in, os, cenlrImputedData,
-                            nonCompCols, false);
-                    return;
+                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+                    this.csvService.writeRawData(in1, os, cenlrImputedData, excludedColumns, false);
+
+                    //merge the cenlr data with the prediction column (which hasn't been cenlr'd)
+                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    in2 = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+                    os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+                    this.csvService.mergeFiles(in1, in2, os, Arrays.asList(predictionColumnIndex), null);
+
                 } catch (IOException e) {
                     log.warn("Unable to get double pdf values: ", e);
                     log.warn("Assuming bad VM");
@@ -257,7 +265,8 @@ public class KDECallable implements Callable<Object> {
                 }
             }
         } finally {
-            IOUtils.closeQuietly(in);
+            IOUtils.closeQuietly(in1);
+            IOUtils.closeQuietly(in2);
             IOUtils.closeQuietly(os);
         }
     }

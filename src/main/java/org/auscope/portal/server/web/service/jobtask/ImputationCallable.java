@@ -50,6 +50,13 @@ public class ImputationCallable implements Callable<Object> {
             exclusions.add(index);
         }
 
+        //Don't impute prediction parameter
+        in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
+        index = csvService.columnNameToIndex(in, job.getPredictionParameter());;
+        if (index != null && !exclusions.contains(index)) {
+            exclusions.add(index);
+        }
+
         return exclusions;
     }
 
