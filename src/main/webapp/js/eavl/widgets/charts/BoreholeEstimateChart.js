@@ -86,7 +86,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
 
         this.d3svg.attr("height", data.length * this.rowHeight);
         var width = this.viewport.attr('width');
-        var barWidth = width - this.textWidth;
+        var chartWidth = width - this.textWidth;
 
         var estimateToColor = function(e) {
             if (e < 0.1) {
@@ -112,6 +112,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
 
         this.d3svg.call(tip);
 
+        //Plot probability at each depth
         for (var i = 0; i < data.length; i++) {
             var bh = data[i];
             var bhGroup = this.d3svg.append("g")
@@ -121,7 +122,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             //We will be rendering a LOT of rectangles. Using the d3.append for each element is
             //a HUGE performance hit. There is no appendAll or bulkAppend so we're forced to step 
             //outside D3js and do the appending manually using document fragments.
-            var rectWidth = barWidth / bh.values.length;
+            var rectWidth = chartWidth / bh.values.length;
             var frag = document.createDocumentFragment(); //This is a virtual element so we can append everything in one hit
             for (var j = 0; j < bh.values.length; j++) {
                 var rectEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -142,6 +143,25 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             frag.appendChild(textEl);
             
             bhGroup[0][0].appendChild(frag);
+            
+            //Plot predictor quantity at each location
+            var lineGroup = bhGroup.append("g")
+                .attr("transform", "translate(" + (this.textWidth + this.rowMargin + rectWidth / 2) + ", " + (this.rowMargin) + ")");
+            var x = d3.scale.linear().range([0, chartWidth]);
+            var y = d3.scale.linear().range([this.rowHeight - this.rowMargin * 2, 0]);
+            
+            var xyPredictorData = bh.values.map(function(d, i) { return [i, d[1]]});
+            var valueline = d3.svg.line()
+                    .x(function(d) { return x(d[0]); })
+                    .y(function(d) { return y(d[1]); });
+
+            x.domain(d3.extent(xyPredictorData, function(d) { return d[0]; }));
+            y.domain(d3.extent(xyPredictorData, function(d) { return d[1]; }));
+            
+            lineGroup.append("path")
+                .datum(xyPredictorData)
+                .attr("class", "bhe-line")
+                .attr("d", valueline(xyPredictorData));
         }
     }
 });
