@@ -40,20 +40,8 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
             return null;
         }
 
-        var value = this.d3.brush.extent()[0];
-        var valueIndex = d3.bisect(this.d3.xData, value);
-
-        var totalArea = 0;
-        var previous = this.d3.xData[valueIndex], current;
-        for (var i = valueIndex + 1; i < this.d3.xData.length; i++) {
-          current = this.d3.xData[i];
-          totalArea += this.d3.yData[i] * (current - previous);
-          previous = current;
-        }
-
-        return totalArea * 100;
-//        var logValue = this.d3.brush.extent()[0];
-//        return Math.pow(10, logValue); //inverse log to get the actual cutoff value
+        var logValue = this.d3.brush.extent()[0];
+        return Math.pow(10, logValue); //inverse log to get the actual cutoff value
     },
 
     _handleBrush : function(fireEvent) {
