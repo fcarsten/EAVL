@@ -83,7 +83,7 @@ public class ResultsController extends BasePortalController {
             Collections.sort(jobs, new Comparator<EAVLJob>() {
                 @Override
                 public int compare(EAVLJob o1, EAVLJob o2) {
-                    return o1.getId().compareTo(o2.getId());
+                    return o2.getId().compareTo(o1.getId());
                 }
             });
             for (EAVLJob job : jobs) {
