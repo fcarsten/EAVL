@@ -6,6 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,6 +80,12 @@ public class ResultsController extends BasePortalController {
         try {
             List<EAVLJob> jobs = jobService.getJobsForUser(request, user);
             List<ModelMap> jobModels = new ArrayList<ModelMap>(jobs.size());
+            Collections.sort(jobs, new Comparator<EAVLJob>() {
+                @Override
+                public int compare(EAVLJob o1, EAVLJob o2) {
+                    return o1.getId().compareTo(o2.getId());
+                }
+            });
             for (EAVLJob job : jobs) {
                 jobModels.add(viewFactory.toView(job));
             }
