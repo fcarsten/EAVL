@@ -95,7 +95,6 @@ Ext.define('eavl.widgets.CSVGrid', {
 
         this.callParent(arguments);
 
-        this.addEvents('parameterchanged');
         this.on('cellclick', this._handleCellClick, this);
     },
 

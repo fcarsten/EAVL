@@ -155,8 +155,6 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         });
 
         this.callParent(arguments);
-
-        this.addEvents(['parameterchanged']);
     },
 
     initComponent : function() {
