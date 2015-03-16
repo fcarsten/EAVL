@@ -1,6 +1,5 @@
 package org.auscope.portal.server.web.service.jobtask;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -35,6 +34,7 @@ public class TestImputationCallable extends PortalTestClass {
 
         final String holeIdParam = "hole-id";
         final String savedParam = "saved-param";
+        final String predictionParam = "param-to-predict";
 
         final InputStream mockIs1 = context.mock(InputStream.class, "mockIs1");
         final InputStream mockIs2 = context.mock(InputStream.class, "mockIs2");
@@ -56,9 +56,9 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_IMPUTED_CSV);will(returnValue(mockOs));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);will(returnValue(mockOsValidate));
 
-            oneOf(mockCsvService).getRawData(with(mockIs3), with(equal(Arrays.asList(2, 1))), with(false));will(returnValue(data));
-            oneOf(mockCsvService).writeRawData(with(mockIs3), with(mockOsTmp), with(imputedData), with(equal(Arrays.asList(2, 1))), with(false));
-            oneOf(mockCsvService).mergeFiles(with(mockIs3), with(mockIs2), with(mockOs), with(equal(Arrays.asList(2, 1))), with(((List<Integer>) null)));
+            oneOf(mockCsvService).getRawData(with(mockIs3), with(equal(Arrays.asList(2, 1, 3))), with(false));will(returnValue(data));
+            oneOf(mockCsvService).writeRawData(with(mockIs3), with(mockOsTmp), with(imputedData), with(equal(Arrays.asList(2, 1, 3))), with(false));
+            oneOf(mockCsvService).mergeFiles(with(mockIs3), with(mockIs2), with(mockOs), with(equal(Arrays.asList(2, 1, 3))), with(((List<Integer>) null)));
 
             oneOf(mockFss).deleteStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);
 
@@ -67,11 +67,13 @@ public class TestImputationCallable extends PortalTestClass {
 
             allowing(mockJob).getHoleIdParameter();will(returnValue(holeIdParam));
             allowing(mockJob).getSavedParameters();will(returnValue(Sets.newHashSet(savedParam)));
+            allowing(mockJob).getPredictionParameter();will(returnValue(predictionParam));
 
             oneOf(mockCsvService).columnNameToIndex(mockIs1, holeIdParam);will(returnValue(new Integer(1)));
+            oneOf(mockCsvService).columnNameToIndex(mockIs1, predictionParam);will(returnValue(new Integer(3)));
             oneOf(mockCsvService).columnNameToIndex(with(mockIs1), with(Arrays.asList(savedParam)));will(returnValue(Arrays.asList(new Integer(2))));
 
-            oneOf(mockCsvService).cullEmptyRows(mockIs1, mockOsValidate, Arrays.asList(2, 1), false);
+            oneOf(mockCsvService).cullEmptyRows(mockIs1, mockOsValidate, Arrays.asList(2, 1, 3), false);
 
             atLeast(1).of(mockIs2).close();
             atLeast(1).of(mockIs3).close();
@@ -85,6 +87,8 @@ public class TestImputationCallable extends PortalTestClass {
     public void testWPSError() throws Exception {
         ImputationCallable ic = new ImputationCallable(mockJob, mockWpsClient, mockCsvService, mockFss);
 
+        final String predictionParam = "param-to-predict";
+
         final InputStream mockIs1 = context.mock(InputStream.class, "mockIs1");
         final OutputStream mockOs = context.mock(OutputStream.class, "mockOs");
 
@@ -94,19 +98,21 @@ public class TestImputationCallable extends PortalTestClass {
         context.checking(new Expectations() {{
             allowing(mockJob).getHoleIdParameter();will(returnValue("hole-id"));
             allowing(mockJob).getSavedParameters();will(returnValue(new HashSet<String>()));
+            allowing(mockJob).getPredictionParameter();will(returnValue(predictionParam));
 
             oneOf(mockCsvService).columnNameToIndex(mockIs1, "hole-id");will(returnValue(new Integer(1)));
+            oneOf(mockCsvService).columnNameToIndex(mockIs1, predictionParam);will(returnValue(new Integer(3)));
             oneOf(mockCsvService).columnNameToIndex(with(mockIs1), with(new ArrayList<String>()));will(returnValue(new ArrayList<Integer>()));
 
             allowing(mockFss).readFile(mockJob, EAVLJobConstants.FILE_DATA_CSV);will(returnValue(mockIs1));
             allowing(mockFss).readFile(mockJob, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);will(returnValue(mockIs1));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);will(returnValue(mockOs));
 
-            oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1))), with(false));will(returnValue(data));
+            oneOf(mockCsvService).getRawData(with(mockIs1), with(equal(Arrays.asList(1, 3))), with(false));will(returnValue(data));
             oneOf(mockWpsClient).getWpsClient().imputationNA(data);will(throwException(new PortalServiceException("")));
             oneOf(mockIs1).close();
 
-            oneOf(mockCsvService).cullEmptyRows(mockIs1, mockOs, Arrays.asList(1), false);
+            oneOf(mockCsvService).cullEmptyRows(mockIs1, mockOs, Arrays.asList(1, 3), false);
 
             oneOf(mockOs).close();
         }});
