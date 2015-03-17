@@ -47,7 +47,7 @@ Ext.define('eavl.widgets.plugins.HeaderIcons', {
     _iconCfgToMarkup : function(iconCfg, left, containerHeight) {
         var style = {
             'vertical-align': 'middle',
-            'margin-top': '-4px',
+            'margin-top': '-2px',
             display: 'inline-block'
         };
         if (left) {
