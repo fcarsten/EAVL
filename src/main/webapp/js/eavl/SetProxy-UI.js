@@ -91,7 +91,7 @@ Ext.application({
                         });
                     }
                 },{
-                    xtype: 'container',
+                    xtype: 'panel',
                     region: 'center',
                     layout: {
                         type: 'hbox',
@@ -249,7 +249,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
             items : [{
                 xtype : 'pdfield',
                 width: '100%',
-                height: 80,
+                height: 85,
                 title: config.title,
                 itemId : 'pdfield',
                 emptyText : 'Drag a parameter here to select it.',
