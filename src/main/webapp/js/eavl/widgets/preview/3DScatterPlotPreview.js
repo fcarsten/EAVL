@@ -65,14 +65,13 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                                 parent.removeAll(true);
                             }
 
-                            var f = parent.add({
+                            parent.add({
                                 xtype: 'datadisplayfield',
                                 border: false,
                                 fieldLabel: plot.xLabel,
                                 margin : '10 0 0 0',
                                 value: data.x
                             });
-                            f.setHideLabel(true);
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 fieldLabel: plot.yLabel,
