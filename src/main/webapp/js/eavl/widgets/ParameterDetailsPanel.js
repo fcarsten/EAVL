@@ -62,7 +62,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                         height: 400,
                     },{
                         itemId : 'valuespie',
-                        xtype : 'chart',
+                        xtype : 'polar',
                         animate: true,
                         store: this.pieStore,
                         flex: 1,
@@ -70,11 +70,14 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                         style: {
                             background : 'white'
                         },
+                        interactions: ['rotate', 'itemhighlight'],
+                        insetPadding: 30,
+                        innerPadding: 20,
                         series: [{
                             type: 'pie',
                             field: 'total',
-                            colorSet : ['#F7977A', '#FFF79A', '#82CA9D', '#779ECB'],
-                            tips: {
+                            animation: {easing: 'easeOut', duration: 400},
+                            tooltip: {
                                 trackMouse: true,
                                 renderer: function(storeItem, item, panel) {
                                     //calculate percentage.
@@ -82,22 +85,15 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                                     me.pieStore.each(function(rec) {
                                         total += rec.get('total');
                                     });
-                                    this.setTitle(storeItem.get('name') + ': ' + Math.round(storeItem.get('total') / total * 100) + '%');
-                                }
-                            },
-                            highlightCfg: {
-                                segment: {
-                                    margin: 8, //workaround for extjs bug. Need to double up the margin size for the shadow
+                                    this.setHtml(storeItem.get('name') + ': ' + Math.round(storeItem.get('total') / total * 100) + '%');
                                 }
                             },
                             highlight: {
-                                segment: {
-                                    margin: 8
-                                }
+                                margin: 20
                             },
                             label: {
                                 field: 'name',
-                                display: 'rotate',
+                                display: 'outside',
                                 contrast: true,
                                 font: '16px Arial'
                             }
@@ -215,32 +211,31 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
      */
     _loadPieStore : function(parameterDetails) {
         var data = [];
-
+        var colors = [];
+        
         if (parameterDetails.get('totalMissing') > 0) {
             data.push({name : 'No sample', total : parameterDetails.get('totalMissing')});
-        } else {
-            data.push({name : '', total : 0});
+            colors.push('#FFF79A');
         }
 
         if (parameterDetails.get('totalText') > 0) {
             data.push({name : 'Text', total : parameterDetails.get('totalText')});
-        } else {
-            data.push({name : '', total : 0});
+            colors.push('#F7977A');
         }
 
         if (parameterDetails.get('totalNumeric') > 0) {
             data.push({name : 'Numeric', total : parameterDetails.get('totalNumeric')});
-        } else {
-            data.push({name : '', total : 0});
+            colors.push('#82CA9D');
         }
 
         if (parameterDetails.get('totalZeroes') > 0) {
             data.push({name : 'Zeroes', total : parameterDetails.get('totalZeroes')});
-        } else {
-            data.push({name : '', total : 0});
+            colors.push('#779ECB');
         }
 
         this.pieStore.loadData(data);
+        var series = this.down("#valuespie").getSeries();
+        series[0].setColors(colors);
     },
 
     /**
@@ -479,7 +474,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
             spanEl.setStyle('font-style', 'italic');
             spanEl.setStyle('margin-top', '-70px');
         }
-        spanEl.setHTML(uomName);
+        spanEl.setHtml(uomName);
         
         if (valid) {
             imgEl.set({'src': 'img/check.svg'});

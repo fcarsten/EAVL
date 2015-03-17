@@ -245,7 +245,7 @@ Ext.application({
                 url : 'validation/getCompositionalParameterDetails.do',
                 reader : {
                     type : 'json',
-                    root : 'data'
+                    rootProperty : 'data'
                 }
             },
             listeners: {
