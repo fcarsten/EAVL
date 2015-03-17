@@ -34,7 +34,7 @@ Ext.define('eavl.widgets.ParameterDetailsField', {
         Ext.apply(config, {
             viewConfig : {
                 deferEmptyText : false,
-                emptyText: Ext.util.Format.format('<span class="pdl-row-text" style="font-style:italic;font-weight:normal;color:#aaaaaa;padding:5px 0 0 20px;">{0}</span>', config.emptyText ? config.emptyText : "")
+                emptyText: Ext.util.Format.format('<span class="pdl-row-text" style="font-style:italic;font-weight:normal;color:#aaaaaa;padding:0px;">{0}</span>', config.emptyText ? config.emptyText : "")
             }
         });
         this.callParent(arguments);
