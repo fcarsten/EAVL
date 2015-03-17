@@ -12,6 +12,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
         this.innerId = Ext.id();
         this._md = {};
         Ext.apply(config,{
+            border: false,
             layout : 'fit',
             items : [{
                 xtype : 'container',
@@ -22,6 +23,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                 items : [{
                     xtype: 'panel',
                     width: 150,
+                    border: false,
                     layout: {
                         type: 'vbox',
                         align: 'center'
@@ -47,7 +49,8 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                         text: 'for more information'
                     }]
                 },{
-                    xtype : '3dscatterplot',
+                    xtype : 'threedscatterplot',
+                    border: false,
                     itemId : 'plot',
                     valueAttr : 'estimate',
                     valueScale : 'log',
@@ -62,12 +65,14 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                                 parent.removeAll(true);
                             }
 
-                            parent.add({
+                            var f = parent.add({
                                 xtype: 'datadisplayfield',
+                                border: false,
                                 fieldLabel: plot.xLabel,
                                 margin : '10 0 0 0',
                                 value: data.x
                             });
+                            f.setHideLabel(true);
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 fieldLabel: plot.yLabel,

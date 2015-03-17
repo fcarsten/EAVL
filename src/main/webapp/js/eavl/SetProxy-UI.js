@@ -93,6 +93,7 @@ Ext.application({
                 },{
                     xtype: 'panel',
                     region: 'center',
+                    border: false,
                     layout: {
                         type: 'hbox',
                         align : 'stretch',

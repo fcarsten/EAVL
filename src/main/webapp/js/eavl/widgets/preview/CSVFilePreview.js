@@ -48,6 +48,7 @@ Ext.define('eavl.widgets.preview.CSVFilePreview', {
                 }
 
                 me.add(Ext.create('eavl.widgets.CSVGrid', {
+                    border: false,
                     itemId: 'csvGrid',
                     jobId: job.get('id'),
                     file: fileName,
@@ -55,7 +56,7 @@ Ext.define('eavl.widgets.preview.CSVFilePreview', {
                     readOnly: true,
                     sortColumns: false
                 }));
-                me.doComponentLayout();
+                me.doLayout();
             }
         });
     }

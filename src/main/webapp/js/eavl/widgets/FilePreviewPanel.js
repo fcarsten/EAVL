@@ -21,11 +21,12 @@ Ext.define('eavl.widgets.FilePreviewPanel', {
 
         var previewers = [
             {
+                border: false,
                 itemId: 'empty',
                 html: '<div class="preview-empty-container"><div class="preview-empty-container-inner">Select a file above to activate the preview window.</div></div>'
             },
             Ext.create('eavl.widgets.preview.CSVFilePreview', {itemId: 'csv'}),
-            Ext.create('eavl.widgets.preview.3DScatterPlotPreview', {itemId: '3dscatter'}),
+            Ext.create('eavl.widgets.preview.3DScatterPlotPreview', {itemId: 'threedscatterplot'}),
             Ext.create('eavl.widgets.preview.BoreholeEstimatePreview', {itemId: 'bhestimate'})
         ];
 

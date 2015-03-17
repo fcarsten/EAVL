@@ -68,6 +68,7 @@ Ext.application({
                 xtype: 'container',
                 id : 'parent-container',
                 region: 'center',
+                border: false,
                 style: {
                     'background-color' : 'white'
                 },

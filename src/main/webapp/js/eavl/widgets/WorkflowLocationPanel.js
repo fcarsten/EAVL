@@ -161,6 +161,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
 
         Ext.apply(config, {
             id: 'workflow-location-panel',
+            border: false,
             html : markup
         });
 

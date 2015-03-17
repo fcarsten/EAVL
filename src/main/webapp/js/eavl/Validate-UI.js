@@ -130,6 +130,7 @@ Ext.application({
                     }
                 },{
                     xtype: 'panel',
+                    border: false,
                     region: 'center',
                     layout: {
                         type: 'hbox',
@@ -213,7 +214,6 @@ Ext.application({
                         title : 'Parameter Details',
                         emptyText : 'Either click or drag a parameter into this panel to inspect it.',
                         flex : 1,
-                        margin : '0 0 0 10',
                         plugins : [{
                             ptype : 'modeldnd',
                             ddGroup : 'validate-dnd-pd',
