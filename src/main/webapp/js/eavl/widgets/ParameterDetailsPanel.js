@@ -42,11 +42,13 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
             },
             items: [{
                 itemId : 'card-empty',
+                border: false,
                 xtype : 'container',
                 html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
             },{
                 itemId : 'card-inspect',
                 layout : 'fit',
+                border: false,
                 items : [{
                     xtype : 'container',
                     region : 'north',
@@ -63,6 +65,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                     },{
                         itemId : 'valuespie',
                         xtype : 'polar',
+                        border: false,
                         animate: true,
                         store: this.pieStore,
                         flex: 1,
@@ -101,6 +104,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                     },{
                         itemId : 'textlist',
                         flex: 1,
+                        border: false,
                         height: 400,
                         xtype : 'grid',
                         store : this.textValuesStore,
@@ -315,6 +319,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
     constructor : function(config) {
 
         Ext.apply(config, {
+            border: false,
             layout : {
                 type: 'vbox',
                 align: 'center',
