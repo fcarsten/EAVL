@@ -146,7 +146,7 @@ Ext.application({
                         xtype : 'pdlist',
                         title : 'Compositional Parameters',
                         width : 300,
-                        margins: '0 10 10 10',
+                        margin: '0 10 0 10',
                         parameterDetails : parameterDetails,
                         sortFn : eavl.models.ParameterDetails.sortColIndexFn,
                         viewConfig : {
@@ -174,7 +174,7 @@ Ext.application({
                         xtype: 'container',
                         flex: 1,
                         layout: 'vbox',
-                        margins: '0 10 0 0',
+                        margin: '0 10 0 0',
                         items : [{
                             xtype : 'pdfield',
                             id : 'holeid-field',
@@ -182,7 +182,7 @@ Ext.application({
                             title: 'Hole Identifier',
                             height: 85,
                             emptyText : 'Drag a parameter here to select it.',
-                            margins: '0 0 10 0',
+                            margin: '0 0 10 0',
                             allowBlank: false,
                             value: holeIdPd,
                             plugins: [{
@@ -211,7 +211,7 @@ Ext.application({
                             title: 'Element to predict',
                             height: 85,
                             emptyText : 'Drag a parameter here to select it.',
-                            margins: '0 0 10 0',
+                            margin: '0 0 10 0',
                             allowBlank: false,
                             value: predictionPd,
                             plugins: [{

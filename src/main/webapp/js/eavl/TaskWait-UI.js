@@ -71,7 +71,7 @@ Ext.application({
                     })
                 },{
                     xtype: 'container',
-                    margins: '20 0 0 0',
+                    margin: '20 0 0 0',
                     height: 200,
                     layout : {
                         type: 'vbox',
