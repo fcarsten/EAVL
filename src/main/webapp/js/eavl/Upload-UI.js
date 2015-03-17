@@ -6,6 +6,8 @@ Ext.application({
 
 
     init: function() {
+        Ext.QuickTips.init();
+        
         eavl.widgets.SplashScreen.showLoadingSplash('Loading upload form, please stand by ...');
     },
 
@@ -13,9 +15,8 @@ Ext.application({
     //Any processing logic should be managed in dedicated classes - don't let this become a
     //monolithic 'do everything' function
     launch : function() {
-
         eavl.widgets.SplashScreen.hideLoadingScreen();
-
+        
         var jobId = null;
 
         var showCSVGrid = function(id, parameterDetails) {
@@ -67,6 +68,7 @@ Ext.application({
                 xtype: 'container',
                 id : 'parent-container',
                 region: 'center',
+                border: false,
                 style: {
                     'background-color' : 'white'
                 },

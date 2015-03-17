@@ -90,6 +90,7 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
         }
 
         Ext.apply(config, {
+            cls: 'pdl',
             hideHeaders : true,
             store : store,
             columns : cols

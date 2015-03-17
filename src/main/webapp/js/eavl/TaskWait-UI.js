@@ -71,7 +71,7 @@ Ext.application({
                     })
                 },{
                     xtype: 'container',
-                    margins: '20 0 0 0',
+                    margin: '20 0 0 0',
                     height: 200,
                     layout : {
                         type: 'vbox',
@@ -137,6 +137,11 @@ Ext.application({
                         taskId: taskId
                     },
                     callback: function(options, success, response) {
+                        //This allows us to test out the GUI on this page without
+                        //a running job
+                        if (taskId === 'test') {
+                            return;
+                        }
                         if (success) {
                             var responseObj = Ext.JSON.decode(response.responseText);
                             if (responseObj.success && !responseObj.data) {

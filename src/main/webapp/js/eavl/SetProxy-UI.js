@@ -91,8 +91,9 @@ Ext.application({
                         });
                     }
                 },{
-                    xtype: 'container',
+                    xtype: 'panel',
                     region: 'center',
+                    border: false,
                     layout: {
                         type: 'hbox',
                         align : 'stretch',
@@ -104,7 +105,7 @@ Ext.application({
                         width: 300,
                         parameterDetails : records,
                         disableSelection: true,
-                        margins: '0 10 0 10',
+                        margin: '0 10 0 10',
                         plugins: [{
                             ptype : 'modeldnd',
                             ddGroup : 'set-proxy-pd',
@@ -132,21 +133,21 @@ Ext.application({
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 1',
-                            margins: '0 10 0 0',
+                            margin: '0 10 0 0',
                             id: 'setproxy-1',
                             parameterDetails: p1Value
                         },{
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 2',
-                            margins: '0 10 0 0',
+                            margin: '0 10 0 0',
                             id: 'setproxy-2',
                             parameterDetails: p2Value
                         },{
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 3',
-                            margins: '0 10 0 0',
+                            margin: '0 10 0 0',
                             id: 'setproxy-3',
                             parameterDetails: p3Value
                         }]
@@ -249,11 +250,11 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
             items : [{
                 xtype : 'pdfield',
                 width: '100%',
-                height: 80,
+                height: 85,
                 title: config.title,
                 itemId : 'pdfield',
                 emptyText : 'Drag a parameter here to select it.',
-                margins: '0 0 10 0',
+                margin: '0 0 10 0',
                 allowBlank: false,
                 value: pd,
                 plugins: [{

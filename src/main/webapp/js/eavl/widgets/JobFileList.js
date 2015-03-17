@@ -34,7 +34,7 @@ Ext.define('eavl.widgets.JobFileList', {
                 url : 'results/getFilesForJob.do',
                 reader : {
                     type : 'json',
-                    root : 'data'
+                    rootProperty : 'data'
                 },
                 listeners : {
                     exception : function(proxy, response, operation) {
@@ -168,8 +168,6 @@ Ext.define('eavl.widgets.JobFileList', {
         });
 
         this.callParent(arguments);
-
-        this.addEvents(['preview', 'dataview']);
     },
 
     _downloadAllClickHandler : function() {

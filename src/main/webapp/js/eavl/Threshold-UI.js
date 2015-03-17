@@ -75,6 +75,7 @@ Ext.application({
                 },{
                     xtype: 'container',
                     region: 'center',
+                    border: false,
                     layout: {
                         type: 'vbox',
                         pack : 'center',

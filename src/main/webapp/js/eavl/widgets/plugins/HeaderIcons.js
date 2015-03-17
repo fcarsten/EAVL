@@ -47,7 +47,7 @@ Ext.define('eavl.widgets.plugins.HeaderIcons', {
     _iconCfgToMarkup : function(iconCfg, left, containerHeight) {
         var style = {
             'vertical-align': 'middle',
-            'margin-top': '-4px',
+            'margin-top': '-2px',
             display: 'inline-block'
         };
         if (left) {
@@ -86,8 +86,8 @@ Ext.define('eavl.widgets.plugins.HeaderIcons', {
         
         
         var headerEl = me.header.getEl();
-        var containerEl = headerEl.down('.x-panel-header-text-container');
-        var textEl = headerEl.down('.x-panel-header-text');
+        var containerEl = headerEl.down('.x-panel-header-title');
+        var textEl = headerEl.down('.x-title-text');
         
         var containerHeight = containerEl.getHeight();
         containerEl.setStyle('overflow', 'visible');
@@ -98,7 +98,7 @@ Ext.define('eavl.widgets.plugins.HeaderIcons', {
             dismissDelay: 10000  
         };
         Ext.each(me.iconsLeft, function(iconCfg) {
-            var newEl = Ext.DomHelper.insertBefore(textEl, me._iconCfgToMarkup(iconCfg, true, containerHeight), true);
+            var newEl = Ext.DomHelper.insertFirst(textEl, me._iconCfgToMarkup(iconCfg, true, containerHeight), true);
             if (iconCfg.handler) {
                 newEl.on('click', iconCfg.handler);
             }
@@ -110,7 +110,7 @@ Ext.define('eavl.widgets.plugins.HeaderIcons', {
         });
         
         Ext.each(me.iconsText, function(iconCfg) {
-            var newEl = Ext.DomHelper.insertAfter(textEl, me._iconCfgToMarkup(iconCfg, false, containerHeight), true);
+            var newEl = textEl.appendChild(me._iconCfgToMarkup(iconCfg, false, containerHeight), true);
             if (iconCfg.handler) {
                 newEl.on('click', iconCfg.handler);
             }

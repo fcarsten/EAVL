@@ -8,6 +8,7 @@ Ext.define('eavl.widgets.preview.BoreholeEstimatePreview', {
 
         Ext.apply(config, {
             layout: 'fit',
+            border: false,
             items: [{
                 xtype: 'bhestimatechart',
                 itemId: 'chart',

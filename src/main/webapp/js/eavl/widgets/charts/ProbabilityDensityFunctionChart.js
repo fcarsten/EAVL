@@ -28,8 +28,6 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
         this.allowCutoffSelection = config.allowCutoffSelection ? true : false;
         this._cutoffOverride = Ext.isNumber(config.cutoffValue) ? config.cutoffValue : null;
         this.callParent(arguments);
-
-        this.addEvents(['cutoffchanged']);
     },
 
     /**

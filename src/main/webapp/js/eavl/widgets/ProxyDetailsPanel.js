@@ -35,12 +35,14 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
         var emptyCard = {
             itemId : 'card-empty',
             xtype : 'container',
+            border: false,
             html : Ext.util.Format.format('<div class="proxydp-empty-container"><div class="proxydp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
         };
 
         var inspectCard = {
             itemId : 'card-inspect',
             xtype: 'container',
+            border: false,
             layout: {
                 type: 'vbox',
                 align : 'center',
@@ -48,12 +50,14 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
             },
             items: [{
                 xtype: 'panel',
+                border: false,
                 width: '100%',
                 flex: 1,
                 layout: 'fit',
                 items : [{
                     xtype: 'doublepdfchart',
                     itemId: 'dpdfchart',
+                    border: false,
                     file: eavl.models.EAVLJob.FILE_IMPUTED_CSV,
                     preserveAspectRatio : config.preserveAspectRatio,
                     parameterDetails : this.parameterDetails,
@@ -62,12 +66,14 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
                 }]
             },{
                 xtype: 'panel',
+                border: false,
                 width: '100%',
                 flex: 1,
                 layout: 'fit',
                 items : [{
                     xtype: 'meanacfchart',
                     itemId: 'meanacfchart',
+                    border: false,
                     parameterDetails : this.parameterDetails,
                     preserveAspectRatio : config.preserveAspectRatio,
                     targetWidth: config.targetChartWidth,
@@ -96,8 +102,6 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
         });
 
         this.callParent(arguments);
-
-        this.addEvents(['parameterchanged']);
     },
 
     initComponent : function() {
