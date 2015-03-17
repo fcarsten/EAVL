@@ -52,7 +52,8 @@
 	display: inline-block;
 	font-size: 300%;
 	font-weight: bold;
-	margin-top: -80px;
+	top: -30px;
+	position: relative;
 	margin-right: 15px;
 }
 
