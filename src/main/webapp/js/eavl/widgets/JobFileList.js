@@ -168,8 +168,6 @@ Ext.define('eavl.widgets.JobFileList', {
         });
 
         this.callParent(arguments);
-
-        this.addEvents(['preview', 'dataview']);
     },
 
     _downloadAllClickHandler : function() {

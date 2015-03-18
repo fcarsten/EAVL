@@ -10,7 +10,7 @@ Ext.define('eavl.widgets.SplashScreen', {
      * Loads a full screen splash screen with the specified message. If a splash is already showing, it will be hidden
      */
     eavl.widgets.SplashScreen.showLoadingSplash = function(message) {
-        if (!eavl.widgets.SplashScreen._splashscreen) {
+        if (eavl.widgets.SplashScreen._splashscreen) {
             eavl.widgets.SplashScreen.hideLoadingScreen();
         }
         eavl.widgets.SplashScreen._splashscreen = Ext.getBody().mask(message, 'splashscreen');
@@ -29,12 +29,6 @@ Ext.define('eavl.widgets.SplashScreen', {
 
             // fade out the body mask
             eavl.widgets.SplashScreen._splashscreenfading.fadeOut({
-                duration: 500,
-                remove: true
-            });
-
-            // fade out the message
-            eavl.widgets.SplashScreen._splashscreenfading.next().fadeOut({
                 duration: 500,
                 remove: true
             });

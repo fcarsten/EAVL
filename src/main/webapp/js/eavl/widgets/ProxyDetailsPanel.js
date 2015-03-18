@@ -96,8 +96,6 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
         });
 
         this.callParent(arguments);
-
-        this.addEvents(['parameterchanged']);
     },
 
     initComponent : function() {

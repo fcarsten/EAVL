@@ -73,7 +73,7 @@ Ext.define('eavl.widgets.CSVGrid', {
                 extraParams: proxyParams,
                 reader: {
                     type : 'array',
-                    root: 'rows',
+                    rootProperty: 'rows',
                     totalProperty: 'totalCount'
                 }
             }
@@ -95,7 +95,6 @@ Ext.define('eavl.widgets.CSVGrid', {
 
         this.callParent(arguments);
 
-        this.addEvents('parameterchanged');
         this.on('cellclick', this._handleCellClick, this);
     },
 
@@ -173,7 +172,7 @@ Ext.define('eavl.widgets.CSVGrid', {
     generateColumnForParameterDetails : function(parameterDetails) {
         var name = parameterDetails.get('name');
         return Ext.create('Ext.grid.column.Column', {
-            itemId: name,
+            itemId: name.replace(/ /g, "_"),
             dataIndex: name,
             renderer : Ext.bind(this._handleCellRender, this),
             header : this._parameterDetailsToColHeader(parameterDetails), sortable: false
@@ -218,7 +217,7 @@ Ext.define('eavl.widgets.CSVGrid', {
         var name = column.getItemId();
 
         for (var i = 0; i < this.parameterDetails.length; i++) {
-            if (this.parameterDetails[i].get('name') === name) {
+            if (this.parameterDetails[i].get('name').replace(/ /g, "_") === name) {
                 return this.parameterDetails[i];
             }
         }
