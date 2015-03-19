@@ -35,10 +35,12 @@
 	background-image: url(../../../img/logo.png);
 	display: inline-block;
 	margin-right: 10px;
+	position: relative;
+	top: -15px;
 }
 
 #top-bar-container ul {
-    padding: 25px 0 0;
+    padding: 12px 0 0;
     display: inline-block;
 }
 

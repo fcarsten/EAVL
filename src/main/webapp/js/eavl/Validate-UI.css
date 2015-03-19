@@ -16,13 +16,13 @@
 .trash-empty-container {
     width: 95%;
     position:absolute;
-    height: 95%;
+    height: 90%;
 }
 
 .trash-empty-container-inner {
     text-align: center;
     height : 120px;
-    margin-top: 15px;
+    margin-top: 5px;
     position:absolute;
     width: 100%;
 }

@@ -36,8 +36,9 @@ Ext.application({
                     xtype: 'workflowpanel',
                     region: 'north'
                 },{
-                    xtype: 'container',
+                    xtype: 'panel',
                     region: 'center',
+                    border: false,
                     layout: {
                         type: 'hbox',
                         align : 'stretch',
@@ -87,7 +88,7 @@ Ext.application({
                                 },
                                 preview : function(jobFileList, fileName, job) {
                                     if (fileName.endsWith(".json")) {
-                                        Ext.getCmp('filepreviewpanel').preview(job, fileName, "3dscatter");
+                                        Ext.getCmp('filepreviewpanel').preview(job, fileName, "threedscatterplot");
                                     } else if (fileName.endsWith(".csv")) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "bhestimate");
                                     }
@@ -113,7 +114,7 @@ Ext.application({
                 url : 'results/getJobsForUser.do',
                 reader : {
                     type : 'json',
-                    root : 'data'
+                    rootProperty : 'data'
                 }
             },
             listeners: {

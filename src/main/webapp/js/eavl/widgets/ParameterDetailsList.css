@@ -25,3 +25,7 @@
     font-weight: bold;
     text-decoration: underline;
 }
+
+.pdl .x-grid-empty {
+	padding: 8px;
+}

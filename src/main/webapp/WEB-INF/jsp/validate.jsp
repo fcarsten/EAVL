@@ -6,6 +6,8 @@
         <title>EAVL - Validate Dataset</title>
         
         <jsp:include page="../../jsimports.htm"/>
+        <script type="text/javascript" src="portal-core/js/ext-5.1.0/build/packages/sencha-charts/build/sencha-charts.js"></script>
+        
         
         <script type="text/javascript" src="portal-core/js/d3/d3.min.js"></script>
         
