@@ -85,9 +85,11 @@ public class ValidationController extends BasePortalController {
 
 
         EAVLJob job;
+        boolean newJob = false;
         try {
             if (jobId == null) {
                 job = jobService.createJobForSession(request, user);
+                newJob = true;
             } else {
                 job = jobService.getUserJobById(request, user, jobId);
             }
@@ -102,7 +104,15 @@ public class ValidationController extends BasePortalController {
         //Handle incoming file
         StagedFile file = null;
         try {
-            if (!fss.stageInDirectoryExists(job)) {
+            if (fss.stageInDirectoryExists(job)) {
+                if (newJob) {
+                    //Edge case - should only occur if the DB is changed and the file
+                    //cache is not cleared before using (resulting in ID collisions)
+                    //See EAVL-54
+                    fss.deleteStageInDirectory(job);
+                    fss.generateStageInDirectory(job);
+                }
+            } else {
                 fss.generateStageInDirectory(job);
             }
             file = fss.handleFileUpload(job, (MultipartHttpServletRequest) request);
