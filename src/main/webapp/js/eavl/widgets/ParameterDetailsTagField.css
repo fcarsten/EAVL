@@ -1,0 +1,20 @@
+.pdtf li.x-tagfield-item {
+    font-size: 16px;
+    font-weight: bold;
+	background-image: url(../../../img/tick.png);
+	background-size: 16px 16px;
+	background-repeat: no-repeat;
+	background-color: #c1ddf1;
+	padding: 0 1px 0 21px!important;
+}
+
+.pdtf:not(.x-item-disabled) .x-tagfield-item:hover {
+    background-color: #92c8ef;
+    background-image: url(../../../img/tick.png);
+    background-size: 16px 16px;
+    background-repeat: no-repeat;
+}
+
+.pdtf .x-tagfield  {
+	overflow: hidden;
+}

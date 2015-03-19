@@ -15,6 +15,7 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/SetProxy-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsTagField.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/MeanACFChart.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ProxyDetailsPanel.css">
@@ -25,6 +26,7 @@
         <script type="text/javascript" src="js/eavl/widgets/plugins/ModelDragDrop.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsField.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsTagField.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ProxyDetailsPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>

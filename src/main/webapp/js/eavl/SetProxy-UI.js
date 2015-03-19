@@ -40,6 +40,15 @@ Ext.application({
                 p2Value = eavl.models.ParameterDetails.extractFromArray(records, initialParams.proxyParameters[1]);
                 p3Value = eavl.models.ParameterDetails.extractFromArray(records, initialParams.proxyParameters[2]);
             }
+            
+            var p1Denoms = [];
+            var p2Denoms = [];
+            var p3Denoms = [];
+            if (initialParams && initialParams.proxyDenominators) {
+                p1Denoms = initialParams.proxyDenominators[0];
+                p2Denoms = initialParams.proxyDenominators[1];
+                p3Denoms = initialParams.proxyDenominators[2];
+            }
 
             Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
                 layout: 'border',
@@ -135,21 +144,27 @@ Ext.application({
                             title: 'Proxy 1',
                             margin: '0 10 0 0',
                             id: 'setproxy-1',
-                            parameterDetails: p1Value
+                            allPds : records,
+                            pdNumerator: p1Value,
+                            pdDenominator: p1Denoms
                         },{
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 2',
                             margin: '0 10 0 0',
                             id: 'setproxy-2',
-                            parameterDetails: p2Value
+                            allPds : records,
+                            pdNumerator: p2Value,
+                            pdDenominator: p2Denoms
                         },{
                             xtype: 'setproxyselection',
                             flex: 1,
                             title: 'Proxy 3',
                             margin: '0 10 0 0',
                             id: 'setproxy-3',
-                            parameterDetails: p3Value
+                            allPds : records,
+                            pdNumerator: p3Value,
+                            pdDenominator: p3Denoms
                         }]
                     }]
                 }]
@@ -166,7 +181,7 @@ Ext.application({
                 },
                 reader : {
                     type : 'json',
-                    root : 'data'
+                    rootProperty : 'data'
                 }
             },
             listeners: {
@@ -238,8 +253,10 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
     constructor : function(config) {
         var me = this;
 
-        var pd = config.parameterDetails ? config.parameterDetails : null;
-
+        var pd = config.pdNumerator ? config.pdNumerator : null;
+        var denom = config.pdDenominator ? config.pdDenominator : null;
+        var allPds = config.allPds ? config.allPds : null;
+        
         Ext.apply(config, {
             xtype: 'container',
             layout: {
@@ -257,6 +274,35 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 margin: '0 0 10 0',
                 allowBlank: false,
                 value: pd,
+                plugins: [{
+                    ptype : 'modeldnd',
+                    ddGroup : 'set-proxy-pd',
+                    highlightBody : false,
+                    handleDrop : function(pdfield, pd, source) {
+                        //Swap if we already have a value
+                        if (pdfield.getValue()) {
+                            var currentValue = pdfield.getValue();
+                            source.getStore().add(currentValue);
+                        }
+                        pdfield.setValue(pd);
+
+                        pdfield.ownerCt.down('#proxy-panel').showParameterDetails(pd);
+                    },
+                    handleDrag : function(pdfield, pd) {
+                        pdfield.reset();
+                        pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
+                    }
+                }]
+            },{
+                xtype : 'pdtagfield',
+                width: '100%',
+                title: config.title,
+                itemId : 'pdtagfield',
+                emptyText : 'Drag a parameter here to select it.',
+                margin: '0 0 10 0',
+                allowBlank: false,
+                value: denom,
+                parameterDetails: allPds,
                 plugins: [{
                     ptype : 'modeldnd',
                     ddGroup : 'set-proxy-pd',
