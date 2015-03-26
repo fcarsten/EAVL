@@ -38,8 +38,7 @@ Ext.application({
             if (initialParams && initialParams.proxyParameters) {
                 Ext.each(records, function(pd) {
                     if (pd.get('name') === initialParams.proxyParameters[0]) {
-                        //p1Value = pd;
-                        console.log("Test code disabling - dont commit");
+                        p1Value = pd;
                     } else if (pd.get('name') === initialParams.proxyParameters[1]) {
                         p2Value = pd;
                     } else if (pd.get('name') === initialParams.proxyParameters[2]) {
@@ -122,7 +121,7 @@ Ext.application({
                     items: [{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy 1',
+                        title: 'Proxy ratio 1',
                         margin: '0 10 0 0',
                         id: 'setproxy-1',
                         allPds : records,
@@ -131,7 +130,7 @@ Ext.application({
                     },{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy 2',
+                        title: 'Proxy ratio 2',
                         margin: '0 10 0 0',
                         id: 'setproxy-2',
                         allPds : records,
@@ -140,7 +139,7 @@ Ext.application({
                     },{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy 3',
+                        title: 'Proxy ratio 3',
                         id: 'setproxy-3',
                         allPds : records,
                         pdNumerator: p3Value,
@@ -257,7 +256,13 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                     margin: '0 0 10 0',
                     allowBlank: false,
                     parameterDetails: allPds,
-                    value: pd
+                    value: pd,
+                    listeners: {
+                        change : function(combo, newValue, oldValue) {
+                            var proxypanel = combo.ownerCt.ownerCt.down("#proxy-panel");
+                            proxypanel.showParameterDetails(combo.getParameterDetails());
+                        }
+                    }
                 },{
                     xtype : 'pdtagfield',
                     anchor: '100%',
@@ -267,58 +272,18 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                     margin: '0 0 10 0',
                     allowBlank: false,
                     value: denom,
-                    parameterDetails: allPds,
-                    plugins: [{
-                        ptype : 'modeldnd',
-                        ddGroup : 'set-proxy-pd',
-                        highlightBody : false,
-                        handleDrop : function(pdfield, pd, source) {
-                            //Swap if we already have a value
-                            if (pdfield.getValue()) {
-                                var currentValue = pdfield.getValue();
-                                source.getStore().add(currentValue);
-                            }
-                            pdfield.setValue(pd);
-    
-                            pdfield.ownerCt.down('#proxy-panel').showParameterDetails(pd);
-                        },
-                        handleDrag : function(pdfield, pd) {
-                            pdfield.reset();
-                            pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
-                        }
-                    }]
+                    parameterDetails: allPds
                 }]
             },{
                 xtype: 'proxypanel',
                 itemId: 'proxy-panel',
                 width: '100%',
-                emptyText: 'Drag a parameter above to select it as a proxy',
+                emptyText: 'Select a numerator above to examine it here.',
                 flex: 1,
                 targetChartWidth: 700,
                 targetChartHeight: 400,
                 preserveAspectRatio: true,
-                parameterDetails: pd,
-                plugins: [{
-                    ptype : 'modeldnd',
-                    ddGroup : 'set-proxy-pd',
-                    highlightBody : false,
-                    handleDrop : function(proxypanel, pd, source) {
-                        var pdfield = proxypanel.ownerCt.down("#pdfield");
-
-                        //Swap if we already have a value
-                        if (pdfield.getValue()) {
-                            var currentValue = pdfield.getValue();
-                            source.getStore().add(currentValue);
-                        }
-                        pdfield.setValue(pd);
-
-                        proxypanel.showParameterDetails(pd);
-                    },
-                    handleDrag : function(pdfield, pd) {
-                        pdfield.reset();
-                        pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
-                    }
-                }]
+                parameterDetails: pd
             }]
         });
 
