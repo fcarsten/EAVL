@@ -8,11 +8,23 @@
     position: absolute;
 }
 
-.pdcombo-field {
-	margin-left: 40px;
-	font-weight: bold;
+/* Empty Text*/
+.pdcombo-field:empty {
+    font-style:italic;
+    font-weight:normal;
     font-size: 150%;
-    margin-top: 4px;
+    color:#aaaaaa;
+    padding-top:15px;
+}
+
+/* Normal Text*/
+.pdcombo-field:not(.x-form-empty-field):not(.x-form-invalid-field) {
+	margin-left: 40px;
+	font-style: normal;
+	font-weight: bold;
+	color: black;
+    padding-top:0px;
+    margin-top: 3px;
 }
 
 

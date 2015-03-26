@@ -83,7 +83,6 @@ Ext.define('eavl.widgets.ParameterDetailsCombo', {
         
         this.parameterDetails = config.parameterDetails;
         
-        var tpl = '<div style="display:table;"><img class="pdcombo-popup-icon" data-qtip="{tip}" src="{img}"><span class="pdcombo-popup-text">{name}</span></div>';
         Ext.apply(config, {
            store: store,
            displayField: 'displayName',
@@ -92,19 +91,31 @@ Ext.define('eavl.widgets.ParameterDetailsCombo', {
            listConfig : {
                cls: 'pdcombo',
                getInnerTpl: function() {
-                   return tpl;
+                   return '<div style="display:table;"><img class="pdcombo-popup-icon" data-qtip="{tip}" src="{img}"><span class="pdcombo-popup-text">{name}</span></div>';
                }
            },
-           forceSelection: true,
-           typeAhead: true,
-           typeAheadDelay: 10,
-           queryMode: 'local'
+           editable: false,
+           forceSelection: true
         });
         this.callParent(arguments);
         
         this.on('change', this._updateIcon, this);
         this.on('afterrender', function(me) {
             me._updateIcon(me, me.getValue());
+        });
+        
+        //Workaround - see http://www.sencha.com/forum/showthread.php?299279-Extjs-5.1-Combo-filter-clear-issue.
+        this.on('collapse', function(field, e) {
+            if (Ext.isEmpty(field.getRawValue())) {
+                field.getStore().clearFilter()
+            }
+        });
+        
+        //Workaround - Fixes empty field class being removed on focus
+        this.on('focus', function(field, e) {
+            if (Ext.isEmpty(field.getRawValue())) {
+                field.getEl().down('input').addCls('x-form-empty-field');
+            }
         });
     },
 

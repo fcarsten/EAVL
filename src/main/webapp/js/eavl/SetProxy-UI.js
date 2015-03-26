@@ -38,7 +38,8 @@ Ext.application({
             if (initialParams && initialParams.proxyParameters) {
                 Ext.each(records, function(pd) {
                     if (pd.get('name') === initialParams.proxyParameters[0]) {
-                        p1Value = pd;
+                        //p1Value = pd;
+                        console.log("Test code disabling - dont commit");
                     } else if (pd.get('name') === initialParams.proxyParameters[1]) {
                         p2Value = pd;
                     } else if (pd.get('name') === initialParams.proxyParameters[2]) {
@@ -252,7 +253,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                     anchor: '100%',
                     height: 45,
                     itemId : 'pdfield',
-                    emptyText : 'Drag a parameter here to select it.',
+                    emptyText : 'Select a numerator for the proxy ratio.',
                     margin: '0 0 10 0',
                     allowBlank: false,
                     parameterDetails: allPds,
@@ -262,7 +263,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                     anchor: '100%',
                     title: config.title,
                     itemId : 'pdtagfield',
-                    emptyText : 'Drag a parameter here to select it.',
+                    emptyText : 'Select denominator(s) for the proxy ratio.',
                     margin: '0 0 10 0',
                     allowBlank: false,
                     value: denom,
@@ -293,7 +294,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 width: '100%',
                 emptyText: 'Drag a parameter above to select it as a proxy',
                 flex: 1,
-                targetChartWidth: 400,
+                targetChartWidth: 700,
                 targetChartHeight: 400,
                 preserveAspectRatio: true,
                 parameterDetails: pd,

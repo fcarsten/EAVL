@@ -1,36 +1,55 @@
+.pdtf .x-tagfield {
+	min-height: 45px;
+}
+
+.pdtf-popup-icon {
+    margin-right: 10px;
+    margin-top: 10px;
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+}
+
+.pdtf-popup-text {
+    font-weight: bold;
+    font-size: 150%;
+    padding-top: 8px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.pdtf-tag-icon {
+	width: 16px;
+	height: 16px;
+	display: inline-block;
+	margin-top: 2px;
+	margin-right: 2px;
+}
+
+.pdtf li.x-tagfield-item div.x-tagfield-item-text {
+	display: inline-block;
+}
+
+.pdtf li.x-tagfield-item div.x-tagfield-item-close {
+    margin-top: 3px;
+}
+
 .pdtf li.x-tagfield-item {
     font-size: 16px;
     font-weight: bold;
-	background-image: url(../../../img/tick.png);
-	background-size: 16px 16px;
-	background-repeat: no-repeat;
-	background-color: #c1ddf1;
-	padding: 0 1px 0 21px!important;
+	background-color: white;
+	padding: 0 1px 0 2px!important;
+	color: black;
 }
 
 .pdtf:not(.x-item-disabled) .x-tagfield-item:hover {
-    background-color: #c1ddf1 !important;
-    background-image: url(../../../img/tick.png);
-    background-size: 16px 16px;
-    background-repeat: no-repeat;
+    background-color: white !important;
     border: 1px solid #e2e2e2 !important;
+    color: black;
 }
 
 .pdtf .x-tagfield  {
 	overflow: hidden;
 }
 
-/* We dont want selection - we disable selection effects via CSS */
-.x-field:not(.x-item-disabled) li.x-tagfield-item.x-tagfield-item-selected {
-	background-image: url(../../../img/tick.png) !important;
-    background-size: 16px 16px !important;
-    background-repeat: no-repeat !important;
-    background-color: #c1ddf1 !important;
-    color: gray !important;
-    border: 1px solid #e2e2e2 !important;
-}
 
-/* We dont want selection - we disable selection effects via CSS */
-.x-field:not(.x-item-disabled) li.x-tagfield-item.x-tagfield-item-selected .x-tagfield-item-close {
-	background-position: 0 0;
-}

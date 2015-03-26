@@ -22,10 +22,34 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
      * }
      */
     constructor : function(config) {
-        var store = Ext.create('Ext.data.Store', {
-            model: 'eavl.models.ParameterDetails',
-            data: config.parameterDetails
+        var items = [];
+        Ext.each(config.parameterDetails, function(pd) {
+            
+            var status = pd.calculateStatus();
+            var img = 'img/tick.png';
+            var tip = 'This parameter contains more than 70% numeric values';
+            if (status === eavl.models.ParameterDetails.STATUS_ERROR) {
+                img = 'img/exclamation.png';
+                tip = 'This parameter contains non numeric values.';
+            } else if (status === eavl.models.ParameterDetails.STATUS_WARNING) {
+                img = 'img/error.png';
+                tip = 'This parameter less than 70% numeric values.';
+            }
+            
+            items.push({
+                name: pd.get('name'),
+                displayName: pd.get('displayName'),
+                img: img,
+                tip: tip
+            });
         });
+        
+        var store = Ext.create('Ext.data.Store', {
+            fields: ["name", "displayName", "img", "tip"],
+            data : items
+        });
+        
+        this.parameterDetails = config.parameterDetails;
         
         var valueStrings = [];
         Ext.each(config.value, function(v) {
@@ -35,16 +59,20 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
         
         Ext.apply(config, {
             cls: 'pdtf',
-            //displayTpl: '<img src="img/tick.png" width="16" height"16">{[values]}',
             store : store,
             displayField: 'name',
             valueField: 'name',
-            emptyText: Ext.util.Format.format('<span class="pdl-row-text" style="font-style:italic;font-weight:normal;color:#aaaaaa;padding:0px;">{0}</span>', config.emptyText ? config.emptyText : "")
+            emptyText: Ext.util.Format.format('<span class="pdl-row-text" style="font-style:italic;font-weight:normal;color:#aaaaaa;padding:0px;padding-top:13px;">{0}</span>', config.emptyText ? config.emptyText : ""),
+            listConfig : {
+                cls: 'pdcombo',
+                getInnerTpl: function() {
+                    return '<div style="display:table;"><img class="pdtf-popup-icon" data-qtip="{tip}" src="{img}"><span class="pdtf-popup-text">{name}</span></div>';
+                }
+            }
         });
         this.callParent(arguments);
         
         this.on('change', this._emptyTextWorkaround);
-        this.on('select', this._tagSelect);
     },
     
     //Workaround for empty text not getting removed
@@ -57,7 +85,59 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
         }
     },
     
-    _tagSelect : function(me, record) {
-        console.log(record);
-    }
+    /**
+     * Overidden from ExtJS base
+     *      Removed tag selection
+     *      Added icon with unique tooltip to each tag
+     * 
+     * Build the markup for the labelled items. Template must be built on demand due to ComboBox initComponent
+     * lifecycle for the creation of on-demand stores (to account for automatic valueField/displayField setting)
+     * @private
+     */
+    getMultiSelectItemMarkup: function() {
+        var me = this,
+            cssPrefix = Ext.baseCSSPrefix,
+            valueField = me.valueField;
+
+        if (!me.multiSelectItemTpl) {
+            if (!me.labelTpl) {
+                me.labelTpl = '{' + me.displayField + '}';
+            }
+            me.labelTpl = me.getTpl('labelTpl');
+
+            me.multiSelectItemTpl = new Ext.XTemplate([
+                '<tpl for=".">',
+                    '<li data-selectionIndex="{[xindex - 1]}" data-recordId="{internalId}" data-value="{[this.getItemValue(values)]}" class="' + cssPrefix + 'tagfield-item',
+                    '{%',
+                        'values = values.data;',
+                    '%}',
+                    '" qtip="{' + me.displayField + '}">' ,
+                    '<img class="pdtf-tag-icon" data-qtip="{[this.getItemTip(values)]}" src="{[this.getItemIcon(values)]}">',
+                    '<div class="' + cssPrefix + 'tagfield-item-text">{[this.getItemLabel(values)]}</div>',
+                    '<div class="' + cssPrefix + 'tagfield-item-close"></div>' ,
+                    '</li>' ,
+                '</tpl>',
+                {
+                    getItemLabel: function(values) {
+                        return me.labelTpl.apply(values);
+                    },
+                    getItemValue: function(rec) {
+                        return rec.get(valueField);
+                    },
+                    getItemIcon: function(rec) {
+                        return rec.img;
+                    },
+                    getItemTip: function(rec) {
+                        return rec.tip;
+                    },
+                    strict: true
+                }
+            ]);
+        }
+        if (!me.multiSelectItemTpl.isTemplate) {
+            me.multiSelectItemTpl = this.getTpl('multiSelectItemTpl');
+        }
+
+        return me.multiSelectItemTpl.apply(me.valueCollection.getRange());
+    },
 });
