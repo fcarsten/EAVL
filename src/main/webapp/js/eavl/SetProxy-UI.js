@@ -36,9 +36,15 @@ Ext.application({
             var p2Value = null;
             var p3Value = null;
             if (initialParams && initialParams.proxyParameters) {
-                p1Value = eavl.models.ParameterDetails.extractFromArray(records, initialParams.proxyParameters[0]);
-                p2Value = eavl.models.ParameterDetails.extractFromArray(records, initialParams.proxyParameters[1]);
-                p3Value = eavl.models.ParameterDetails.extractFromArray(records, initialParams.proxyParameters[2]);
+                Ext.each(records, function(pd) {
+                    if (pd.get('name') === initialParams.proxyParameters[0]) {
+                        p1Value = pd;
+                    } else if (pd.get('name') === initialParams.proxyParameters[1]) {
+                        p2Value = pd;
+                    } else if (pd.get('name') === initialParams.proxyParameters[2]) {
+                        p3Value = pd;
+                    }
+                });
             }
             
             var p1Denoms = [];
@@ -103,69 +109,41 @@ Ext.application({
                     xtype: 'panel',
                     region: 'center',
                     border: false,
+                    padding: '0 10 10 10',
+                    style: {
+                        'background-color' : 'white'
+                    },
                     layout: {
                         type: 'hbox',
                         align : 'stretch',
                         pack : 'center'
                     },
                     items: [{
-                        xtype : 'pdlist',
-                        title : 'Compositional Parameters',
-                        width: 300,
-                        parameterDetails : records,
-                        disableSelection: true,
-                        margin: '0 10 0 10',
-                        plugins: [{
-                            ptype : 'modeldnd',
-                            ddGroup : 'set-proxy-pd',
-                            highlightBody : false,
-                            handleDrop : function(pdlist, pd) {
-                                pdlist.getStore().add(pd);
-                            },
-                            handleDrag : function(pdlist, pd) {
-                                pdlist.getStore().remove(pd);
-                            }
-                        }],
-                        viewConfig : {
-                            deferEmptyText : false,
-                            emptyText : '<div class="pdlist-empty-container"><div class="pdlist-empty-container-inner">No parameters available.</div></div>'
-                        }
-                    },{
-                        xtype: 'container',
+                        xtype: 'setproxyselection',
                         flex: 1,
-                        layout: {
-                            type: 'hbox',
-                            align : 'stretch',
-                            pack : 'center'
-                        },
-                        items: [{
-                            xtype: 'setproxyselection',
-                            flex: 1,
-                            title: 'Proxy 1',
-                            margin: '0 10 0 0',
-                            id: 'setproxy-1',
-                            allPds : records,
-                            pdNumerator: p1Value,
-                            pdDenominator: p1Denoms
-                        },{
-                            xtype: 'setproxyselection',
-                            flex: 1,
-                            title: 'Proxy 2',
-                            margin: '0 10 0 0',
-                            id: 'setproxy-2',
-                            allPds : records,
-                            pdNumerator: p2Value,
-                            pdDenominator: p2Denoms
-                        },{
-                            xtype: 'setproxyselection',
-                            flex: 1,
-                            title: 'Proxy 3',
-                            margin: '0 10 0 0',
-                            id: 'setproxy-3',
-                            allPds : records,
-                            pdNumerator: p3Value,
-                            pdDenominator: p3Denoms
-                        }]
+                        title: 'Proxy 1',
+                        margin: '0 10 0 0',
+                        id: 'setproxy-1',
+                        allPds : records,
+                        pdNumerator: p1Value,
+                        pdDenominator: p1Denoms
+                    },{
+                        xtype: 'setproxyselection',
+                        flex: 1,
+                        title: 'Proxy 2',
+                        margin: '0 10 0 0',
+                        id: 'setproxy-2',
+                        allPds : records,
+                        pdNumerator: p2Value,
+                        pdDenominator: p2Denoms
+                    },{
+                        xtype: 'setproxyselection',
+                        flex: 1,
+                        title: 'Proxy 3',
+                        id: 'setproxy-3',
+                        allPds : records,
+                        pdNumerator: p3Value,
+                        pdDenominator: p3Denoms
                     }]
                 }]
             });
@@ -265,62 +243,49 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 pack : 'center'
             },
             items : [{
-                xtype : 'pdfield',
-                width: '100%',
-                height: 85,
+                xtype: 'panel',
                 title: config.title,
-                itemId : 'pdfield',
-                emptyText : 'Drag a parameter here to select it.',
-                margin: '0 0 10 0',
-                allowBlank: false,
-                value: pd,
-                plugins: [{
-                    ptype : 'modeldnd',
-                    ddGroup : 'set-proxy-pd',
-                    highlightBody : false,
-                    handleDrop : function(pdfield, pd, source) {
-                        //Swap if we already have a value
-                        if (pdfield.getValue()) {
-                            var currentValue = pdfield.getValue();
-                            source.getStore().add(currentValue);
-                        }
-                        pdfield.setValue(pd);
-
-                        pdfield.ownerCt.down('#proxy-panel').showParameterDetails(pd);
-                    },
-                    handleDrag : function(pdfield, pd) {
-                        pdfield.reset();
-                        pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
-                    }
-                }]
-            },{
-                xtype : 'pdtagfield',
                 width: '100%',
-                title: config.title,
-                itemId : 'pdtagfield',
-                emptyText : 'Drag a parameter here to select it.',
-                margin: '0 0 10 0',
-                allowBlank: false,
-                value: denom,
-                parameterDetails: allPds,
-                plugins: [{
-                    ptype : 'modeldnd',
-                    ddGroup : 'set-proxy-pd',
-                    highlightBody : false,
-                    handleDrop : function(pdfield, pd, source) {
-                        //Swap if we already have a value
-                        if (pdfield.getValue()) {
-                            var currentValue = pdfield.getValue();
-                            source.getStore().add(currentValue);
+                layout : 'anchor',
+                items: [{
+                    xtype : 'pdcombo',
+                    anchor: '100%',
+                    height: 45,
+                    itemId : 'pdfield',
+                    emptyText : 'Drag a parameter here to select it.',
+                    margin: '0 0 10 0',
+                    allowBlank: false,
+                    parameterDetails: allPds,
+                    value: pd
+                },{
+                    xtype : 'pdtagfield',
+                    anchor: '100%',
+                    title: config.title,
+                    itemId : 'pdtagfield',
+                    emptyText : 'Drag a parameter here to select it.',
+                    margin: '0 0 10 0',
+                    allowBlank: false,
+                    value: denom,
+                    parameterDetails: allPds,
+                    plugins: [{
+                        ptype : 'modeldnd',
+                        ddGroup : 'set-proxy-pd',
+                        highlightBody : false,
+                        handleDrop : function(pdfield, pd, source) {
+                            //Swap if we already have a value
+                            if (pdfield.getValue()) {
+                                var currentValue = pdfield.getValue();
+                                source.getStore().add(currentValue);
+                            }
+                            pdfield.setValue(pd);
+    
+                            pdfield.ownerCt.down('#proxy-panel').showParameterDetails(pd);
+                        },
+                        handleDrag : function(pdfield, pd) {
+                            pdfield.reset();
+                            pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
                         }
-                        pdfield.setValue(pd);
-
-                        pdfield.ownerCt.down('#proxy-panel').showParameterDetails(pd);
-                    },
-                    handleDrag : function(pdfield, pd) {
-                        pdfield.reset();
-                        pdfield.ownerCt.down('#proxy-panel').hideParameterDetails();
-                    }
+                    }]
                 }]
             },{
                 xtype: 'proxypanel',
