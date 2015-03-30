@@ -48,7 +48,7 @@ public class ViewEAVLJobFactory {
             status = STATUS_KDE_ERROR;
         } else if (jobTaskService.isExecuting(job.getImputationTaskId())) {
             status = STATUS_IMPUTING;
-        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_CSV)) {
+        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV)) {
             if (job.getPredictionCutoff() == null) {
                 status = STATUS_THRESHOLD;
             } else {

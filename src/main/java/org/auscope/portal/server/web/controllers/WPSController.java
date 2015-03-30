@@ -129,7 +129,7 @@ public class WPSController extends BasePortalController {
             }
 
             IOUtils.closeQuietly(csvData);
-            csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             double[][] data = csvService.getRawData(csvData,
                     Arrays.asList(predictionColumnIndex, columnIndex));
 
@@ -195,12 +195,12 @@ public class WPSController extends BasePortalController {
                         "Hole ID column DNE");
             }
             InputStream csvData = fss.readFile(job,
-                    EAVLJobConstants.FILE_IMPUTED_CSV);
+                    EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             int holeIdIndex = csvService
                     .columnNameToIndex(csvData, holeIdParam);
             IOUtils.closeQuietly(csvData);
 
-            csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            csvData = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             String[][] data = csvService.getRawStringData(csvData,
                     Arrays.asList(holeIdIndex, columnIndex), true);
 

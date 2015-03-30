@@ -20,7 +20,7 @@ Ext.define('eavl.models.EAVLJob', {
         FILE_DATA_CSV : "data.csv",
         FILE_TEMP_DATA_CSV : "data-tmp.csv",
         FILE_VALIDATED_DATA_CSV : "data-validated.csv",
-        FILE_IMPUTED_CSV : "data-imputed.csv",
+        FILE_IMPUTED_SCALED_CSV : "data-imputed-scaled.csv",
         FILE_KDE_JSON : "data-kde.json",
         FILE_KDE_CSV : "data-kde.csv",
     },

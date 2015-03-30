@@ -70,12 +70,12 @@ public class KDECallable implements Callable<Object> {
         List<String> savedParamList = new ArrayList<String>(
                 job.getSavedParameters());
         InputStream in = this.fss.readFile(job,
-                EAVLJobConstants.FILE_IMPUTED_CSV);
+                EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
         List<Integer> savedParamIndexes = csvService.columnNameToIndex(in,
                 savedParamList);
         exclusions.addAll(savedParamIndexes);
 
-        in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+        in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
         Integer index = csvService.columnNameToIndex(in,
                 job.getHoleIdParameter());
         if (index != null && !exclusions.contains(index)) {
@@ -152,7 +152,7 @@ public class KDECallable implements Callable<Object> {
 
             List<Integer> nonCompCols = getExcludedColumns();
 
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             Integer predictionIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
             centredLogRatio(nonCompCols, predictionIndex);
 
@@ -196,7 +196,7 @@ public class KDECallable implements Callable<Object> {
 
             // Merge that fake CSV file with the imputed CSV data
             in = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-            in2 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            in2 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_CSV);
             csvService.mergeFiles(in, in2, os, null, null);
 
@@ -234,7 +234,7 @@ public class KDECallable implements Callable<Object> {
         excludedColumns.add(predictionColumnIndex);
 
         try {
-            in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             double[][] imputedData = csvService.getRawData(in1, excludedColumns, false);
 
             checkDataBeforeCLR(imputedData);
@@ -248,12 +248,12 @@ public class KDECallable implements Callable<Object> {
                     double[][] cenlrImputedData = wpsClient.cenLR(imputedData);
 
                     // Write the cenlr imputed data to a temporary file
-                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
                     os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
                     this.csvService.writeRawData(in1, os, cenlrImputedData, excludedColumns, false);
 
                     //merge the cenlr data with the prediction column (which hasn't been cenlr'd)
-                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
                     in2 = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
                     os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
                     this.csvService.mergeFiles(in1, in2, os, Arrays.asList(predictionColumnIndex), null);
