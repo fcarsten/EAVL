@@ -63,19 +63,22 @@ Ext.application({
                     region: 'north',
                     allowNext: function(callback) {
                         var pdField1 = Ext.getCmp('setproxy-1').down('#pdfield');
-                        if (!pdField1.isValid()) {
+                        var pdtag1 = Ext.getCmp('setproxy-1').down('#pdtagfield'); 
+                        if (!pdField1.isValid() || !pdtag1.isValid()) {
                             callback(false);
                             return;
                         }
 
                         var pdField2 = Ext.getCmp('setproxy-2').down('#pdfield');
-                        if (!pdField2.isValid()) {
+                        var pdtag2 = Ext.getCmp('setproxy-2').down('#pdtagfield');
+                        if (!pdField2.isValid() || !pdtag2.isValid()) {
                             callback(false);
                             return;
                         }
 
                         var pdField3 = Ext.getCmp('setproxy-3').down('#pdfield');
-                        if (!pdField3.isValid()) {
+                        var pdtag3 = Ext.getCmp('setproxy-3').down('#pdtagfield');
+                        if (!pdField3.isValid() || !pdtag3.isValid()) {
                             callback(false);
                             return;
                         }
@@ -83,9 +86,14 @@ Ext.application({
                         Ext.Ajax.request({
                             url: 'setproxy/saveAndSubmitProxySelection.do',
                             params : {
-                                proxy : [pdField1.getValue().get('name'),
-                                         pdField2.getValue().get('name'),
-                                         pdField3.getValue().get('name')]
+                                numerator1 : pdField1.getValue().get('name'),
+                                denom1 : pdtag1.getValue(),
+                                
+                                numerator2 : pdField2.getValue().get('name'),
+                                denom2 : pdtag2.getValue(),
+                                
+                                numerator3 : pdField3.getValue().get('name'),
+                                denom3 : pdtag3.getValue(),
                             },
                             callback : function(options, success, response) {
                                 eavl.widgets.SplashScreen.hideLoadingScreen();

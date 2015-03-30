@@ -39,7 +39,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
              {url:'identify.html', title:'Identify', help: 'Identify what your parameters represent.'},
              {url:'validate.html', title:'Validate', help: 'Remove any non numeric values (or trash the parameter entirely)'},
              {url:'threshold.html', title:'Threshold', help: 'Select a threshold for the parameter to predict.'},
-             {url:'setproxy.html', title:'Proxies', help: 'Select three parameters to act as proxies for the predicted element.'},
+             {url:'setproxy.html', title:'Proxies', help: 'Select three parameter ratios to act as proxies for the predicted element.'},
              {url:'results.html', title:'Results', help: 'Browse the results of existing jobs.'}],
 
     allowNext : null,
