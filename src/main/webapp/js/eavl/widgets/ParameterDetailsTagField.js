@@ -68,11 +68,35 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
                 getInnerTpl: function() {
                     return '<div style="display:table;"><img class="pdtf-popup-icon" data-qtip="{tip}" src="{img}"><span class="pdtf-popup-text">{name}</span></div>';
                 }
+            },
+            triggers: {
+                all: {
+                    cls: 'pdtf-all-trigger',
+                    handler: Ext.bind(this._handleAllClicked, this),
+                    weight: -998
+                },
+                clear: {
+                    cls: 'x-form-clear-trigger',
+                    handler: Ext.bind(this._handleClearClicked, this),
+                    weight: -999
+                }
             }
         });
         this.callParent(arguments);
         
         this.on('change', this._emptyTextWorkaround);
+    },
+    
+    _handleClearClicked : function() {
+        this.setValue([]);
+    },
+    
+    _handleAllClicked : function() {
+        var values = [];
+        Ext.each(this.parameterDetails, function(pd) {
+            values.push(pd.get('name'));
+        });
+        this.setValue(values);
     },
     
     //Workaround for empty text not getting removed
@@ -139,5 +163,5 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
         }
 
         return me.multiSelectItemTpl.apply(me.valueCollection.getRange());
-    },
+    }
 });

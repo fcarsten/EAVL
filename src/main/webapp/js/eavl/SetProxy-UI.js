@@ -247,9 +247,10 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 title: config.title,
                 width: '100%',
                 layout : 'anchor',
+                border: false,
                 items: [{
                     xtype : 'pdcombo',
-                    anchor: '100%',
+                    width: '100%',
                     height: 45,
                     itemId : 'pdfield',
                     emptyText : 'Select a numerator for the proxy ratio.',
@@ -261,11 +262,18 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                         change : function(combo, newValue, oldValue) {
                             var proxypanel = combo.ownerCt.ownerCt.down("#proxy-panel");
                             proxypanel.showParameterDetails(combo.getParameterDetails());
+                            
+                            var tagField = combo.ownerCt.ownerCt.down("#pdtagfield");
+                            var denoms = tagField.getValue();
+                            if (denoms.indexOf(newValue) < 0) {
+                                denoms.push(newValue);
+                                tagField.setValue(denoms);
+                            }
                         }
                     }
                 },{
                     xtype : 'pdtagfield',
-                    anchor: '100%',
+                    width: '100%',
                     title: config.title,
                     itemId : 'pdtagfield',
                     emptyText : 'Select denominator(s) for the proxy ratio.',
