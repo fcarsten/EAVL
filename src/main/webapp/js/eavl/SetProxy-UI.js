@@ -266,6 +266,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                             var tagField = combo.ownerCt.ownerCt.down("#pdtagfield");
                             var denoms = tagField.getValue();
                             if (denoms.indexOf(newValue) < 0) {
+                                denoms = Ext.Array.clone(denoms); //Don't insert directly into internal array
                                 denoms.push(newValue);
                                 tagField.setValue(denoms);
                             }
