@@ -118,18 +118,6 @@ Ext.define('eavl.widgets.EAVLJobList', {
         this.callParent(arguments);
     },
     
-    _trashRenderer : function(value, metaData, record, row, col, store, gridView) {
-        return Ext.DomHelper.markup({
-            tag : 'img',
-            width : 32,
-            height : 32,
-            style: {
-                cursor: 'pointer'
-            },
-            src: 'img/trash.svg'
-        });
-    },
-    
     _deleteJob : function(job) {
         var mask = new Ext.LoadMask({
             msg    : 'Deleting job...',
