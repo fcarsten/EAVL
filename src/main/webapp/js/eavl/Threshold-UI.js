@@ -98,7 +98,7 @@ Ext.application({
                             allowCutoffSelection : true,
                             targetWidth: 1000,
                             targetHeight: 600,
-                            file: eavl.models.EAVLJob.FILE_IMPUTED_CSV,
+                            file: eavl.models.EAVLJob.FILE_IMPUTED_SCALED_CSV,
                             preserveAspectRatio: true
                         }]
                     }]

@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -376,6 +375,24 @@ public class ResultsController extends BasePortalController {
             return generateJSONResponseMAV(false);
         } finally {
             IOUtils.closeQuietly(is);
+        }
+    }
+
+    @RequestMapping("/deleteJob.do")
+    public ModelAndView deleteJob(HttpServletRequest request,
+            @AuthenticationPrincipal EavlUser user,
+            @RequestParam(value="jobId") Integer jobId) {
+
+        try {
+            EAVLJob job = jobService.getUserJobById(request, user, jobId);
+
+            jobService.delete(job);
+            fss.deleteStageInDirectory(job);
+
+            return generateJSONResponseMAV(true);
+        } catch (PortalServiceException e) {
+            log.error(String.format("Unable to delete job %1$s for user %2$s", jobId, user), e);
+            return generateJSONResponseMAV(false);
         }
     }
 }

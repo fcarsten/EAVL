@@ -210,15 +210,18 @@ Ext.define('eavl.widgets.JobFileList', {
     /**
      * Reload this list with files for the specified job
      *
-     * @param job EAVLJob instance to show
+     * @param job EAVLJob instance to show or null if you wish to clear this list
      */
     showFilesForJob : function(job) {
         this.job = job;
 
         var store = this.getStore();
-        var ajaxProxy = store.getProxy();
-        ajaxProxy.extraParams.jobId = job.get('id');
         store.removeAll(false);
-        store.load();
+        
+        if (job) {
+            var ajaxProxy = store.getProxy();
+            ajaxProxy.extraParams.jobId = job.get('id');
+            store.load();
+        }
     }
 });

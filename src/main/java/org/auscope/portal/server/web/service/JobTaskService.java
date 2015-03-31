@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.auscope.portal.server.web.service.jobtask.JobTaskListener;
 import org.auscope.portal.server.web.service.jobtask.JobTaskRepository;
@@ -124,6 +125,37 @@ public class JobTaskService {
         }
 
         return et.jobTask;
+    }
+
+    /**
+     * Iterates through the active task list AND any tasks registered to job and
+     * requests cancellation (if the job is running) and removes the job from the
+     * underlying persistor.
+     *
+     * @param job The job to completely remove any tasks for.
+     */
+    public void removeTasksForJob(EAVLJob job) {
+        //Remove any active tasks
+        for (String key : activeTasks.keySet()) {
+            if (key.equals(job.getImputationTaskId())
+                    || key.equals(job.getKdeTaskId())
+                    || activeTasks.get(key).jobTask.getJob().getId() == job.getId()) {
+
+                activeTasks.get(key).future.cancel(true);
+                activeTasks.remove(key);
+                if (key != null && persistor.exists(key)) {
+                    persistor.delete(key);
+                }
+            }
+        }
+
+        //Remove any persisted tasks that weren't deleted due to inactivity
+        if (job.getKdeTaskId() != null && persistor.exists(job.getKdeTaskId())) {
+            persistor.delete(job.getKdeTaskId());
+        }
+        if (job.getImputationTaskId() != null && persistor.exists(job.getImputationTaskId())) {
+            persistor.delete(job.getImputationTaskId());
+        }
     }
 
     private String submit(JobTask task, boolean persist)  {

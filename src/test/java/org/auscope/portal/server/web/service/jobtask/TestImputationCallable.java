@@ -15,6 +15,7 @@ import org.auscope.portal.core.test.PortalTestClass;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.jmock.Expectations;
@@ -27,10 +28,11 @@ public class TestImputationCallable extends PortalTestClass {
     private WpsService mockWpsClient = context.mock(WpsService.class);
     private CSVService mockCsvService = context.mock(CSVService.class);
     private FileStagingService mockFss = context.mock(FileStagingService.class);
+    private EAVLJobService mockJobService = context.mock(EAVLJobService.class);
 
     @Test
-    public void testNormalOperation() throws Exception {
-        ImputationCallable ic = new ImputationCallable(mockJob, mockWpsClient, mockCsvService, mockFss);
+    public void testNoScalingOperation() throws Exception {
+        ImputationCallable ic = new ImputationCallable(mockJob, mockWpsClient, mockCsvService, mockFss, mockJobService, null, null, null);
 
         final String holeIdParam = "hole-id";
         final String savedParam = "saved-param";
@@ -55,6 +57,7 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);will(returnValue(mockOsTmp));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_IMPUTED_CSV);will(returnValue(mockOs));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);will(returnValue(mockOsValidate));
+            oneOf(mockFss).renameStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
 
             oneOf(mockCsvService).getRawData(with(mockIs3), with(equal(Arrays.asList(2, 1, 3))), with(false));will(returnValue(data));
             oneOf(mockCsvService).writeRawData(with(mockIs3), with(mockOsTmp), with(imputedData), with(equal(Arrays.asList(2, 1, 3))), with(false));
@@ -85,7 +88,7 @@ public class TestImputationCallable extends PortalTestClass {
 
     @Test(expected=PortalServiceException.class)
     public void testWPSError() throws Exception {
-        ImputationCallable ic = new ImputationCallable(mockJob, mockWpsClient, mockCsvService, mockFss);
+        ImputationCallable ic = new ImputationCallable(mockJob, mockWpsClient, mockCsvService, mockFss, mockJobService, null, null, null);
 
         final String predictionParam = "param-to-predict";
 
