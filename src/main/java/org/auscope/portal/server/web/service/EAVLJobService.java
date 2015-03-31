@@ -33,6 +33,9 @@ public class EAVLJobService {
     private JobRepository persistor;
 
     @Autowired
+    private JobTaskService jobTaskService;
+
+    @Autowired
     public EAVLJobService(FileStagingService fss) {
     }
 
@@ -105,6 +108,7 @@ public class EAVLJobService {
      * @throws PortalServiceException
      */
     public void delete(EAVLJob job) throws PortalServiceException {
+        jobTaskService.removeTasksForJob(job);
         persistor.delete(job);
     }
 
