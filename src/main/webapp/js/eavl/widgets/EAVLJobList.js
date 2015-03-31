@@ -23,9 +23,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
             iconCls: 'joblist-trash-icon',
             cls: 'joblist-trash-button',
             scope : this,
-            handler: function() {
-                console.log("todo");
-            }
+            handler: this._deleteClick
         });
         
         
@@ -132,7 +130,55 @@ Ext.define('eavl.widgets.EAVLJobList', {
         });
     },
     
-    _trashClick : function(value, record, rowIdx, tip) {
+    _deleteJob : function(job) {
+        var mask = new Ext.LoadMask({
+            msg    : 'Deleting job...',
+            target : this
+        });
+        mask.show();
         
+        Ext.Ajax.request({
+            url: 'results/deleteJob.do',
+            params: {
+                jobId: job.get('id')
+            },
+            scope: this,
+            callback: function(options, success, response) {
+                mask.hide();
+                mask.destroy();
+                
+                if (!success) {
+                    Ext.Msg.alert('Error', 'Error contacting EAVL server. Please try refreshing the page.');
+                    return;
+                }
+                
+                if (!Ext.JSON.decode(response.responseText).success) {
+                    Ext.Msg.alert('Error', 'Error deleting job. Please try refreshing the page before retrying.');
+                    return;
+                }
+                
+                this.getStore().remove(job);
+            }
+        });
+    },
+    
+    _deleteClick : function() {
+        var selection = this.getSelection();
+        if (!selection) {
+            return;
+        }
+        
+        Ext.Msg.show({
+            title:'Confirm deletion',
+            message: 'You are about to completely delete this job and all input/output files. Are you sure you wish to continue?',
+            buttons: Ext.Msg.YESNO,
+            icon: Ext.Msg.ERROR,
+            scope: this,
+            fn: function(btn) {
+                if (btn === 'yes') {
+                    this._deleteJob(selection[0]);
+                }
+            }
+        });        
     }
 });
