@@ -18,8 +18,18 @@ Ext.define('eavl.widgets.EAVLJobList', {
      * }
      */
     constructor : function(config) {
+        this.deleteJobAction = new Ext.Action({
+            text: 'Delete',
+            iconCls: 'joblist-trash-icon',
+            cls: 'joblist-trash-button',
+            scope : this,
+            handler: function() {
+                console.log("todo");
+            }
+        });
+        
+        
         this.emptyText = config.emptyText ? config.emptyText : "";
-
 
         var store = Ext.create('Ext.data.Store', {
             model : 'eavl.models.EAVLJob',
@@ -29,6 +39,11 @@ Ext.define('eavl.widgets.EAVLJobList', {
         Ext.apply(config, {
             hideHeaders : true,
             store : store,
+            plugins : [{
+                ptype : 'inlinecontextmenu',
+                align : 'right',
+                actions: [this.deleteJobAction]
+            }],
             columns : [{
                 dataIndex : 'name',
                 flex : 1,
@@ -103,5 +118,21 @@ Ext.define('eavl.widgets.EAVLJobList', {
         });
 
         this.callParent(arguments);
+    },
+    
+    _trashRenderer : function(value, metaData, record, row, col, store, gridView) {
+        return Ext.DomHelper.markup({
+            tag : 'img',
+            width : 32,
+            height : 32,
+            style: {
+                cursor: 'pointer'
+            },
+            src: 'img/trash.svg'
+        });
+    },
+    
+    _trashClick : function(value, record, rowIdx, tip) {
+        
     }
 });

@@ -45,6 +45,8 @@
         <script src="portal-core/js/portal/util/GoogleAnalytic.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/widgets/grid/column/ClickColumn.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/widgets/grid/plugin/CellTips.js" type="text/javascript"></script>
+        <script src="portal-core/js/portal/widgets/grid/plugin/RowExpanderContainer.js" type="text/javascript"></script>
+        <script src="portal-core/js/portal/widgets/grid/plugin/InlineContextMenu.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/widgets/field/DataDisplayField.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/charts/BaseD3Chart.js" type="text/javascript"></script>
         <script src="portal-core/js/portal/charts/3DScatterPlot.js" type="text/javascript"></script>
