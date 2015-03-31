@@ -14,7 +14,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
      *
      * Adds the following events
      * {
-     *
+     *  jobdelete : function(this, job) - fired whenever a job is succesfully deleted
      * }
      */
     constructor : function(config) {
@@ -158,6 +158,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
                 }
                 
                 this.getStore().remove(job);
+                this.fireEvent('jobdelete', this, job);
             }
         });
     },

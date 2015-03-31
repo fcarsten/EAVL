@@ -57,6 +57,11 @@ Ext.application({
                         listeners: {
                             select: function(sm, job) {
                                 Ext.getCmp('jobfilelist').showFilesForJob(job);
+                            },
+                            jobdelete: function(sm, job) {
+                                Ext.getCmp('jobfilelist').showFilesForJob(null);
+                                Ext.getCmp('filepreviewpanel').clearPreview();
+                                
                             }
                         }
                     },{
