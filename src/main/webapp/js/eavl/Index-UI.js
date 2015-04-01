@@ -14,6 +14,8 @@ Ext.application({
             name: 'Conditional Probability',
             version: '0.0.1-BETA',
             background: 'img/workflows/cp.png',
+            initialLink: 'upload.html',
+            resultsLink: 'results.html',
             description: '<a href="#todo">Research Paper</a><br>' + 
                          '<a href="#todo">Website</a><br>' +
                          '<br>' +
@@ -125,13 +127,26 @@ Ext.application({
                                 },{
                                     xtype: 'button',
                                     scale: 'large',
-                                    text: 'See existing jobs'
-                                        
+                                    text: 'See existing jobs',
+                                    handler: function() {
+                                        if (wf.get('resultsLink')) {
+                                            document.location.href = wf.get('resultsLink');
+                                        } else {
+                                            Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                        }
+                                    }
                                 },{
                                     xtype: 'button',
                                     cls: 'important-button',
                                     scale: 'large',
-                                    text: 'Start a new job'
+                                    text: 'Start a new job',
+                                    handler: function() {
+                                        if (wf.get('initialLink')) {
+                                            document.location.href = wf.get('initialLink');
+                                        } else {
+                                            Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                        }
+                                    }
                                 }]
                             }],
                             listeners: {

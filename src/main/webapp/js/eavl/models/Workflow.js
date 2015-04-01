@@ -10,6 +10,8 @@ Ext.define('eavl.models.Workflow', {
         { name: 'version', type: 'string' }, //Version string
         { name: 'description', type: 'string' }, //long description of this workflow
         { name: 'background', type: 'string' }, //URL to background image
+        { name: 'initialLink', type: 'string' }, //URL to starting page
+        { name: 'resultsLink', type: 'string' }, //URL to results page
         { name: 'contacts', type: 'auto' } //eavl.models.Contact[]
     ],
     
