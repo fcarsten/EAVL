@@ -102,7 +102,48 @@ Ext.application({
             },{
                 xtype: 'workflowselectionpanel',
                 region: 'center',
-                workflows: [wfCp, test1]
+                workflows: [wfCp, test1],
+                listeners: {
+                    select: function(panel, wf, e) {
+                        Ext.create('Ext.Window', {
+                            layout: 'fit',
+                            modal: true,
+                            width: 1000,
+                            height: 600,
+                            plain: true,
+                            header: false,
+                            resizable: false,
+                            items: [{
+                                xtype: 'workflowinspectpanel',
+                                workflow: wf
+                            }],
+                            dockedItems: [{
+                                xtype: 'toolbar',
+                                dock: 'bottom',
+                                items: [{
+                                    xtype: 'tbfill'
+                                },{
+                                    xtype: 'button',
+                                    scale: 'large',
+                                    text: 'See existing jobs'
+                                        
+                                },{
+                                    xtype: 'button',
+                                    cls: 'important-button',
+                                    scale: 'large',
+                                    text: 'Start a new job'
+                                }]
+                            }],
+                            listeners: {
+                                'afterrender' : function(win) {
+                                    win.mon(Ext.getBody(), 'click', function(el, e){
+                                        win.close(win.closeAction);
+                                    }, win, { delegate: '.x-mask' });
+                                }
+                            }
+                        }).show(e);
+                    }
+                }
             }]
         });
     }

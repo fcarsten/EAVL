@@ -16,7 +16,7 @@ Ext.define('eavl.widgets.WorkflowSelectionPanel', {
      *
      * Adds the following events
      * {
-     *
+     *  select - function(this, workflow, el) Fired whenever the user selects a workflow
      * }
      */
     constructor : function(config) {
@@ -57,7 +57,7 @@ Ext.define('eavl.widgets.WorkflowSelectionPanel', {
         var id = Ext.fly(t).getAttribute('workflowId');
         var workflow = this._store.getById(id);
         if (workflow) {
-            console.log("Clicked:", workflow.get('name'));
+            this.fireEvent('select', this, workflow, e);
         }
     },
     
