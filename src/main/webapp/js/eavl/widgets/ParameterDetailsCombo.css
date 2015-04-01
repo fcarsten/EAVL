@@ -1,0 +1,45 @@
+.pdcombo-icon {
+    margin-right: 10px;
+    margin-left: 8px;
+    margin-top: 5px;
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+    position: absolute;
+}
+
+/* Empty Text*/
+.pdcombo-field:empty {
+    font-style:italic;
+    font-weight:normal;
+    font-size: 150%;
+    color:#aaaaaa;
+    padding-top:15px;
+}
+
+/* Normal Text*/
+.pdcombo-field:not(.x-form-empty-field):not(.x-form-invalid-field) {
+	margin-left: 40px;
+	font-style: normal;
+	font-weight: bold;
+	color: black;
+    padding-top:0px;
+    margin-top: 3px;
+}
+
+
+.pdcombo-popup-icon {
+	margin-right: 10px;
+	margin-top: 10px;
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+}
+
+.pdcombo-popup-text {
+	font-weight: bold;
+    font-size: 150%;
+    padding-top: 8px;
+    display: table-cell;
+    vertical-align: middle;
+}
