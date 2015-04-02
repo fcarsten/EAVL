@@ -72,6 +72,9 @@ Ext.application({
         
         Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
             layout: 'border',
+            style: {
+                'background-color': 'white'
+            },
             items: [{
                 xtype: 'panel',
                 region: 'north',
@@ -102,63 +105,70 @@ Ext.application({
                     }]
                 })
             },{
-                xtype: 'workflowselectionpanel',
+                xtype: 'tabpanel',
                 region: 'center',
-                workflows: [wfCp, test1],
-                listeners: {
-                    select: function(panel, wf, e) {
-                        Ext.create('Ext.Window', {
-                            layout: 'fit',
-                            modal: true,
-                            width: 1000,
-                            height: 600,
-                            plain: true,
-                            header: false,
-                            resizable: false,
-                            items: [{
-                                xtype: 'workflowinspectpanel',
-                                workflow: wf
-                            }],
-                            dockedItems: [{
-                                xtype: 'toolbar',
-                                dock: 'bottom',
+                layout: 'fit',
+                plain: true,
+                margin: '10 0 0 0',
+                items: [{
+                    title: 'Workflows',
+                    xtype: 'workflowselectionpanel',
+                    workflows: [wfCp, test1],
+                    listeners: {
+                        select: function(panel, wf, e) {
+                            Ext.create('Ext.Window', {
+                                layout: 'fit',
+                                modal: true,
+                                width: 1000,
+                                height: 600,
+                                plain: true,
+                                header: false,
+                                resizable: false,
                                 items: [{
-                                    xtype: 'tbfill'
-                                },{
-                                    xtype: 'button',
-                                    scale: 'large',
-                                    text: 'See existing jobs',
-                                    handler: function() {
-                                        if (wf.get('resultsLink')) {
-                                            document.location.href = wf.get('resultsLink');
-                                        } else {
-                                            Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                    xtype: 'workflowinspectpanel',
+                                    workflow: wf
+                                }],
+                                dockedItems: [{
+                                    xtype: 'toolbar',
+                                    dock: 'bottom',
+                                    items: [{
+                                        xtype: 'tbfill'
+                                    },{
+                                        xtype: 'button',
+                                        scale: 'large',
+                                        text: 'See existing jobs',
+                                        handler: function() {
+                                            if (wf.get('resultsLink')) {
+                                                document.location.href = wf.get('resultsLink');
+                                            } else {
+                                                Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                            }
                                         }
-                                    }
-                                },{
-                                    xtype: 'button',
-                                    cls: 'important-button',
-                                    scale: 'large',
-                                    text: 'Start a new job',
-                                    handler: function() {
-                                        if (wf.get('initialLink')) {
-                                            document.location.href = wf.get('initialLink');
-                                        } else {
-                                            Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                    },{
+                                        xtype: 'button',
+                                        cls: 'important-button',
+                                        scale: 'large',
+                                        text: 'Start a new job',
+                                        handler: function() {
+                                            if (wf.get('initialLink')) {
+                                                document.location.href = wf.get('initialLink');
+                                            } else {
+                                                Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                            }
                                         }
+                                    }]
+                                }],
+                                listeners: {
+                                    'afterrender' : function(win) {
+                                        win.mon(Ext.getBody(), 'click', function(el, e){
+                                            win.close(win.closeAction);
+                                        }, win, { delegate: '.x-mask' });
                                     }
-                                }]
-                            }],
-                            listeners: {
-                                'afterrender' : function(win) {
-                                    win.mon(Ext.getBody(), 'click', function(el, e){
-                                        win.close(win.closeAction);
-                                    }, win, { delegate: '.x-mask' });
                                 }
-                            }
-                        }).show(e);
+                            }).show(e);
+                        }
                     }
-                }
+                }]
             }]
         });
     }
