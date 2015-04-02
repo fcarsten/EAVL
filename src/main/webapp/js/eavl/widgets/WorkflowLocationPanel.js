@@ -108,8 +108,12 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
                 tag : 'div',
                 id : 'top-bar-container',
                 children: [{
-                    tag : 'div',
-                    id: 'top-bar-logo'
+                    tag : 'div',                    
+                    id: 'top-bar-logo',
+                    style: {
+                        cursor: 'pointer'
+                    },
+                    onclick: "javascript:document.location.href='index.jsp'"
                 },{
                     tag: 'ul',
                     children : menuItems
