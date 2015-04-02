@@ -214,7 +214,7 @@ public class ResultsController extends BasePortalController {
         //Create a filename that is semi-unique to the job (and slightly human readable)
         String downloadFileName = "";
         if (fileNames.length == 1) {
-            downloadFileName = fileNames[0];
+            downloadFileName = fileNames[0] + ".zip";
         } else {
             String jobName = job.getName() == null ? "" : job.getName();
             Date submitDate = job.getSubmitDate();
