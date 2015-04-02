@@ -86,13 +86,13 @@ Ext.application({
                         Ext.Ajax.request({
                             url: 'setproxy/saveAndSubmitProxySelection.do',
                             params : {
-                                numerator1 : pdField1.getValue().get('name'),
+                                numerator1 : pdField1.getValue(),
                                 denom1 : pdtag1.getValue(),
                                 
-                                numerator2 : pdField2.getValue().get('name'),
+                                numerator2 : pdField2.getValue(),
                                 denom2 : pdtag2.getValue(),
                                 
-                                numerator3 : pdField3.getValue().get('name'),
+                                numerator3 : pdField3.getValue(),
                                 denom3 : pdtag3.getValue(),
                             },
                             callback : function(options, success, response) {
