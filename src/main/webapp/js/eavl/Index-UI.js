@@ -16,11 +16,11 @@ Ext.application({
             background: 'img/workflows/cp.png',
             initialLink: 'upload.html',
             resultsLink: 'results.html',
-            description: '<a href="#todo">Research Paper</a><br>' + 
-                         '<a href="#todo">Website</a><br>' +
-                         '<br>' +
-                         'The conditional probability description goes in here.<br>' +
-                         'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            description: '<a href="docs/Hill2014.pdf">Research Paper</a><br>' + 
+                         '<p>Gold distribution in vein-hosted hydrothermal ore deposits is commonly nuggety (i.e. occurs as very localised concentrations of gold). In such cases, samples for gold assay from diamond drill core may return low gold grades despite their host rocks being mineralised. It is common practice in nuggety orebodies to use more spatially continuous proxies for mineralisation to help define the boundaries of mineralised regions. </p>' +
+                         '<p>This workflow provides a method for automating the use of geochemical data as a proxy for mineralisation. Automation has the advantage of repeatability and fast processing time. The workflow uses a probabilistic approach to quantify the relationship between gold assay values and a chemical sub-composition. The conditional probability method allows several chemical elements or ratios to be combined to produce a single numerical indicator of probability of mineralisation for each sample. The probability is calculated using Bayes theorem:</p>' +
+                         '<img src="docs/cp-equation.png" width="414" height="59"/>' +
+                         '<p>where <i>Au</i> is gold assay, <i>v</i> is a threshold value, and <i>G1, G2, G3</i>... are the geochemical proxies.</p>',
             contacts: [
                 Ext.create('eavl.models.Contact', {
                     name: 'Joshua Vote',
@@ -45,26 +45,13 @@ Ext.application({
             name: 'Geophysical Inversions',
             version: 'VGL-1.0.0',
             background: 'img/workflows/vgl.png',
-            description: '<a href="#todo">Research Paper</a><br>' + 
-                         '<a href="#todo">Website</a><br>' +
-                         '<br>' +
-                         'The conditional probability description goes in here.<br>' +
-                         'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            description: '<p>This workflow is still a work in progress. Please check back later.</p>' +
+                         '<p>In the interim the <a href="http://vgl.csiro.au">Virtual Geophysics Laboratory<a> is available for performing inversions.</p>',
             contacts: [
                 Ext.create('eavl.models.Contact', {
                     name: 'Joshua Vote',
                     email: 'Josh.Vote@csiro.au',
                     group: 'Developers'
-                }),
-                Ext.create('eavl.models.Contact', {
-                    name: 'Carsten Friedrich',
-                    email: 'Carsten.Friedrich@csiro.au',
-                    group: 'Developers'
-                }),
-                Ext.create('eavl.models.Contact', {
-                    name: 'June Hill',
-                    email: 'June.Hill@csiro.au',
-                    group: 'Researchers'
                 })
             ]
         });
