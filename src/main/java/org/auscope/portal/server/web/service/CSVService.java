@@ -688,7 +688,7 @@ public class CSVService {
      * @param deletedCsvData
      * @param columnIndexes
      */
-    public int deleteColumns(InputStream csvData, OutputStream deletedCsvData, Set<Integer> columnIndexes) throws PortalServiceException {
+    public int deleteColumns(InputStream csvData, OutputStream deletedCsvData, Set<Integer> columnIndexes, boolean delete) throws PortalServiceException {
         CSVReader reader = null;
         CSVWriter writer = null;
 
@@ -696,21 +696,28 @@ public class CSVService {
             reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
             writer = new CSVWriter(new OutputStreamWriter(deletedCsvData), ',', '\'');
 
-            int colsToDelete = columnIndexes.size();
-
             String[] dataLine;
             String[] outputLine = null;
             int linesWritten = 0;
             while((dataLine = getNextNonEmptyRow(reader)) != null) {
-
                 if (outputLine == null) {
-                    outputLine = new String[dataLine.length - colsToDelete];
+                    if(delete) {
+                        outputLine = new String[dataLine.length - columnIndexes.size()];
+                    } else {
+                        outputLine = new String[columnIndexes.size()];
+                    }
                 }
 
                 int j = 0;
                 for (int i = 0; i < dataLine.length; i++) {
-                    if (!columnIndexes.contains(i)) {
-                        outputLine[j++] = dataLine[i];
+                    if(delete) {
+                        if (!columnIndexes.contains(i)) {
+                            outputLine[j++] = dataLine[i];
+                        }
+                    } else {
+                        if (columnIndexes.contains(i)) {
+                            outputLine[j++] = dataLine[i];
+                        }
                     }
                 }
 

@@ -1,5 +1,7 @@
 package org.auscope.portal.server.web.controllers;
 
+import java.util.HashSet;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.auscope.portal.core.server.controllers.BasePortalController;
@@ -11,6 +13,8 @@ import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
 import org.auscope.portal.server.web.service.WpsService;
+import org.auscope.portal.server.web.service.jobtask.JobTask;
+import org.auscope.portal.server.web.service.jobtask.KDECallable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -55,8 +59,12 @@ public class SetProxyController extends BasePortalController {
             return generateJSONResponseMAV(false);
         }
 
-        /*try {
-            job.setProxyParameters(Sets.newHashSet(proxies));
+        HashSet<Proxy> proxies = new HashSet<Proxy>();
+        proxies.add(new Proxy(numerator1, denom1));
+        proxies.add(new Proxy(numerator2, denom2));
+        proxies.add(new Proxy(numerator3, denom3));
+        try {
+            job.setProxyParameters(proxies);
             JobTask newTask = new JobTask(job);
             newTask.setTask(new KDECallable(job, wpsService, csvService, fss));
             String taskId = jobTaskService.submit(newTask);
@@ -67,9 +75,6 @@ public class SetProxyController extends BasePortalController {
         } catch (PortalServiceException ex) {
             log.error("Unable to save job:", ex);
             return generateJSONResponseMAV(false);
-        }*/
-
-        //TODO: Actual work
-        return generateJSONResponseMAV(false);
+        }
     }
 }

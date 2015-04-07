@@ -21,6 +21,7 @@ import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.web.controllers.Proxy;
 import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.WpsService;
@@ -148,14 +149,25 @@ public class KDECallable implements Callable<Object> {
         OutputStreamWriter writer = null;
 
         try {
-            job.getProxyParameters();
-
-            List<Integer> nonCompCols = getExcludedColumns();
-
             in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             Integer predictionIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
-            centredLogRatio(nonCompCols, predictionIndex);
+            this.csvService.deleteColumns(in, deletedCsvData, columnIndexes, delete)
+            IOUtils.closeQuietly(in);
 
+            for(Proxy proxy : job.getProxyParameters()) {
+
+                List<String> proxyNames = new ArrayList<>();
+                proxyNames.add(proxy.getNumerator());
+                proxyNames.addAll(proxy.getDenom());
+
+                in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+                List<Integer> clrIndeces = csvService.columnNameToIndex(in, proxyNames);
+                IOUtils.closeQuietly(in);
+
+                centredLogRatio(clrIndeces);
+            }
+
+            List<Integer> nonCompCols = getExcludedColumns();
             HpiKdeJSON kdeJsonHigh = hpiKde(nonCompCols, (double) job.getPredictionCutoff());
             HpiKdeJSON kdeJsonAll = hpiKde(nonCompCols, Double.NEGATIVE_INFINITY);
 
@@ -226,16 +238,16 @@ public class KDECallable implements Callable<Object> {
         return res;
     }
 
-    private void centredLogRatio(List<Integer> nonCompCols, Integer predictionColumnIndex) throws PortalServiceException, WPSClientException {
+    private void centredLogRatio(List<Integer> proxyCols) throws PortalServiceException, WPSClientException {
         InputStream in1 = null, in2 = null;
         OutputStream os = null;
 
-        List<Integer> excludedColumns = new ArrayList<Integer>(nonCompCols);
-        excludedColumns.add(predictionColumnIndex);
+//        List<Integer> includedColumns = new ArrayList<Integer>(proxyCols);
+//        includedColumns.add(predictionColumnIndex);
 
         try {
             in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-            double[][] imputedData = csvService.getRawData(in1, excludedColumns, false);
+            double[][] imputedData = csvService.getRawData(in1, proxyCols, true);
 
             checkDataBeforeCLR(imputedData);
 
@@ -250,7 +262,7 @@ public class KDECallable implements Callable<Object> {
                     // Write the cenlr imputed data to a temporary file
                     in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
                     os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-                    this.csvService.writeRawData(in1, os, cenlrImputedData, excludedColumns, false);
+                    this.csvService.writeRawData(in1, os, cenlrImputedData, proxyCols, true);
 
                     //merge the cenlr data with the prediction column (which hasn't been cenlr'd)
                     in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
