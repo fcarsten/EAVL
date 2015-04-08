@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import net.sf.json.JSONObject;
@@ -51,19 +52,19 @@ public class KDECallable implements Callable<Object> {
         this.fss = fss;
     }
 
-    protected List<Integer> getProxyCols(String file)
-            throws PortalServiceException {
-        List<Integer> inclusions = new ArrayList<Integer>();
-
-        List<String> proxyParamList = new ArrayList<String>(
-                job.getProxyParameters());
-        InputStream in = this.fss.readFile(job, file);
-        List<Integer> savedParamIndexes = csvService.columnNameToIndex(in,
-                proxyParamList);
-        inclusions.addAll(savedParamIndexes);
-
-        return inclusions;
-    }
+//    protected List<Integer> getProxyCols(String file)
+//            throws PortalServiceException {
+//        List<Integer> inclusions = new ArrayList<Integer>();
+//
+//        List<Proxy> proxyParamList = new ArrayList<String>(
+//                job.getProxyParameters());
+//        InputStream in = this.fss.readFile(job, file);
+//        List<Integer> savedParamIndexes = csvService.columnNameToIndex(in,
+//                proxyParamList);
+//        inclusions.addAll(savedParamIndexes);
+//
+//        return inclusions;
+//    }
 
     protected List<Integer> getExcludedColumns() throws PortalServiceException {
         List<Integer> exclusions = new ArrayList<Integer>();
@@ -86,7 +87,7 @@ public class KDECallable implements Callable<Object> {
         return exclusions;
     }
 
-    private HpiKdeJSON hpiKde(List<Integer> nonCompCols, double cutOff)
+    private HpiKdeJSON hpiKde(double cutOff)
             throws PortalServiceException, WPSClientException {
 
         InputStream in = null;
@@ -94,22 +95,25 @@ public class KDECallable implements Callable<Object> {
         HpiKdeJSON kdeJson = null;
 
         try {
-            List<Integer> includedCols = getProxyCols(EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-            in = this.fss.readFile(job,
-                    EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-            double[][] proxyCenlrData = csvService.getRawData(in,
-                    includedCols, true);
 
             in = this.fss.readFile(job,
                     EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
             Integer predictorIndex = csvService.columnNameToIndex(in,
                     job.getPredictionParameter());
+            IOUtils.closeQuietly(in);
+
+            in = this.fss.readFile(job,
+                    EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+            double[][] proxyCenlrData = csvService.getRawData(in, Arrays.asList(predictorIndex), false);
+            IOUtils.closeQuietly(in);
+
             in = this.fss.readFile(job,
                     EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
             double[] predictorCenlrData = this.csvService
                     .getParameterValues(in, predictorIndex, true);
 
             int retries = WPSController.MAX_RETRIES;
+            Exception error=null;
             while (kdeJson == null && retries-- > 0) {
                 WpsServiceClient wpsClient = null;
                 try {
@@ -121,17 +125,19 @@ public class KDECallable implements Callable<Object> {
                     kdeJson = wpsClient.hpiKdeJSON(proxyCenlrData,
                             predictorCenlrData,
                             cutOff);
+                    return kdeJson;
                 } catch (IOException e) {
+                    error=e;
                     log.warn("Unable to get double pdf values: ", e);
                     log.warn("Assuming bad VM");
                     wpsService.checkVM(wpsClient);
                 }
             }
+            throw new PortalServiceException("WPS Sever HpiKde call exceeded max retries", error);
         } finally {
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(os);
         }
-        return kdeJson;
     }
 
     private void checkDataBeforeKde(double[] ds) {
@@ -149,27 +155,10 @@ public class KDECallable implements Callable<Object> {
         OutputStreamWriter writer = null;
 
         try {
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-            Integer predictionIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
-            this.csvService.deleteColumns(in, deletedCsvData, columnIndexes, delete)
-            IOUtils.closeQuietly(in);
+            centeredLogRatio();
 
-            for(Proxy proxy : job.getProxyParameters()) {
-
-                List<String> proxyNames = new ArrayList<>();
-                proxyNames.add(proxy.getNumerator());
-                proxyNames.addAll(proxy.getDenom());
-
-                in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-                List<Integer> clrIndeces = csvService.columnNameToIndex(in, proxyNames);
-                IOUtils.closeQuietly(in);
-
-                centredLogRatio(clrIndeces);
-            }
-
-            List<Integer> nonCompCols = getExcludedColumns();
-            HpiKdeJSON kdeJsonHigh = hpiKde(nonCompCols, (double) job.getPredictionCutoff());
-            HpiKdeJSON kdeJsonAll = hpiKde(nonCompCols, Double.NEGATIVE_INFINITY);
+            HpiKdeJSON kdeJsonHigh = hpiKde((double) job.getPredictionCutoff());
+            HpiKdeJSON kdeJsonAll = hpiKde(Double.NEGATIVE_INFINITY);
 
             if (kdeJsonHigh == null || kdeJsonAll==null) {
                 return new PortalServiceException(
@@ -224,6 +213,51 @@ public class KDECallable implements Callable<Object> {
         }
     }
 
+    private void centeredLogRatio() throws PortalServiceException, WPSClientException {
+        InputStream in = null;
+        OutputStream os = null;
+        try {
+            Set<Proxy> proxies = job.getProxyParameters();
+            double[][] cenlrData = new double[proxies.size() + 1][];
+            String[] cenlrHeader = new String[proxies.size() + 1];
+
+            in = this.fss.readFile(job,
+                    EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+            Integer predictionColumnIndex = csvService.columnNameToIndex(in,
+                    job.getPredictionParameter());
+
+            in = this.fss.readFile(job,
+                    EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+            cenlrData[0] = this.csvService.getParameterValues(in, predictionColumnIndex);
+            cenlrHeader[0] = job.getPredictionParameter();
+
+            int index=1;
+            for (Proxy proxy : proxies) {
+                List<String> proxyNames = new ArrayList<>();
+                proxyNames.add(proxy.getNumerator());
+                proxyNames.addAll(proxy.getDenom());
+
+                in = this.fss.readFile(job,
+                        EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+                List<Integer> clrIndeces = csvService.columnNameToIndex(in,
+                        proxyNames);
+                IOUtils.closeQuietly(in);
+
+                cenlrHeader[index] = proxy.getNumerator();
+                cenlrData[index++] = CSVService.extractColumn(centredLogRatio(clrIndeces), 0);
+            }
+
+            cenlrData = CSVService.transpose(cenlrData);
+
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+            this.csvService.writeRawData(os, cenlrHeader, cenlrData);
+
+        } finally {
+            IOUtils.closeQuietly(in);
+            IOUtils.closeQuietly(os);
+        }
+    }
+
     private double[] getEstimate(String kdeJson) {
         JSONObject json = JSONObject.fromObject(kdeJson);
         JSONObject gkde = (JSONObject) json.get("gkde");
@@ -238,7 +272,7 @@ public class KDECallable implements Callable<Object> {
         return res;
     }
 
-    private void centredLogRatio(List<Integer> proxyCols) throws PortalServiceException, WPSClientException {
+    private double[][] centredLogRatio(List<Integer> proxyCols) throws PortalServiceException, WPSClientException {
         InputStream in1 = null, in2 = null;
         OutputStream os = null;
 
@@ -250,32 +284,22 @@ public class KDECallable implements Callable<Object> {
             double[][] imputedData = csvService.getRawData(in1, proxyCols, true);
 
             checkDataBeforeCLR(imputedData);
-
+            IOException error=null;
             int retries = WPSController.MAX_RETRIES;
             while (retries-- > 0) {
                 WpsServiceClient wpsClient = null;
                 try {
                     wpsClient = wpsService.getWpsClient();
 
-                    double[][] cenlrImputedData = wpsClient.cenLR(imputedData);
-
-                    // Write the cenlr imputed data to a temporary file
-                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-                    os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-                    this.csvService.writeRawData(in1, os, cenlrImputedData, proxyCols, true);
-
-                    //merge the cenlr data with the prediction column (which hasn't been cenlr'd)
-                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-                    in2 = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-                    os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-                    this.csvService.mergeFiles(in1, in2, os, Arrays.asList(predictionColumnIndex), null);
-
+                    return wpsClient.cenLR(imputedData);
                 } catch (IOException e) {
+                    error=e;
                     log.warn("Unable to get double pdf values: ", e);
                     log.warn("Assuming bad VM");
                     wpsService.checkVM(wpsClient);
                 }
             }
+            throw new PortalServiceException("WPS Server call failed max retries" , error);
         } finally {
             IOUtils.closeQuietly(in1);
             IOUtils.closeQuietly(in2);

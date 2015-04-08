@@ -75,6 +75,9 @@ public class Proxy implements Serializable {
         this.numerator = numerator;
     }
 
+    public Proxy() {
+    }
+
     public Proxy(String numerator, String[] denom) {
         this.numerator=numerator;
         this.denom=Sets.newHashSet(denom);

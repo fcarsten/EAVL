@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -53,7 +54,7 @@ public class EAVLJob implements StagedFileOwner {
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> savedParameters;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     private Set<Proxy> proxyParameters;
 
     @Basic

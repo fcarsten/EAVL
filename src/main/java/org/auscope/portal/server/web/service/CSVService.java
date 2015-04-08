@@ -6,11 +6,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.eavl.ParameterDetails;
@@ -905,6 +907,48 @@ public class CSVService {
     	writeRawData(csvData, replacedCsvData, data, null, true);
     }
 
+    public String[] getHeaderLine(InputStream csvData,
+            List<Integer> headerColIndexes, boolean includeHeaderColIndexes)
+            throws IOException {
+        CSVReader reader = null;
+
+        try {
+            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+
+            // Copy the header line (if it exists)
+            String[] headerLine = getNextNonEmptyRow(reader);
+            if (isHeaderLine(headerLine)) {
+                if (headerColIndexes == null) {
+                    return headerLine;
+                } else {
+                    if (includeHeaderColIndexes) {
+                        String[] newHeader = new String[headerColIndexes.size()];
+                        for (int i = 0; i < newHeader.length; i++) {
+                            newHeader[i] = headerLine[headerColIndexes.get(i)];
+                        }
+                        return newHeader;
+                    } else {
+                        String[] newHeader = new String[headerLine.length
+                                - headerColIndexes.size()];
+                        int idx = 0;
+                        for (int i = 0; i < headerLine.length; i++) {
+                            if (headerColIndexes.contains(i)) {
+                                continue;
+                            }
+
+                            newHeader[idx++] = headerLine[i];
+                        }
+                        return newHeader;
+                    }
+                }
+            } else
+                return null;
+        } finally {
+            IOUtils.closeQuietly(reader);
+            IOUtils.closeQuietly(csvData);
+        }
+    }
+
     /**
      * Reads the headers of csvData into replacedCsvData and then follows it up by writing the entirety of
      * data into replacedCsvData
@@ -916,41 +960,25 @@ public class CSVService {
      * @param includeHeaderColIndexes If true, headerColIndexes will refer to columns to extract. If false, headerColIndexes will refer to columns to exclude
      * @return
      * @throws PortalServiceException
+     * @throws IOException
      */
     public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data, List<Integer> headerColIndexes, boolean includeHeaderColIndexes) throws PortalServiceException {
-        CSVReader reader = null;
+        try {
+            writeRawData(replacedCsvData, getHeaderLine(csvData, headerColIndexes, includeHeaderColIndexes), data);
+        } catch (IOException e) {
+           throw new PortalServiceException(e.getMessage(), e);
+        }
+    }
+
+
+    public void writeRawData(OutputStream replacedCsvData, String[] headers, double[][] data) throws PortalServiceException {
         CSVWriter writer = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
             writer = new CSVWriter(new OutputStreamWriter(replacedCsvData), ',', '\'');
 
-            //Copy the header line (if it exists)
-            String[] headerLine = getNextNonEmptyRow(reader);
-            if (isHeaderLine(headerLine)) {
-            	if (headerColIndexes == null) {
-            		writer.writeNext(headerLine);
-            	} else {
-            		if (includeHeaderColIndexes) {
-                        String[] newHeader = new String[headerColIndexes.size()];
-                        for (int i = 0; i < newHeader.length; i++) {
-                        	newHeader[i] = headerLine[headerColIndexes.get(i)];
-                        }
-                        writer.writeNext(newHeader);
-                    } else {
-                    	String[] newHeader = new String[headerLine.length - headerColIndexes.size()];
-                        int idx = 0;
-                        for (int i = 0; i < headerLine.length; i++) {
-                            if (headerColIndexes.contains(i)) {
-                                continue;
-                            }
-
-                            newHeader[idx++] = headerLine[i];
-                        }
-                        writer.writeNext(newHeader);
-                    }
-            	}
-            }
+            if(headers!=null)
+                writer.writeNext(headers);
 
             if (data == null || data.length == 0 || data[0].length == 0) {
                 return;
@@ -972,10 +1000,8 @@ public class CSVService {
         } finally {
             //These can be sensitive to order (and we can't just close the readers incase we have issues generating them)
             //Ensure the writers close BEFORE we close the underlying streams
-            IOUtils.closeQuietly(reader);
             IOUtils.closeQuietly(writer);
             IOUtils.closeQuietly(replacedCsvData);
-            IOUtils.closeQuietly(csvData);
         }
     }
 
@@ -1355,5 +1381,32 @@ public class CSVService {
            IOUtils.closeQuietly(scaledData);
            IOUtils.closeQuietly(csvData);
        }
+    }
+
+    public int deleteColumns(InputStream is, OutputStream os,
+            HashSet<Integer> indexes) throws PortalServiceException {
+        return deleteColumns(is, os, indexes, true);
+    }
+
+    public static double[] extractColumn(double[][] predictionData, int i) {
+        double[] res = new double[predictionData.length];
+        for (int j = 0; j < predictionData.length; j++) {
+            res[j] = predictionData[j][i];
+        }
+        return res;
+    }
+
+    public static double[][] transpose(double[][] data) {
+        if(data==null ) return null;
+        if(data.length==0) return data;
+
+        double[][] res = new double[data[0].length][];
+        for(int i=0; i<data[0].length; i++) {
+            res[i] = new double[data.length];
+            for(int k=0; k<data.length; k++) {
+                res[i][k] = data[k][i];
+            }
+        }
+        return res;
     }
 }
