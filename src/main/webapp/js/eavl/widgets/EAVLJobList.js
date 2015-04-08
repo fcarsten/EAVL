@@ -21,9 +21,17 @@ Ext.define('eavl.widgets.EAVLJobList', {
         this.deleteJobAction = new Ext.Action({
             text: 'Delete',
             iconCls: 'joblist-trash-icon',
-            cls: 'joblist-trash-button',
+            cls: 'joblist-inline-button',
             scope : this,
             handler: this._deleteClick
+        });
+        
+        this.errorMessageAction = new Ext.Action({
+            text: 'Error Message',
+            iconCls: 'joblist-error-icon',
+            cls: 'joblist-inline-button',
+            scope : this,
+            handler: this._errorMessageClick
         });
         
         
@@ -40,7 +48,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
             plugins : [{
                 ptype : 'inlinecontextmenu',
                 align : 'right',
-                actions: [this.deleteJobAction]
+                actions: [this.deleteJobAction, this.errorMessageAction]
             }],
             columns : [{
                 dataIndex : 'name',
@@ -116,6 +124,24 @@ Ext.define('eavl.widgets.EAVLJobList', {
         });
 
         this.callParent(arguments);
+    },
+    
+    _errorMessageClick : function() {
+        var selection = this.getSelection();
+        if (!selection) {
+            return;
+        }
+        
+        var job = selection[0];
+        var message = job.get('kdeTaskError') ? job.get('kdeTaskError') : job.get('imputationTaskError');
+        if (!message) {
+            return;
+        }
+        Ext.create('eavl.widgets.ErrorWindow', {
+            title: 'Error Message',
+            message: message,
+            job: job
+        }).show();
     },
     
     _deleteJob : function(job) {
