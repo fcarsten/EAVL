@@ -34,7 +34,9 @@ Ext.define('eavl.models.EAVLJob', {
         { name: 'savedParameters', type: 'auto' }, //String[] Parameter names listed as saved
         { name: 'proxyParameters', type: 'auto' }, //String[] Parameter names chosen as proxies
         { name: 'imputationTaskId', type: 'string' },
+        { name: 'imputationTaskError', type: 'string' },
         { name: 'kdeTaskId', type: 'string' },
+        { name: 'kdeTaskError', type: 'string' },
         { name: 'holeIdParameter', type: 'string' }
     ],
 
