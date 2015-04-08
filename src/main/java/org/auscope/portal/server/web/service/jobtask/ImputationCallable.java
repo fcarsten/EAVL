@@ -127,7 +127,7 @@ public class ImputationCallable implements Callable<Object> {
             if (uomNameKeys != null && uomNameKeys.length > 0) {
                 performUomScaling();
             } else {
-                this.fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+                this.fss.renameStageInFile(job, EAVLJobConstants.FILE_IMPUTED_CSV, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             }
 
             return imputedData;
