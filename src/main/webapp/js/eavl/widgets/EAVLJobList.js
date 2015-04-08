@@ -48,7 +48,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
             plugins : [{
                 ptype : 'inlinecontextmenu',
                 align : 'right',
-                actions: [this.deleteJobAction, this.errorMessageAction]
+                actions: [this.errorMessageAction, this.deleteJobAction]
             }],
             columns : [{
                 dataIndex : 'name',
@@ -124,6 +124,25 @@ Ext.define('eavl.widgets.EAVLJobList', {
         });
 
         this.callParent(arguments);
+        
+        this.on('select', this._rowSelect, this);
+    },
+    
+    /**
+     * Turns on/off various inline selection actions based on the selected job
+     */ 
+    _rowSelect : function() {
+        var selection = this.getSelection();
+        if (!selection) {
+            return;
+        }
+        
+        var job = selection[0];
+        if (job.get('kdeTaskError') || job.get('imputationTaskError')) {
+            this.errorMessageAction.show();
+        } else {
+            this.errorMessageAction.hide();
+        }
     },
     
     _errorMessageClick : function() {
