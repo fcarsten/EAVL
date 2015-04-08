@@ -163,7 +163,8 @@ Ext.application({
                 type : 'ajax',
                 url : 'validation/getCompositionalParameterDetails.do',
                 extraParams: {
-                    file: eavl.models.EAVLJob.FILE_IMPUTED_SCALED_CSV
+                    file: eavl.models.EAVLJob.FILE_IMPUTED_SCALED_CSV,
+                    includePredictionParam: false
                 },
                 reader : {
                     type : 'json',

@@ -418,7 +418,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         name = name.replace(/percent/i, eavl.models.ParameterDetails.UOM_PPM);
         name = name.replace(/perc/i, eavl.models.ParameterDetails.UOM_PPM);
         
-        if (!name.contains(eavl.models.ParameterDetails.UOM_PPM)) {
+        if (!name.indexOf(eavl.models.ParameterDetails.UOM_PPM) >= 0) {
             name += ' [' + eavl.models.ParameterDetails.UOM_PPM + ']';
         }
         
