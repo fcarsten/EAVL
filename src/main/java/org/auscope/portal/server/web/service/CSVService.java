@@ -37,7 +37,7 @@ public class CSVService {
     }
 
     private CSVWriter generateWriter(OutputStream os) {
-        return new CSVWriter(new OutputStreamWriter(os), ',', '\'');
+        return new CSVWriter(new OutputStreamWriter(os), ',', CSVWriter.NO_QUOTE_CHARACTER);
     }
 
     private CSVReader generateReader(InputStream is, int startLine) {
