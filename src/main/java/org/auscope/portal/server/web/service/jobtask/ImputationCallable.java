@@ -20,6 +20,7 @@ import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
+import org.n52.wps.client.WPSClientException;
 
 /**
  * Performs Imputation and Unit of Measure scaling
@@ -133,6 +134,26 @@ public class ImputationCallable implements Callable<Object> {
             return imputedData;
         } catch (Exception ex) {
             log.error("Imputation Error: ", ex);
+
+            //Record an error message into the job
+            String errorMessage = null;
+            if (ex instanceof WPSClientException) {
+                errorMessage = String.format("The remote computation service has returned an error when processing your data. Please contact EAVL support for more information.\nRemote Error: %1$s", ex.getMessage());
+            } else if (ex instanceof IllegalArgumentException) {
+                errorMessage = String.format("Your selected threshold or proxies are invalid and cannot be processed.\nMessage: %1$s", ex.getMessage());
+            } else if (ex instanceof IOException) {
+                errorMessage = String.format("There was an error communicating to the remote processing service. Please try again later.\nMessage: %1$s", ex.getMessage());
+            } else {
+                errorMessage = String.format("There was an error when performing calculations. Please try again later.\nMessage: %1$s", ex.getMessage());
+            }
+            try {
+                EAVLJob updatedJob = jobService.getJobById(job.getId());
+                updatedJob.setImputationTaskError(errorMessage);
+                jobService.save(updatedJob);
+            } catch (Exception saveEx) {
+                log.error("Unable to write error message to job with ID" + job.getId(), saveEx);
+            }
+
             throw new PortalServiceException("", ex);
         } finally {
             IOUtils.closeQuietly(in2);

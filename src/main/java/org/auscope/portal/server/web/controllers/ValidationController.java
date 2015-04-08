@@ -345,6 +345,7 @@ public class ValidationController extends BasePortalController {
             String taskId = jobTaskService.submit(newTask);
 
             job.setImputationTaskId(taskId);
+            job.setImputationTaskError(null);
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");

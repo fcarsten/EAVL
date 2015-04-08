@@ -69,7 +69,9 @@ public class ViewEAVLJobFactory {
         m.put("savedParameters", job.getSavedParameters());
         m.put("proxyParameters", job.getProxyParameters());
         m.put("imputationTaskId", job.getImputationTaskId());
+        m.put("imputationTaskError", job.getImputationTaskError());
         m.put("kdeTaskId", job.getKdeTaskId());
+        m.put("kdeTaskError", job.getKdeTaskError());
         m.put("holeIdParameter", job.getHoleIdParameter());
 
         return m;

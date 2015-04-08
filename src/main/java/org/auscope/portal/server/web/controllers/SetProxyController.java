@@ -2,7 +2,6 @@ package org.auscope.portal.server.web.controllers;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.auscope.eavl.wpsclient.ConditionalProbabilityWpsClient;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
@@ -14,7 +13,6 @@ import org.auscope.portal.server.web.service.JobTaskService;
 import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.jobtask.JobTask;
 import org.auscope.portal.server.web.service.jobtask.KDECallable;
-import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -59,9 +57,10 @@ public class SetProxyController extends BasePortalController {
         try {
             job.setProxyParameters(Sets.newHashSet(proxies));
             JobTask newTask = new JobTask(job);
-            newTask.setTask(new KDECallable(job, wpsService, csvService, fss));
+            newTask.setTask(new KDECallable(job, wpsService, csvService, fss, jobService));
             String taskId = jobTaskService.submit(newTask);
             job.setKdeTaskId(taskId);
+            job.setKdeTaskError(null);
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");

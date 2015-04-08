@@ -166,7 +166,7 @@ Ext.application({
                 },
                 reader : {
                     type : 'json',
-                    root : 'data'
+                    rootProperty : 'data'
                 }
             },
             listeners: {

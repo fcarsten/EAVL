@@ -39,7 +39,14 @@ public class EAVLJobService {
     public EAVLJobService(FileStagingService fss) {
     }
 
-    private EAVLJob getJobById(Integer id) {
+    /**
+     * Returns the EAVLJob with the specified ID. No checking for user ownership is made.
+     *
+     * Returns null if the job ID DNE
+     * @param id
+     * @return
+     */
+    public EAVLJob getJobById(Integer id) {
         if (id == null) {
             return null;
         }

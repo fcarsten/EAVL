@@ -18,20 +18,27 @@
 	height: 16px;
 }
 
-.joblist-trash-button {
+.joblist-error-icon {
+    background-image: url(../../../img/exclamation.png);
+    background-size: 16px 16px;
+    width: 16px;
+    height: 16px;
+}
+
+.joblist-inline-button {
 	background-color: white;
 	background-image: none;
 }
 
-.joblist-trash-button.x-btn-over {
+.joblist-inline-button.x-btn-over {
     background-color: white;
     background-image: none;
 }
 
-.joblist-trash-button .x-btn-button {
+.joblist-inline-button .x-btn-button {
 	background-color: white;
 }
 
-.joblist-trash-button span.x-btn-inner {
+.joblist-inline-button span.x-btn-inner {
     color: black;
 }
