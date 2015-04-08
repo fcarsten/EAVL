@@ -174,7 +174,8 @@ public class ValidationController extends BasePortalController {
     @RequestMapping("/getCompositionalParameterDetails.do")
     public ModelAndView getCompositionalParameterDetails(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="file") String file,
-            @RequestParam(required=false,value="jobId") Integer jobId) {
+            @RequestParam(required=false,value="jobId") Integer jobId,
+            @RequestParam(required=false,value="includePredictionParam",defaultValue="true") boolean includePredictionParam) {
         try {
             EAVLJob job;
             if (jobId != null) {
@@ -187,7 +188,9 @@ public class ValidationController extends BasePortalController {
             List<ParameterDetails> pds = pdService.getParameterDetails(job, fileToRead);
             if (job.getSavedParameters() != null) {
                 for (int i = pds.size() - 1; i >= 0; i--) {
-                    if (job.getSavedParameters().contains(pds.get(i).getName())) {
+                    String pdName = pds.get(i).getName();
+                    if (job.getSavedParameters().contains(pdName) ||
+                            (!includePredictionParam && pdName.equals(job.getPredictionParameter()))) {
                         pds.remove(i);
                     }
                 }

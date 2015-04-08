@@ -243,6 +243,9 @@ Ext.application({
             proxy : {
                 type : 'ajax',
                 url : 'validation/getCompositionalParameterDetails.do',
+                extraParams: {
+                    includePredictionParam: true
+                },
                 reader : {
                     type : 'json',
                     rootProperty : 'data'
