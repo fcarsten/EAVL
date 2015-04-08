@@ -24,7 +24,8 @@ import org.junit.Test;
 import com.google.common.collect.Sets;
 
 public class TestImputationCallable extends PortalTestClass {
-    private EAVLJob mockJob = context.mock(EAVLJob.class);
+    private EAVLJob mockJob = context.mock(EAVLJob.class, "mockJob");
+    private EAVLJob mockJob2 = context.mock(EAVLJob.class, "mockJob2");
     private WpsService mockWpsClient = context.mock(WpsService.class);
     private CSVService mockCsvService = context.mock(CSVService.class);
     private FileStagingService mockFss = context.mock(FileStagingService.class);
@@ -57,7 +58,7 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV);will(returnValue(mockOsTmp));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_IMPUTED_CSV);will(returnValue(mockOs));
             oneOf(mockFss).writeFile(mockJob, EAVLJobConstants.FILE_VALIDATED_DATA_CSV);will(returnValue(mockOsValidate));
-            oneOf(mockFss).renameStageInFile(mockJob, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+            oneOf(mockFss).renameStageInFile(mockJob, EAVLJobConstants.FILE_IMPUTED_CSV, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
 
             oneOf(mockCsvService).getRawData(with(mockIs3), with(equal(Arrays.asList(2, 1, 3))), with(false));will(returnValue(data));
             oneOf(mockCsvService).writeRawData(with(mockIs3), with(mockOsTmp), with(imputedData), with(equal(Arrays.asList(2, 1, 3))), with(false));
@@ -99,6 +100,7 @@ public class TestImputationCallable extends PortalTestClass {
         final double[][] imputedData = new double[][] {{0.2, 0.4, 0.9}};
 
         context.checking(new Expectations() {{
+            allowing(mockJob).getId();will(returnValue(999));
             allowing(mockJob).getHoleIdParameter();will(returnValue("hole-id"));
             allowing(mockJob).getSavedParameters();will(returnValue(new HashSet<String>()));
             allowing(mockJob).getPredictionParameter();will(returnValue(predictionParam));
@@ -118,6 +120,10 @@ public class TestImputationCallable extends PortalTestClass {
             oneOf(mockCsvService).cullEmptyRows(mockIs1, mockOs, Arrays.asList(1, 3), false);
 
             oneOf(mockOs).close();
+
+            oneOf(mockJobService).getJobById(999);will(returnValue(mockJob2));
+            oneOf(mockJob2).setImputationTaskError(with(any(String.class)));
+            oneOf(mockJobService).save(mockJob2);
         }});
 
         Assert.assertSame(imputedData, ic.call());
