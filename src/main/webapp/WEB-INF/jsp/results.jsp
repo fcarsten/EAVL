@@ -59,7 +59,9 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/BoreholeEstimateChart.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/FilePreviewPanel.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ErrorWindow.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/Results-UI.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/EAVL-Common.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/models/EAVLJob.js"></script>
@@ -80,6 +82,7 @@
         <script type="text/javascript" src="js/eavl/widgets/preview/3DScatterPlotPreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/BoreholeEstimatePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/FilePreviewPanel.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/ErrorWindow.js"></script>
         
         <script type="text/javascript" src="js/eavl/Results-UI.js"></script>
     </head>

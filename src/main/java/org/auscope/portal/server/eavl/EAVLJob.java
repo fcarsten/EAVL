@@ -60,7 +60,13 @@ public class EAVLJob implements StagedFileOwner {
     @Basic
     private String imputationTaskId;
     @Basic
+    @Column(length=4096)
+    private String imputationTaskError;
+    @Basic
     private String kdeTaskId;
+    @Basic
+    @Column(length=4096)
+    private String kdeTaskError;
     @Basic
     private String holeIdParameter;
 
@@ -257,5 +263,43 @@ public class EAVLJob implements StagedFileOwner {
     public Date getSubmitDate() {
         return submitDate;
     }
+
+    /**
+     * Gets the error string for the most recently run imputation task or null if
+     * there is no error or no imputation task.
+     * @return
+     */
+    public String getImputationTaskError() {
+        return imputationTaskError;
+    }
+
+    /**
+     * Sets the error string for the most recently run imputation task or null if
+     * there is no error or no imputation task.
+     * @param imputationTaskError can be null
+     */
+    public void setImputationTaskError(String imputationTaskError) {
+        this.imputationTaskError = imputationTaskError;
+    }
+
+    /**
+     * Gets the error string for the most recently run KDE task or null if
+     * there is no error or no KDE task.
+     * @return
+     */
+    public String getKdeTaskError() {
+        return kdeTaskError;
+    }
+
+    /**
+     * Sets the error string for the most recently run KDE task or null if
+     * there is no error or no KDE task.
+     * @param kdeTaskError Can be null
+     * @return
+     */
+    public void setKdeTaskError(String kdeTaskError) {
+        this.kdeTaskError = kdeTaskError;
+    }
+
 
 }

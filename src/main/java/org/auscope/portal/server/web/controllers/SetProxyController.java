@@ -66,9 +66,10 @@ public class SetProxyController extends BasePortalController {
         try {
             job.setProxyParameters(proxies);
             JobTask newTask = new JobTask(job);
-            newTask.setTask(new KDECallable(job, wpsService, csvService, fss));
+            newTask.setTask(new KDECallable(job, wpsService, csvService, fss, jobService));
             String taskId = jobTaskService.submit(newTask);
             job.setKdeTaskId(taskId);
+            job.setKdeTaskError(null);
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");

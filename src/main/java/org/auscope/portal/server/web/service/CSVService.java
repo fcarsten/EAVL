@@ -38,6 +38,18 @@ public class CSVService {
         Text
     }
 
+    private CSVWriter generateWriter(OutputStream os) {
+        return new CSVWriter(new OutputStreamWriter(os), ',', CSVWriter.NO_QUOTE_CHARACTER);
+    }
+
+    private CSVReader generateReader(InputStream is, int startLine) {
+        return new CSVReader(new InputStreamReader(is), ',', '\'', startLine);
+    }
+
+    private CSVReader generateReader(InputStream is) {
+        return generateReader(is, 0);
+    }
+
     /**
      * Reads up to "maximum" lines starting from line number "startLine"
      *
@@ -51,7 +63,7 @@ public class CSVService {
     public List<String[]> readLines(InputStream csvData, int startLine, int maximum) throws PortalServiceException {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', startLine);
+            reader = generateReader(csvData, startLine);
 
             List<String[]> lines = new ArrayList<String[]>(maximum);
             String[] nextLine;
@@ -83,7 +95,7 @@ public class CSVService {
         CSVReader reader = null;
         int count = 0;
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'');
+            reader = generateReader(csvData);
             while (reader.readNext() != null) {
                 count++;
             }
@@ -111,7 +123,7 @@ public class CSVService {
     public int estimateColumnCount(InputStream csvData) throws PortalServiceException {
         CSVReader reader = null;
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             String[] nextLine = getNextNonEmptyRow(reader);
             if (nextLine != null) {
@@ -278,7 +290,7 @@ public class CSVService {
         List<ParameterDetails> details = new ArrayList<ParameterDetails>();
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
@@ -488,7 +500,7 @@ public class CSVService {
         List<Double> values = new ArrayList<Double>();
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
@@ -591,8 +603,8 @@ public class CSVService {
         CSVWriter writer = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
-            writer = new CSVWriter(new OutputStreamWriter(replacedCsvData), ',', '\'');
+            reader = generateReader(csvData);
+            writer = generateWriter(replacedCsvData);
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
@@ -695,8 +707,8 @@ public class CSVService {
         CSVWriter writer = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
-            writer = new CSVWriter(new OutputStreamWriter(deletedCsvData), ',', '\'');
+            reader = generateReader(csvData);
+            writer = generateWriter(deletedCsvData);
 
             String[] dataLine;
             String[] outputLine = null;
@@ -803,7 +815,7 @@ public class CSVService {
         List<double[]> rows = new ArrayList<double[]>();
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
@@ -855,7 +867,7 @@ public class CSVService {
         List<String[]> rows = new ArrayList<String[]>();
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
@@ -913,7 +925,7 @@ public class CSVService {
         CSVReader reader = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             // Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
@@ -1020,7 +1032,7 @@ public class CSVService {
         CSVReader reader = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             //Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
@@ -1061,7 +1073,7 @@ public class CSVService {
         CSVReader reader = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
+            reader = generateReader(csvData);
 
             //Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
@@ -1113,8 +1125,8 @@ public class CSVService {
         CSVWriter writer = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
-            writer = new CSVWriter(new OutputStreamWriter(deletedCsvData), ',', '\'');
+            reader = generateReader(csvData);
+            writer = generateWriter(deletedCsvData);
 
             String[] dataLine;
             int linesWritten = 0;
@@ -1166,9 +1178,9 @@ public class CSVService {
         CSVWriter writer = null;
 
         try {
-            reader1 = new CSVReader(new InputStreamReader(in1), ',', '\'', 0);
-            reader2 = new CSVReader(new InputStreamReader(in2), ',', '\'', 0);
-            writer = new CSVWriter(new OutputStreamWriter(mergedCsvData), ',', '\'');
+            reader1 = generateReader(in1);
+            reader2 = generateReader(in2);
+            writer = generateWriter(mergedCsvData);
 
             String[] dataLine1 = getNextNonEmptyRow(reader1);
             String[] dataLine2 = getNextNonEmptyRow(reader2);
@@ -1259,8 +1271,8 @@ public class CSVService {
         CSVWriter writer = null;
 
         try {
-            reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
-            writer = new CSVWriter(new OutputStreamWriter(culledCsvData), ',', '\'');
+            reader = generateReader(csvData);
+            writer = generateWriter(culledCsvData);
 
             String[] headerLine = getNextNonEmptyRow(reader);
             if (headerLine == null) {
@@ -1329,8 +1341,8 @@ public class CSVService {
                throw new IllegalArgumentException();
           }
 
-           reader = new CSVReader(new InputStreamReader(csvData), ',', '\'', 0);
-           writer = new CSVWriter(new OutputStreamWriter(scaledData), ',', '\'');
+           reader = generateReader(csvData);
+           writer = generateWriter(scaledData);
 
            String[] dataLine = getNextNonEmptyRow(reader);
            if (dataLine == null) {

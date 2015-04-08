@@ -270,12 +270,12 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         Assert.assertEquals(6, service.findReplaceZeroes(is, os, 0, "ZERO_VALUE", false));
-        String expected = "'sample',' gold (au) ppm'\n" +
-                "'0.00001','40'\n" +
-                "'','42'\n" +
-                "'ZERO_VALUE','DL'\n" +
-                "'ZERO_VALUE','DLVal'\n" +
-                "'ZERO_VALUE','DL'\n";
+        String expected = "sample, gold (au) ppm\n" +
+                "0.00001,40\n" +
+                ",42\n" +
+                "ZERO_VALUE,DL\n" +
+                "ZERO_VALUE,DLVal\n" +
+                "ZERO_VALUE,DL\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -286,12 +286,12 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         Assert.assertEquals(6, service.findReplace(is, os, 1, "DL", "999"));
-        String expected = "'sample',' gold (au) ppm'\n" +
-                           "'40','40'\n" +
-                           "'','42'\n" +
-                           "'DL','999'\n" +
-                           "'DLVal','DLVal'\n" +
-                           "'DL','999'\n";
+        String expected = "sample, gold (au) ppm\n" +
+                           "40,40\n" +
+                           ",42\n" +
+                           "DL,999\n" +
+                           "DLVal,DLVal\n" +
+                           "DL,999\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -302,12 +302,12 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         Assert.assertEquals(6, service.findReplace(is, os, -1, "40", "SHOULD NOT REPLACE"));
-        String expected = "'sample',' gold (au) ppm'\n" +
-                           "'40','40'\n" +
-                           "'','42'\n" +
-                           "'DL','DL'\n" +
-                           "'DLVal','DLVal'\n" +
-                           "'DL','DL'\n";
+        String expected = "sample, gold (au) ppm\n" +
+                           "40,40\n" +
+                           ",42\n" +
+                           "DL,DL\n" +
+                           "DLVal,DLVal\n" +
+                           "DL,DL\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -318,12 +318,12 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         Assert.assertEquals(6, service.findReplace(is, os, 0, null, "REPLACED"));
-        String expected = "'sample',' gold (au) ppm'\n" +
-                           "'40','40'\n" +
-                           "'REPLACED','42'\n" +
-                           "'DL','DL'\n" +
-                           "'DLVal','DLVal'\n" +
-                           "'DL','DL'\n";
+        String expected = "sample, gold (au) ppm\n" +
+                           "40,40\n" +
+                           "REPLACED,42\n" +
+                           "DL,DL\n" +
+                           "DLVal,DLVal\n" +
+                           "DL,DL\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -358,7 +358,7 @@ public class TestCSVService extends PortalTestClass{
         }
 
         //This is to test that the output streams get properly flushed
-        Assert.assertTrue(actual.endsWith("'9999',' 35',' D/L',' 80',' '\n"));
+        Assert.assertTrue(actual.endsWith("9999, 35, D/L, 80, \n"));
     }
 
     @Test(expected=PortalServiceException.class)
@@ -382,15 +382,15 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         Assert.assertEquals(9, service.findReplace(is, os, -1, null, null, true));
-        String expected = "'A','B','C','D','E'\n" +
-        "'0',' 40',' D/L',' ',' 12'\n" +
-        "'1',' 42',' 102',' 52',' 12'\n" +
-        "'2',' 16',' 103',' 6',' 15'\n" +
-        "'3',' 13',' 101',' 43',' '\n" +
-        "'4',' 16',' 103',' 74',' 16'\n" +
-        "'5',' 48',' 100',' 32',' '\n" +
-        "'6',' 41',' D/L',' 72',' 14'\n" +
-        "'7',' 11',' 101',' 69',' '\n";
+        String expected = "A,B,C,D,E\n" +
+        "0, 40, D/L, , 12\n" +
+        "1, 42, 102, 52, 12\n" +
+        "2, 16, 103, 6, 15\n" +
+        "3, 13, 101, 43, \n" +
+        "4, 16, 103, 74, 16\n" +
+        "5, 48, 100, 32, \n" +
+        "6, 41, D/L, 72, 14\n" +
+        "7, 11, 101, 69, \n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -406,14 +406,14 @@ public class TestCSVService extends PortalTestClass{
         indexes.add(4);
 
         Assert.assertEquals(8, service.deleteColumns(is, os, indexes));
-        String expected = "' 40',' '\n" +
-                "' 42',' 52'\n" +
-                "' 16',' 6'\n" +
-                "' 13',' 43'\n" +
-                "' 16',' 74'\n" +
-                "' 48',' 32'\n" +
-                "' 41',' 72'\n" +
-                "' 11',' 69'\n";
+        String expected = " 40, \n" +
+                " 42, 52\n" +
+                " 16, 6\n" +
+                " 13, 43\n" +
+                " 16, 74\n" +
+                " 48, 32\n" +
+                " 41, 72\n" +
+                " 11, 69\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -674,9 +674,9 @@ public class TestCSVService extends PortalTestClass{
 
         service.writeRawData(is, os, newData);
 
-        String expected = "'sample',' gold (au) ppm','something-else','',' data'\n" +
-                "'0.4','0.2','0.5','0.1','0.8'\n" +
-                "'440.4','230.2','40.2','13.45','88.8'\n";
+        String expected = "sample, gold (au) ppm,something-else,, data\n" +
+                "0.4,0.2,0.5,0.1,0.8\n" +
+                "440.4,230.2,40.2,13.45,88.8\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -692,8 +692,8 @@ public class TestCSVService extends PortalTestClass{
 
         service.writeRawData(is, os, newData);
 
-        String expected = "'0.4','0.2','0.5','0.1','0.8'\n" +
-                "'440.4','230.2','40.2','13.45','88.8'\n";
+        String expected = "0.4,0.2,0.5,0.1,0.8\n" +
+                "440.4,230.2,40.2,13.45,88.8\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -710,9 +710,9 @@ public class TestCSVService extends PortalTestClass{
 
         service.writeRawData(is, os, newData, Arrays.asList(4,2), true);
 
-        String expected = "' data','something-else'\n" +
-                "'0.8','0.5'\n" +
-                "'13.45','40.2'\n";
+        String expected = " data,something-else\n" +
+                "0.8,0.5\n" +
+                "13.45,40.2\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -729,9 +729,9 @@ public class TestCSVService extends PortalTestClass{
 
         service.writeRawData(is, os, newData, Arrays.asList(1,3,2), false);
 
-        String expected = "'sample',' data'\n" +
-                "'0.4','0.8'\n" +
-                "'440.4','88.8'\n";
+        String expected = "sample, data\n" +
+                "0.4,0.8\n" +
+                "440.4,88.8\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -815,14 +815,14 @@ public class TestCSVService extends PortalTestClass{
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Assert.assertEquals(8, service.swapColumns(is, os, 0, 2));
-        String expected = "' D/L',' 40','0',' ',' 12'\n" +
-        "' 102',' 42','1',' 52',' 12'\n" +
-        "' 103',' 16','2',' 6',' 15'\n" +
-        "' 101',' 13','3',' 43',' '\n" +
-        "' 103',' 16','4',' 74',' 16'\n" +
-        "' 100',' 48','5',' 32',' '\n" +
-        "' D/L',' 41','6',' 72',' 14'\n" +
-        "' 101',' 11','7',' 69',' '\n";
+        String expected = " D/L, 40,0, , 12\n" +
+        " 102, 42,1, 52, 12\n" +
+        " 103, 16,2, 6, 15\n" +
+        " 101, 13,3, 43, \n" +
+        " 103, 16,4, 74, 16\n" +
+        " 100, 48,5, 32, \n" +
+        " D/L, 41,6, 72, 14\n" +
+        " 101, 11,7, 69, \n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -833,14 +833,14 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
         Assert.assertEquals(8, service.swapColumns(is, os, 2, 2));
-        String expected = "'0',' 40',' D/L',' ',' 12'\n" +
-        "'1',' 42',' 102',' 52',' 12'\n" +
-        "'2',' 16',' 103',' 6',' 15'\n" +
-        "'3',' 13',' 101',' 43',' '\n" +
-        "'4',' 16',' 103',' 74',' 16'\n" +
-        "'5',' 48',' 100',' 32',' '\n" +
-        "'6',' 41',' D/L',' 72',' 14'\n" +
-        "'7',' 11',' 101',' 69',' '\n";
+        String expected = "0, 40, D/L, , 12\n" +
+        "1, 42, 102, 52, 12\n" +
+        "2, 16, 103, 6, 15\n" +
+        "3, 13, 101, 43, \n" +
+        "4, 16, 103, 74, 16\n" +
+        "5, 48, 100, 32, \n" +
+        "6, 41, D/L, 72, 14\n" +
+        "7, 11, 101, 69, \n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -869,14 +869,14 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Assert.assertEquals(8, service.mergeFiles(is1, is2, os, Arrays.asList(0, 2, 4), Arrays.asList(3, 1)));
 
-        String expected = "'0',' D/L',' 12',' ',' 40'\n" +
-                "'1',' 102',' 12',' 52',' 42'\n" +
-                "'2',' 103',' 15',' 6',' 16'\n" +
-                "'3',' 101',' ',' 43',' 13'\n" +
-                "'4',' 103',' 16',' 74',' 16'\n" +
-                "'5',' 100',' ',' 32',' 48'\n" +
-                "'6',' D/L',' 14',' 72',' 41'\n" +
-                "'7',' 101',' ',' 69',' 11'\n";
+        String expected = "0, D/L, 12, , 40\n" +
+                "1, 102, 12, 52, 42\n" +
+                "2, 103, 15, 6, 16\n" +
+                "3, 101, , 43, 13\n" +
+                "4, 103, 16, 74, 16\n" +
+                "5, 100, , 32, 48\n" +
+                "6, D/L, 14, 72, 41\n" +
+                "7, 101, , 69, 11\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -889,14 +889,14 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Assert.assertEquals(8, service.mergeFiles(is1, is2, os, Arrays.asList(0), Arrays.asList(1)));
 
-        String expected = "'0',' gold (au) ppm'\n" +
-                          "'1','40'\n" +
-                          "'2','42'\n" +
-                          "'3','DL'\n" +
-                          "'4','DLVal'\n" +
-                          "'5','DL'\n" +
-                          "'6',''\n" +
-                          "'7',''\n";
+        String expected = "0, gold (au) ppm\n" +
+                          "1,40\n" +
+                          "2,42\n" +
+                          "3,DL\n" +
+                          "4,DLVal\n" +
+                          "5,DL\n" +
+                          "6,\n" +
+                          "7,\n";
 
         Assert.assertEquals(expected, os.toString());
         is1 = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
@@ -905,14 +905,14 @@ public class TestCSVService extends PortalTestClass{
         os = new ByteArrayOutputStream();
         Assert.assertEquals(8, service.mergeFiles(is2, is1, os, Arrays.asList(1), Arrays.asList(0)));
 
-        expected = "' gold (au) ppm','0'\n" +
-                "'40','1'\n" +
-                "'42','2'\n" +
-                "'DL','3'\n" +
-                "'DLVal','4'\n" +
-                "'DL','5'\n" +
-                "'','6'\n" +
-                "'','7'\n";
+        expected = " gold (au) ppm,0\n" +
+                "40,1\n" +
+                "42,2\n" +
+                "DL,3\n" +
+                "DLVal,4\n" +
+                "DL,5\n" +
+                ",6\n" +
+                ",7\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -941,12 +941,12 @@ public class TestCSVService extends PortalTestClass{
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         Assert.assertEquals(6, service.mergeFiles(is1, is2, os, null, null));
 
-        String expected = "'sample',' gold (au) ppm','sample',' gold (au) ppm'\n" +
-                "'40','40','40','40'\n" +
-                "'','42','','42'\n" +
-                "'DL','DL','DL','DL'\n" +
-                "'DLVal','DLVal','DLVal','DLVal'\n" +
-                "'DL','DL','DL','DL'\n";
+        String expected = "sample, gold (au) ppm,sample, gold (au) ppm\n" +
+                "40,40,40,40\n" +
+                ",42,,42\n" +
+                "DL,DL,DL,DL\n" +
+                "DLVal,DLVal,DLVal,DLVal\n" +
+                "DL,DL,DL,DL\n";
 
         Assert.assertEquals(expected, os.toString());
     }
@@ -955,8 +955,8 @@ public class TestCSVService extends PortalTestClass{
     public void testCullRowsColIndexesExclusion() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        String expected = "'sample',' gold (au) ppm'\n" +
-                "'40','40'\n";
+        String expected = "sample, gold (au) ppm\n" +
+                "40,40\n";
 
         service.cullEmptyRows(is, os, Arrays.asList(1), false);
         Assert.assertEquals(expected, os.toString());
@@ -966,9 +966,9 @@ public class TestCSVService extends PortalTestClass{
     public void testCullRowsColIndexesInclusion() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        String expected = "'sample',' gold (au) ppm'\n" +
-                "'40','40'\n" +
-                "'','42'\n";
+        String expected = "sample, gold (au) ppm\n" +
+                "40,40\n" +
+                ",42\n";
 
         service.cullEmptyRows(is, os, Arrays.asList(1, 0), true);
         Assert.assertEquals(expected, os.toString());
@@ -978,9 +978,9 @@ public class TestCSVService extends PortalTestClass{
     public void testCullRowsData() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/find-replace-data.csv");
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        String expected = "'sample',' gold (au) ppm'\n" +
-                "'40','40'\n" +
-                "'','42'\n";
+        String expected = "sample, gold (au) ppm\n" +
+                "40,40\n" +
+                ",42\n";
 
         service.cullEmptyRows(is, os, null, true);
         Assert.assertEquals(expected, os.toString());
@@ -990,14 +990,14 @@ public class TestCSVService extends PortalTestClass{
     public void testCullWhenExcludingLots() throws Exception {
         InputStream is = ResourceUtil.loadResourceAsStream("org/auscope/portal/server/web/service/example-data-noheaders.csv");
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        String expected = "'0',' 40',' D/L',' ',' 12'\n" +
-                "'1',' 42',' 102',' 52',' 12'\n" +
-                "'2',' 16',' 103',' 6',' 15'\n" +
-                "'3',' 13',' 101',' 43',' '\n" +
-                "'4',' 16',' 103',' 74',' 16'\n" +
-                "'5',' 48',' 100',' 32',' '\n" +
-                "'6',' 41',' D/L',' 72',' 14'\n" +
-                "'7',' 11',' 101',' 69',' '\n";
+        String expected = "0, 40, D/L, , 12\n" +
+                "1, 42, 102, 52, 12\n" +
+                "2, 16, 103, 6, 15\n" +
+                "3, 13, 101, 43, \n" +
+                "4, 16, 103, 74, 16\n" +
+                "5, 48, 100, 32, \n" +
+                "6, 41, D/L, 72, 14\n" +
+                "7, 11, 101, 69, \n";
 
         service.cullEmptyRows(is, os, Arrays.asList(4, 1, 2, 3), false);
         Assert.assertEquals(expected, os.toString());
@@ -1025,15 +1025,15 @@ public class TestCSVService extends PortalTestClass{
 
         service.scaleColumns(is, os, Arrays.asList(2, 0), Arrays.asList(2.0, 10.0), Arrays.asList("newcol1", "newcol2"));
 
-        String expected = "'newcol2',' gold (au) ppm','newcol1','',' data'\n" +
-                "'0.0',' 40','200.0',' 59',' 12'\n" +
-                "'10.0',' 42','',' 52',' 12'\n" +
-                "'20.0',' 16','206.0',' 6',' 15'\n" +
-                "'30.0',' 13','202.0',' 43',' '\n" +
-                "'40.0',' 16','206.0',' 74',' 16'\n" +
-                "'50.0',' 48','200.0',' 32',' '\n" +
-                "'60.0',' 41',' D/L',' 72',' 14'\n" +
-                "'70.0',' 11','202.0',' 69',' '\n";
+        String expected = "newcol2, gold (au) ppm,newcol1,, data\n" +
+                "0.0, 40,200.0, 59, 12\n" +
+                "10.0, 42,, 52, 12\n" +
+                "20.0, 16,206.0, 6, 15\n" +
+                "30.0, 13,202.0, 43, \n" +
+                "40.0, 16,206.0, 74, 16\n" +
+                "50.0, 48,200.0, 32, \n" +
+                "60.0, 41, D/L, 72, 14\n" +
+                "70.0, 11,202.0, 69, \n";
 
         Assert.assertEquals(expected, os.toString());
     }

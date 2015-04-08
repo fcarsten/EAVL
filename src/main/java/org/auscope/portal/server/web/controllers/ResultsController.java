@@ -114,13 +114,36 @@ public class ResultsController extends BasePortalController {
 
             List<ModelMap> files = new ArrayList<ModelMap>();
             for (StagedFile file : fss.listStageInDirectoryFiles(job)) {
-                if (file.getName().endsWith(EAVLJobConstants.PD_CACHE_SUFFIX)) {
+                if (file.getName().endsWith(EAVLJobConstants.PD_CACHE_SUFFIX) ||
+                    file.getName().equals(EAVLJobConstants.FILE_TEMP_DATA_CSV)) {
                     continue;
                 }
 
                 ModelMap m = new ModelMap();
                 m.put("name", file.getName());
                 m.put("size", file.getFile().length());
+                switch (file.getName()) {
+                case EAVLJobConstants.FILE_DATA_CSV:
+                    m.put("group", "Input Data");
+                    break;
+                case EAVLJobConstants.FILE_VALIDATED_DATA_CSV:
+                    m.put("group", "Validation Results");
+                    break;
+                case EAVLJobConstants.FILE_IMPUTED_CSV:
+                case EAVLJobConstants.FILE_IMPUTED_SCALED_CSV:
+                    m.put("group", "Imputation Results");
+                    break;
+                case EAVLJobConstants.FILE_IMPUTED_CENLR_CSV:
+                case EAVLJobConstants.FILE_KDE_JSON_ALL:
+                case EAVLJobConstants.FILE_KDE_JSON_HIGH:
+                case EAVLJobConstants.FILE_KDE_CSV:
+                    m.put("group", "Conditional Probability Results");
+                    break;
+                default:
+                    m.put("group", "Other Files");
+                    break;
+                }
+
                 files.add(m);
             }
 
