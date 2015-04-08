@@ -20,9 +20,14 @@ public final class EAVLJobConstants {
     public static final String FILE_VALIDATED_DATA_CSV = "data-validated.csv";
 
     /**
-     * The filename of the data.csv AFTER it has been culled and imputed
+     * The filename of the data.csv AFTER it has been culled and imputed but not yet uom scaled
      */
     public static final String FILE_IMPUTED_CSV = "data-imputed.csv";
+
+    /**
+     * The filename of the data.csv AFTER it has been culled, imputed and uom scaled
+     */
+    public static final String FILE_IMPUTED_SCALED_CSV = "data-imputed-scaled.csv";
     /**
      * The filename of the data.csv AFTER it has been imputed and centre log ratio'ed
      */

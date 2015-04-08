@@ -29,6 +29,7 @@ Ext.define('eavl.widgets.JobFileList', {
         var me = this;
         var store = Ext.create('Ext.data.Store', {
             model : 'eavl.models.JobFile',
+            grouper: Ext.create('eavl.widgets.JobFileListGrouper', {property: 'group'}),
             proxy : {
                 type : 'ajax',
                 url : 'results/getFilesForJob.do',
@@ -46,9 +47,14 @@ Ext.define('eavl.widgets.JobFileList', {
             }
         });
         
+        this.groupingFeature = Ext.create('Ext.grid.feature.Grouping',{
+            groupHeaderTpl: '{name}'
+        });
+        
         Ext.apply(config, {
             hideHeaders : true,
             store : store,
+            features: [this.groupingFeature],
             plugins: [{
                 ptype: 'celltips'
             },{
@@ -168,6 +174,22 @@ Ext.define('eavl.widgets.JobFileList', {
         });
 
         this.callParent(arguments);
+        
+        store.on('load', this._storeLoad, this);
+    },
+    
+    _storeLoad : function(store, records, successful) {
+        if (successful) {
+            this.groupingFeature.collapseAll();
+            
+            //Expand the "first" group in the list (that exists)
+            Ext.each(eavl.widgets.JobFileListGrouper.ordering, function(group) {
+                if (group in this.groupingFeature.groupCache) {
+                    this.groupingFeature.expand(group);
+                    return false;
+                }
+            }, this);
+        }
     },
 
     _downloadAllClickHandler : function() {
@@ -210,15 +232,43 @@ Ext.define('eavl.widgets.JobFileList', {
     /**
      * Reload this list with files for the specified job
      *
-     * @param job EAVLJob instance to show
+     * @param job EAVLJob instance to show or null if you wish to clear this list
      */
     showFilesForJob : function(job) {
         this.job = job;
 
         var store = this.getStore();
-        var ajaxProxy = store.getProxy();
-        ajaxProxy.extraParams.jobId = job.get('id');
         store.removeAll(false);
-        store.load();
+        
+        if (job) {
+            var ajaxProxy = store.getProxy();
+            ajaxProxy.extraParams.jobId = job.get('id');
+            store.load();
+        }
+    }
+});
+
+/**
+ * This is our custom grouper to override the ordering of group names
+ */
+Ext.define('eavl.widgets.JobFileListGrouper', {
+    extend: 'Ext.util.Grouper',
+    
+    statics : {
+        ordering : ['Conditional Probability Results', 'Imputation Results', 'Validation Results', 'Input Data'],
+    },
+    
+    sortFn : function(item1, item2) {
+        var index1 = Ext.Array.indexOf(eavl.widgets.JobFileListGrouper.ordering, item1.get('group'));
+        var index2 = Ext.Array.indexOf(eavl.widgets.JobFileListGrouper.ordering, item2.get('group'));
+        
+        if (index1 < 0) {
+            index1 = eavl.widgets.JobFileListGrouper.ordering.length;
+        }
+        if (index2 < 0) {
+            index2 = eavl.widgets.JobFileListGrouper.ordering.length;
+        }
+        
+        return index2 - index1;
     }
 });

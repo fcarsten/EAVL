@@ -57,6 +57,11 @@ Ext.application({
                         listeners: {
                             select: function(sm, job) {
                                 Ext.getCmp('jobfilelist').showFilesForJob(job);
+                            },
+                            jobdelete: function(sm, job) {
+                                Ext.getCmp('jobfilelist').showFilesForJob(null);
+                                Ext.getCmp('filepreviewpanel').clearPreview();
+                                
                             }
                         }
                     },{
@@ -65,13 +70,14 @@ Ext.application({
                         layout: {
                             type: 'vbox',
                             align : 'center',
-                            pack : 'center'
+                            pack : 'center',
+                            enableSplitters: true
                         },
                         items: [{
                             xtype: 'jobfilelist',
                             id: 'jobfilelist',
                             width: '100%',
-                            height: 200,
+                            height: 345,
                             margin: '0 0 10 0',
                             title: 'File Browser',
                             hasDataView: function(job, fileName) {
@@ -94,6 +100,8 @@ Ext.application({
                                     }
                                 }
                             }
+                        },{
+                            xtype: 'splitter'
                         },{
                             xtype: 'filepreviewpanel',
                             id: 'filepreviewpanel',

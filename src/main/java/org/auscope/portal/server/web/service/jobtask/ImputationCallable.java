@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -16,9 +17,16 @@ import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
+import org.n52.wps.client.WPSClientException;
 
+/**
+ * Performs Imputation and Unit of Measure scaling
+ * @author Josh Vote
+ *
+ */
 public class ImputationCallable implements Callable<Object> {
 
     private final Log log = LogFactory.getLog(getClass());
@@ -27,13 +35,23 @@ public class ImputationCallable implements Callable<Object> {
     protected WpsService wpsService;
     protected CSVService csvService;
     protected FileStagingService fss;
+    protected EAVLJobService jobService;
 
-    public ImputationCallable(EAVLJob job, WpsService wpsService, CSVService csvService, FileStagingService fss) {
+    protected String[] uomNameKeys;
+    protected String[] uomChangedNames;
+    protected Double[] uomScaleFactors;
+
+    public ImputationCallable(EAVLJob job, WpsService wpsService, CSVService csvService, FileStagingService fss,
+            EAVLJobService jobService, String[] uomNameKeys, String[] uomChangedNames, Double[] uomScaleFactors) {
         super();
         this.job = job;
         this.wpsService = wpsService;
         this.csvService = csvService;
         this.fss = fss;
+        this.uomNameKeys = uomNameKeys;
+        this.uomChangedNames = uomChangedNames;
+        this.uomScaleFactors = uomScaleFactors;
+        this.jobService = jobService;
     }
 
     protected List<Integer> getExcludedColumns() throws PortalServiceException {
@@ -107,14 +125,63 @@ public class ImputationCallable implements Callable<Object> {
 
             this.fss.deleteStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
 
+            if (uomNameKeys != null && uomNameKeys.length > 0) {
+                performUomScaling();
+            } else {
+                this.fss.renameStageInFile(job, EAVLJobConstants.FILE_IMPUTED_CSV, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+            }
+
             return imputedData;
         } catch (Exception ex) {
             log.error("Imputation Error: ", ex);
+
+            //Record an error message into the job
+            String errorMessage = null;
+            if (ex instanceof WPSClientException) {
+                errorMessage = String.format("The remote computation service has returned an error when processing your data. Please contact EAVL support for more information.\nRemote Error: %1$s", ex.getMessage());
+            } else if (ex instanceof IllegalArgumentException) {
+                errorMessage = String.format("Your selected threshold or proxies are invalid and cannot be processed.\nMessage: %1$s", ex.getMessage());
+            } else if (ex instanceof IOException) {
+                errorMessage = String.format("There was an error communicating to the remote processing service. Please try again later.\nMessage: %1$s", ex.getMessage());
+            } else {
+                errorMessage = String.format("There was an error when performing calculations. Please try again later.\nMessage: %1$s", ex.getMessage());
+            }
+            try {
+                EAVLJob updatedJob = jobService.getJobById(job.getId());
+                updatedJob.setImputationTaskError(errorMessage);
+                jobService.save(updatedJob);
+            } catch (Exception saveEx) {
+                log.error("Unable to write error message to job with ID" + job.getId(), saveEx);
+            }
+
             throw new PortalServiceException("", ex);
         } finally {
             IOUtils.closeQuietly(in2);
             IOUtils.closeQuietly(in);
             IOUtils.closeQuietly(os);
+        }
+    }
+
+    private void performUomScaling() throws PortalServiceException {
+        OutputStream os = null;
+        InputStream is = null;
+
+        try {
+            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            List<Integer> colIndexes = csvService.columnNameToIndex(is, Arrays.asList(uomNameKeys));
+            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            os = fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
+            csvService.scaleColumns(is, os, colIndexes, Arrays.asList(uomScaleFactors), Arrays.asList(uomChangedNames));
+
+            //If our element to predict had a name change, update the job too
+            int index = Arrays.asList(uomNameKeys).indexOf(job.getPredictionParameter());
+            if (!uomChangedNames[index].equals(job.getPredictionParameter())) {
+                job.setPredictionParameter(uomChangedNames[index]);
+                jobService.save(job);
+            }
+        } finally {
+            IOUtils.closeQuietly(os);
+            IOUtils.closeQuietly(is);
         }
     }
 

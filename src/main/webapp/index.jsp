@@ -7,13 +7,20 @@
         
         <jsp:include page="jsimports.htm"/>
         
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowLocationPanel.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowSelectionPanel.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowInspectPanel.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/EAVL-Common.css">
+        
+        <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
+        <script type="text/javascript" src="js/eavl/models/Workflow.js"></script>
+        <script type="text/javascript" src="js/eavl/models/Contact.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/WorkflowSelectionPanel.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/WorkflowInspectPanel.js"></script>
+        <script type="text/javascript" src="js/eavl/Index-UI.js"></script>
     </head>
     <body>
-        <h1>Early Access Virtual Laboratory</h1>
         
-        <p>This page is still a work in progress. It will contain links to general EAVL info and how to get started</p>
-        
-        <p><a href="upload.html">Go to Upload Page</a></p>
     </body>
 </html>
 

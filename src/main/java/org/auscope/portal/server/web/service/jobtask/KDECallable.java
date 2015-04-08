@@ -23,6 +23,7 @@ import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
+import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.WpsService;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.n52.wps.client.WPSClientException;
@@ -40,14 +41,16 @@ public class KDECallable implements Callable<Object> {
     protected WpsService wpsService;
     protected CSVService csvService;
     protected FileStagingService fss;
+    protected EAVLJobService jobService;
 
     public KDECallable(EAVLJob job, WpsService wpsService,
-            CSVService csvService, FileStagingService fss) {
+            CSVService csvService, FileStagingService fss, EAVLJobService jobService) {
         super();
         this.job = job;
         this.wpsService = wpsService;
         this.csvService = csvService;
         this.fss = fss;
+        this.jobService = jobService;
     }
 
     protected List<Integer> getProxyCols(String file)
@@ -70,12 +73,12 @@ public class KDECallable implements Callable<Object> {
         List<String> savedParamList = new ArrayList<String>(
                 job.getSavedParameters());
         InputStream in = this.fss.readFile(job,
-                EAVLJobConstants.FILE_IMPUTED_CSV);
+                EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
         List<Integer> savedParamIndexes = csvService.columnNameToIndex(in,
                 savedParamList);
         exclusions.addAll(savedParamIndexes);
 
-        in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+        in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
         Integer index = csvService.columnNameToIndex(in,
                 job.getHoleIdParameter());
         if (index != null && !exclusions.contains(index)) {
@@ -152,7 +155,7 @@ public class KDECallable implements Callable<Object> {
 
             List<Integer> nonCompCols = getExcludedColumns();
 
-            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             Integer predictionIndex = csvService.columnNameToIndex(in, job.getPredictionParameter());
             centredLogRatio(nonCompCols, predictionIndex);
 
@@ -196,13 +199,33 @@ public class KDECallable implements Callable<Object> {
 
             // Merge that fake CSV file with the imputed CSV data
             in = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-            in2 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            in2 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_CSV);
             csvService.mergeFiles(in, in2, os, null, null);
 
             return "";
         } catch (Exception ex) {
-            log.error("Imputation Error: ", ex);
+            log.error("KDE Error: ", ex);
+
+            //Record an error message into the job
+            String errorMessage = null;
+            if (ex instanceof WPSClientException) {
+                errorMessage = String.format("The remote computation service has returned an error when processing your data. Please contact EAVL support for more information.\nRemote Error: %1$s", ex.getMessage());
+            } else if (ex instanceof IllegalArgumentException) {
+                errorMessage = String.format("Your selected threshold or proxies are invalid and cannot be processed.\nMessage: %1$s", ex.getMessage());
+            } else if (ex instanceof IOException) {
+                errorMessage = String.format("There was an error communicating to the remote processing service. Please try again later.\nMessage: %1$s", ex.getMessage());
+            } else {
+                errorMessage = String.format("There was an error when performing calculations. Please try again later.\nMessage: %1$s", ex.getMessage());
+            }
+            try {
+                EAVLJob updatedJob = jobService.getJobById(job.getId());
+                updatedJob.setKdeTaskError(errorMessage);
+                jobService.save(updatedJob);
+            } catch (Exception saveEx) {
+                log.error("Unable to write error message to job with ID" + job.getId(), saveEx);
+            }
+
             throw new PortalServiceException("", ex);
         } finally {
             IOUtils.closeQuietly(writer);
@@ -234,7 +257,7 @@ public class KDECallable implements Callable<Object> {
         excludedColumns.add(predictionColumnIndex);
 
         try {
-            in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+            in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
             double[][] imputedData = csvService.getRawData(in1, excludedColumns, false);
 
             checkDataBeforeCLR(imputedData);
@@ -248,12 +271,12 @@ public class KDECallable implements Callable<Object> {
                     double[][] cenlrImputedData = wpsClient.cenLR(imputedData);
 
                     // Write the cenlr imputed data to a temporary file
-                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
                     os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
                     this.csvService.writeRawData(in1, os, cenlrImputedData, excludedColumns, false);
 
                     //merge the cenlr data with the prediction column (which hasn't been cenlr'd)
-                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CSV);
+                    in1 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
                     in2 = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
                     os = this.fss.writeFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
                     this.csvService.mergeFiles(in1, in2, os, Arrays.asList(predictionColumnIndex), null);

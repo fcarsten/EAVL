@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,6 +79,12 @@ public class ResultsController extends BasePortalController {
         try {
             List<EAVLJob> jobs = jobService.getJobsForUser(request, user);
             List<ModelMap> jobModels = new ArrayList<ModelMap>(jobs.size());
+            Collections.sort(jobs, new Comparator<EAVLJob>() {
+                @Override
+                public int compare(EAVLJob o1, EAVLJob o2) {
+                    return o2.getId().compareTo(o1.getId());
+                }
+            });
             for (EAVLJob job : jobs) {
                 jobModels.add(viewFactory.toView(job));
             }
@@ -106,13 +114,36 @@ public class ResultsController extends BasePortalController {
 
             List<ModelMap> files = new ArrayList<ModelMap>();
             for (StagedFile file : fss.listStageInDirectoryFiles(job)) {
-                if (file.getName().endsWith(EAVLJobConstants.PD_CACHE_SUFFIX)) {
+                if (file.getName().endsWith(EAVLJobConstants.PD_CACHE_SUFFIX) ||
+                    file.getName().equals(EAVLJobConstants.FILE_TEMP_DATA_CSV)) {
                     continue;
                 }
 
                 ModelMap m = new ModelMap();
                 m.put("name", file.getName());
                 m.put("size", file.getFile().length());
+                switch (file.getName()) {
+                case EAVLJobConstants.FILE_DATA_CSV:
+                    m.put("group", "Input Data");
+                    break;
+                case EAVLJobConstants.FILE_VALIDATED_DATA_CSV:
+                    m.put("group", "Validation Results");
+                    break;
+                case EAVLJobConstants.FILE_IMPUTED_CSV:
+                case EAVLJobConstants.FILE_IMPUTED_SCALED_CSV:
+                    m.put("group", "Imputation Results");
+                    break;
+                case EAVLJobConstants.FILE_IMPUTED_CENLR_CSV:
+                case EAVLJobConstants.FILE_KDE_JSON_ALL:
+                case EAVLJobConstants.FILE_KDE_JSON_HIGH:
+                case EAVLJobConstants.FILE_KDE_CSV:
+                    m.put("group", "Conditional Probability Results");
+                    break;
+                default:
+                    m.put("group", "Other Files");
+                    break;
+                }
+
                 files.add(m);
             }
 
@@ -206,7 +237,7 @@ public class ResultsController extends BasePortalController {
         //Create a filename that is semi-unique to the job (and slightly human readable)
         String downloadFileName = "";
         if (fileNames.length == 1) {
-            downloadFileName = fileNames[0];
+            downloadFileName = fileNames[0] + ".zip";
         } else {
             String jobName = job.getName() == null ? "" : job.getName();
             Date submitDate = job.getSubmitDate();
@@ -367,6 +398,24 @@ public class ResultsController extends BasePortalController {
             return generateJSONResponseMAV(false);
         } finally {
             IOUtils.closeQuietly(is);
+        }
+    }
+
+    @RequestMapping("/deleteJob.do")
+    public ModelAndView deleteJob(HttpServletRequest request,
+            @AuthenticationPrincipal EavlUser user,
+            @RequestParam(value="jobId") Integer jobId) {
+
+        try {
+            EAVLJob job = jobService.getUserJobById(request, user, jobId);
+
+            jobService.delete(job);
+            fss.deleteStageInDirectory(job);
+
+            return generateJSONResponseMAV(true);
+        } catch (PortalServiceException e) {
+            log.error(String.format("Unable to delete job %1$s for user %2$s", jobId, user), e);
+            return generateJSONResponseMAV(false);
         }
     }
 }

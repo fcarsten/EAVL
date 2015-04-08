@@ -3,7 +3,6 @@ package org.auscope.portal.server.web.controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -85,9 +84,11 @@ public class ValidationController extends BasePortalController {
 
 
         EAVLJob job;
+        boolean newJob = false;
         try {
             if (jobId == null) {
                 job = jobService.createJobForSession(request, user);
+                newJob = true;
             } else {
                 job = jobService.getUserJobById(request, user, jobId);
             }
@@ -102,7 +103,15 @@ public class ValidationController extends BasePortalController {
         //Handle incoming file
         StagedFile file = null;
         try {
-            if (!fss.stageInDirectoryExists(job)) {
+            if (fss.stageInDirectoryExists(job)) {
+                if (newJob) {
+                    //Edge case - should only occur if the DB is changed and the file
+                    //cache is not cleared before using (resulting in ID collisions)
+                    //See EAVL-54
+                    fss.deleteStageInDirectory(job);
+                    fss.generateStageInDirectory(job);
+                }
+            } else {
                 fss.generateStageInDirectory(job);
             }
             file = fss.handleFileUpload(job, (MultipartHttpServletRequest) request);
@@ -323,23 +332,6 @@ public class ValidationController extends BasePortalController {
         try {
             EAVLJob job = jobService.getJobForSession(request, user);
 
-            if (uomNameKeys != null && uomNameKeys.length > 0) {
-                is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-                List<Integer> colIndexes = csvService.columnNameToIndex(is, Arrays.asList(uomNameKeys));
-                is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
-                os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
-                csvService.scaleColumns(is, os, colIndexes, Arrays.asList(uomScaleFactors), Arrays.asList(uomChangedNames));
-                fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV, EAVLJobConstants.FILE_DATA_CSV);
-                pdService.purgeCache(job, EAVLJobConstants.FILE_DATA_CSV);
-
-                //If our element to predict had a name change, update the job too
-                int index = Arrays.asList(uomNameKeys).indexOf(job.getPredictionParameter());
-                if (!uomChangedNames[index].equals(job.getPredictionParameter())) {
-                    job.setPredictionParameter(uomChangedNames[index]);
-                    jobService.save(job);
-                }
-            }
-
             if (delColIndexes != null && delColIndexes.length > 0) {
                 os = fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
                 is = fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
@@ -349,10 +341,11 @@ public class ValidationController extends BasePortalController {
             }
 
             JobTask newTask = new JobTask(job);
-            newTask.setTask(new ImputationCallable(job, wpsService, csvService, fss));
+            newTask.setTask(new ImputationCallable(job, wpsService, csvService, fss, jobService, uomNameKeys, uomChangedNames, uomScaleFactors));
             String taskId = jobTaskService.submit(newTask);
 
             job.setImputationTaskId(taskId);
+            job.setImputationTaskError(null);
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");

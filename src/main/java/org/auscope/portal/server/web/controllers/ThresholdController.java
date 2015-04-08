@@ -55,8 +55,8 @@ public class ThresholdController extends BasePortalController {
 
 
 
-            if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_CSV)) {
-                response.put("parameterDetails", pdService.getParameterDetails(job, EAVLJobConstants.FILE_IMPUTED_CSV));
+            if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV)) {
+                response.put("parameterDetails", pdService.getParameterDetails(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV));
             }
             response.put("job", viewFactory.toView(job));
 

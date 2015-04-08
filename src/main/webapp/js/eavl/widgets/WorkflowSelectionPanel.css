@@ -1,0 +1,63 @@
+.wfsp-container {
+	
+}
+
+.wfsp-workflow {
+	display: inline-block;
+	margin: 10px 15px 10px 15px;
+	width: 256px;
+	height: 256px;
+	background-size: 256px 256px;]
+	-moz-border-radius: 15px;
+    border-radius: 15px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #1368AE;
+    padding: 5px 15px 5px 15px;
+    cursor: pointer;
+}
+
+.wfsp-title {
+	
+}
+
+.wfsp-name {
+    color: black;
+    font-size: 16px;
+}
+
+.wfsp-version {
+    color: #808080;
+    font-size: 12px;
+}
+
+/*Sourced originally from https://github.com/IanLunn/Hover/blob/master/css/hover.css*/
+/* Grow */
+.hvr-grow {
+	vertical-align: middle;
+	-webkit-transform: translateZ(0);
+	transform: translateZ(0);
+	box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-transition-duration: 0.2s;
+	transition-duration: 0.2s;
+	-webkit-transition-property: transform;
+	transition-property: transform;
+	
+	filter: none; 
+	-webkit-filter: blur(0px); 
+	-moz-filter: blur(0px); 
+	-ms-filter: blur(0px);
+	filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='0');
+}
+.hvr-grow:hover, .hvr-grow:focus, .hvr-grow:active {
+    filter: none; 
+    -webkit-filter: blur(0px); 
+    -moz-filter: blur(0px); 
+    -ms-filter: blur(0px);
+    filter:progid:DXImageTransform.Microsoft.Blur(PixelRadius='0');
+    -webkit-transform: scale(1.05);
+    transform: scale(1.05);
+}

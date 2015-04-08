@@ -48,7 +48,7 @@ public class ViewEAVLJobFactory {
             status = STATUS_KDE_ERROR;
         } else if (jobTaskService.isExecuting(job.getImputationTaskId())) {
             status = STATUS_IMPUTING;
-        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_CSV)) {
+        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV)) {
             if (job.getPredictionCutoff() == null) {
                 status = STATUS_THRESHOLD;
             } else {
@@ -69,7 +69,9 @@ public class ViewEAVLJobFactory {
         m.put("savedParameters", job.getSavedParameters());
         m.put("proxyParameters", job.getProxyParameters());
         m.put("imputationTaskId", job.getImputationTaskId());
+        m.put("imputationTaskError", job.getImputationTaskError());
         m.put("kdeTaskId", job.getKdeTaskId());
+        m.put("kdeTaskError", job.getKdeTaskError());
         m.put("holeIdParameter", job.getHoleIdParameter());
 
         return m;

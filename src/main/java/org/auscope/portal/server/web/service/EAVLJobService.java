@@ -33,10 +33,20 @@ public class EAVLJobService {
     private JobRepository persistor;
 
     @Autowired
+    private JobTaskService jobTaskService;
+
+    @Autowired
     public EAVLJobService(FileStagingService fss) {
     }
 
-    private EAVLJob getJobById(Integer id) {
+    /**
+     * Returns the EAVLJob with the specified ID. No checking for user ownership is made.
+     *
+     * Returns null if the job ID DNE
+     * @param id
+     * @return
+     */
+    public EAVLJob getJobById(Integer id) {
         if (id == null) {
             return null;
         }
@@ -105,6 +115,7 @@ public class EAVLJobService {
      * @throws PortalServiceException
      */
     public void delete(EAVLJob job) throws PortalServiceException {
+        jobTaskService.removeTasksForJob(job);
         persistor.delete(job);
     }
 

@@ -14,12 +14,28 @@ Ext.define('eavl.widgets.EAVLJobList', {
      *
      * Adds the following events
      * {
-     *
+     *  jobdelete : function(this, job) - fired whenever a job is succesfully deleted
      * }
      */
     constructor : function(config) {
+        this.deleteJobAction = new Ext.Action({
+            text: 'Delete',
+            iconCls: 'joblist-trash-icon',
+            cls: 'joblist-inline-button',
+            scope : this,
+            handler: this._deleteClick
+        });
+        
+        this.errorMessageAction = new Ext.Action({
+            text: 'Error Message',
+            iconCls: 'joblist-error-icon',
+            cls: 'joblist-inline-button',
+            scope : this,
+            handler: this._errorMessageClick
+        });
+        
+        
         this.emptyText = config.emptyText ? config.emptyText : "";
-
 
         var store = Ext.create('Ext.data.Store', {
             model : 'eavl.models.EAVLJob',
@@ -29,6 +45,11 @@ Ext.define('eavl.widgets.EAVLJobList', {
         Ext.apply(config, {
             hideHeaders : true,
             store : store,
+            plugins : [{
+                ptype : 'inlinecontextmenu',
+                align : 'right',
+                actions: [this.errorMessageAction, this.deleteJobAction]
+            }],
             columns : [{
                 dataIndex : 'name',
                 flex : 1,
@@ -103,5 +124,95 @@ Ext.define('eavl.widgets.EAVLJobList', {
         });
 
         this.callParent(arguments);
+        
+        this.on('select', this._rowSelect, this);
+    },
+    
+    /**
+     * Turns on/off various inline selection actions based on the selected job
+     */ 
+    _rowSelect : function() {
+        var selection = this.getSelection();
+        if (!selection) {
+            return;
+        }
+        
+        var job = selection[0];
+        if (job.get('kdeTaskError') || job.get('imputationTaskError')) {
+            this.errorMessageAction.show();
+        } else {
+            this.errorMessageAction.hide();
+        }
+    },
+    
+    _errorMessageClick : function() {
+        var selection = this.getSelection();
+        if (!selection) {
+            return;
+        }
+        
+        var job = selection[0];
+        var message = job.get('kdeTaskError') ? job.get('kdeTaskError') : job.get('imputationTaskError');
+        if (!message) {
+            return;
+        }
+        Ext.create('eavl.widgets.ErrorWindow', {
+            title: 'Error Message',
+            message: message,
+            job: job
+        }).show();
+    },
+    
+    _deleteJob : function(job) {
+        var mask = new Ext.LoadMask({
+            msg    : 'Deleting job...',
+            target : this
+        });
+        mask.show();
+        
+        Ext.Ajax.request({
+            url: 'results/deleteJob.do',
+            params: {
+                jobId: job.get('id')
+            },
+            scope: this,
+            callback: function(options, success, response) {
+                mask.hide();
+                mask.destroy();
+                
+                if (!success) {
+                    Ext.Msg.alert('Error', 'Error contacting EAVL server. Please try refreshing the page.');
+                    return;
+                }
+                
+                if (!Ext.JSON.decode(response.responseText).success) {
+                    Ext.Msg.alert('Error', 'Error deleting job. Please try refreshing the page before retrying.');
+                    return;
+                }
+                
+                this.getStore().remove(job);
+                this.fireEvent('jobdelete', this, job);
+            }
+        });
+    },
+    
+    _deleteClick : function() {
+        var selection = this.getSelection();
+        if (!selection) {
+            return;
+        }
+        
+        Ext.Msg.show({
+            title:'Confirm deletion',
+            message: 'You are about to completely delete this job and all input/output files. Are you sure you wish to continue?',
+            buttons: Ext.Msg.YESNO,
+            icon: Ext.Msg.ERROR,
+            scope: this,
+            fn: function(btn) {
+                if (btn === 'yes') {
+                    this._deleteJob(selection[0]);
+                }
+            }
+        });        
     }
 });
