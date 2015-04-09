@@ -37,11 +37,11 @@ Ext.application({
             var p3Value = null;
             if (initialParams && initialParams.proxyParameters) {
                 Ext.each(records, function(pd) {
-                    if (pd.get('name') === initialParams.proxyParameters[0]) {
+                    if (pd.get('name') === initialParams.proxyParameters[0].numerator) {
                         p1Value = pd;
-                    } else if (pd.get('name') === initialParams.proxyParameters[1]) {
+                    } else if (pd.get('name') === initialParams.proxyParameters[1].numerator) {
                         p2Value = pd;
-                    } else if (pd.get('name') === initialParams.proxyParameters[2]) {
+                    } else if (pd.get('name') === initialParams.proxyParameters[2].numerator) {
                         p3Value = pd;
                     }
                 });
@@ -50,10 +50,26 @@ Ext.application({
             var p1Denoms = [];
             var p2Denoms = [];
             var p3Denoms = [];
-            if (initialParams && initialParams.proxyDenominators) {
-                p1Denoms = initialParams.proxyDenominators[0];
-                p2Denoms = initialParams.proxyDenominators[1];
-                p3Denoms = initialParams.proxyDenominators[2];
+            if (initialParams && initialParams.proxyParameters) {
+                
+                Ext.each(initialParams.proxyParameters[0].denom, function(pdName) {
+                    var pd = eavl.models.ParameterDetails.extractFromArray(records, pdName, true);
+                    if (pd) {
+                        p1Denoms.push(pd);
+                    }
+                });
+                Ext.each(initialParams.proxyParameters[1].denom, function(pdName) {
+                    var pd = eavl.models.ParameterDetails.extractFromArray(records, pdName, true);
+                    if (pd) {
+                        p2Denoms.push(pd);
+                    }
+                });
+                Ext.each(initialParams.proxyParameters[2].denom, function(pdName) {
+                    var pd = eavl.models.ParameterDetails.extractFromArray(records, pdName, true);
+                    if (pd) {
+                        p3Denoms.push(pd);
+                    }
+                });
             }
 
             Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {

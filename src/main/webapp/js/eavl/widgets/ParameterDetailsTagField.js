@@ -85,6 +85,12 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
         this.callParent(arguments);
         
         this.on('change', this._emptyTextWorkaround);
+        this.on('render', function() {
+            //Another extjs empty text workaround...
+            if (config.value) {
+                this._emptyTextWorkaround(this, config.value, []);
+            }
+        }, this);
     },
     
     _handleClearClicked : function() {
