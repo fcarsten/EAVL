@@ -256,9 +256,7 @@ public class KDECallable implements Callable<Object> {
 
             int index=1;
             for (Proxy proxy : proxies) {
-                List<String> proxyNames = new ArrayList<>();
-                proxyNames.add(proxy.getNumerator());
-                proxyNames.addAll(proxy.getDenom());
+                List<String> proxyNames = new ArrayList<>(proxy.getDenom());
 
                 in = this.fss.readFile(job,
                         EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
@@ -267,7 +265,8 @@ public class KDECallable implements Callable<Object> {
                 IOUtils.closeQuietly(in);
 
                 cenlrHeader[index] = proxy.getNumerator();
-                cenlrData[index++] = CSVService.extractColumn(centredLogRatio(clrIndeces), 0);
+                int proxyNameIndex =  proxyNames.indexOf(proxy.getNumerator());
+                cenlrData[index++] = CSVService.extractColumn(centredLogRatio(clrIndeces), proxyNameIndex);
             }
 
             cenlrData = CSVService.transpose(cenlrData);
