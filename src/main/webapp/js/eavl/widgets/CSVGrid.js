@@ -165,6 +165,13 @@ Ext.define('eavl.widgets.CSVGrid', {
     },
 
     /**
+     * Turns an arbitrary string into something that is safe to use for an ExtJS item ID
+     */
+    _extjsSafeId : function(name) {
+        return 'csv-' + name.replace(/ /g, '_').replace(/[^a-zA-Z0-9_\-]/g,'');
+    },
+    
+    /**
      * Generates a grid column for the specified parameterDetails (does not add the column to this grid)
      *
      * @param parameterDetails a eavl.models.ParameterDetails object
@@ -172,7 +179,7 @@ Ext.define('eavl.widgets.CSVGrid', {
     generateColumnForParameterDetails : function(parameterDetails) {
         var name = parameterDetails.get('name');
         return Ext.create('Ext.grid.column.Column', {
-            itemId: name.replace(/ /g, "_"),
+            itemId: this._extjsSafeId(name),
             dataIndex: name,
             renderer : Ext.bind(this._handleCellRender, this),
             header : this._parameterDetailsToColHeader(parameterDetails), sortable: false
@@ -217,7 +224,7 @@ Ext.define('eavl.widgets.CSVGrid', {
         var name = column.getItemId();
 
         for (var i = 0; i < this.parameterDetails.length; i++) {
-            if (this.parameterDetails[i].get('name').replace(/ /g, "_") === name) {
+            if (this._extjsSafeId(this.parameterDetails[i].get('name')) === name) {
                 return this.parameterDetails[i];
             }
         }
