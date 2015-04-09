@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
@@ -12,11 +13,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.auscope.portal.core.cloud.StagedFileOwner;
 import org.auscope.portal.server.security.oauth2.EavlUser;
+import org.auscope.portal.server.web.controllers.Proxy;
 
 /**
  * EAVL Job
@@ -49,14 +52,10 @@ public class EAVLJob implements StagedFileOwner {
     }
 
     @ElementCollection(fetch = FetchType.EAGER)
-//    @CollectionTable(name="job_saved_params", joinColumns=@JoinColumn(name="job_id"))
-//    @Column(name="saved_params")
     private Set<String> savedParameters;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-//    @CollectionTable(name="job_proxy_params", joinColumns=@JoinColumn(name="job_id"))
-//    @Column(name="proxy_params")
-    private Set<String> proxyParameters;
+    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    private Set<Proxy> proxyParameters;
 
     @Basic
     private String imputationTaskId;
@@ -249,7 +248,7 @@ public class EAVLJob implements StagedFileOwner {
      * Gets the set of Proxy Parameters chosen for this job (or null if they haven't been chosen yet)
      * @return
      */
-    public Set<String> getProxyParameters() {
+    public Set<Proxy> getProxyParameters() {
         return proxyParameters;
     }
 
@@ -257,7 +256,7 @@ public class EAVLJob implements StagedFileOwner {
      * Sets the set of Proxy Parameters chosen for this job (or null if they haven't been chosen yet)
      * @param proxyParameters
      */
-    public void setProxyParameters(Set<String> proxyParameters) {
+    public void setProxyParameters(Set<Proxy> proxyParameters) {
         this.proxyParameters = proxyParameters;
     }
 

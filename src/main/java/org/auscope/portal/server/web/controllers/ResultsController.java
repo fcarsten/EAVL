@@ -193,13 +193,13 @@ public class ResultsController extends BasePortalController {
                 responsePoints.add(point);
             }
 
-            Iterator<String> proxies = job.getProxyParameters().iterator(); //TODO: This may potentially fail due to set order being undefined
+            Iterator<Proxy> proxies = job.getProxyParameters().iterator(); //TODO: This may potentially fail due to set order being undefined
 
             ModelMap response = new ModelMap();
             response.put("points", responsePoints);
-            response.put("xLabel", proxies.next());
-            response.put("yLabel", proxies.next());
-            response.put("zLabel", proxies.next());
+            response.put("xLabel", proxies.next().getNumerator());
+            response.put("yLabel", proxies.next().getNumerator());
+            response.put("zLabel", proxies.next().getNumerator());
 
             return generateJSONResponseMAV(true, response, "");
         } catch (Exception ex) {

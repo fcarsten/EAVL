@@ -1,5 +1,7 @@
 package org.auscope.portal.server.web.controllers;
 
+import java.util.HashSet;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.auscope.portal.core.server.controllers.BasePortalController;
@@ -19,8 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.google.common.collect.Sets;
 
 @Controller
 @RequestMapping("setproxy")
@@ -44,7 +44,12 @@ public class SetProxyController extends BasePortalController {
     @RequestMapping("saveAndSubmitProxySelection.do")
     public ModelAndView saveAndSubmitProxySelection(HttpServletRequest request,
             @AuthenticationPrincipal EavlUser user,
-            @RequestParam("proxy") String[] proxies) {
+            @RequestParam("numerator1") String numerator1,
+            @RequestParam("denom1") String[] denom1,
+            @RequestParam("numerator2") String numerator2,
+            @RequestParam("denom2") String[] denom2,
+            @RequestParam("numerator3") String numerator3,
+            @RequestParam("denom3") String[] denom3) {
 
         EAVLJob job;
         try {
@@ -54,8 +59,12 @@ public class SetProxyController extends BasePortalController {
             return generateJSONResponseMAV(false);
         }
 
+        HashSet<Proxy> proxies = new HashSet<Proxy>();
+        proxies.add(new Proxy(numerator1, denom1));
+        proxies.add(new Proxy(numerator2, denom2));
+        proxies.add(new Proxy(numerator3, denom3));
         try {
-            job.setProxyParameters(Sets.newHashSet(proxies));
+            job.setProxyParameters(proxies);
             JobTask newTask = new JobTask(job);
             newTask.setTask(new KDECallable(job, wpsService, csvService, fss, jobService));
             String taskId = jobTaskService.submit(newTask);
