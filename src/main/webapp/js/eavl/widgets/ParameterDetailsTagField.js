@@ -102,6 +102,7 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
     //Workaround for empty text not getting removed
     //see http://www.sencha.com/forum/showthread.php?285390
     _emptyTextWorkaround : function(me, newValue, oldValue) {
+        newValue = this.getValue(); //Another workaround for out of order events...
         if (!Ext.isEmpty(newValue) && Ext.isEmpty(oldValue)) {
             me.getEl().down('.x-tagfield-input div.x-form-empty-field').setStyle({'display' : 'none'});
         } else if (Ext.isEmpty(newValue) && !Ext.isEmpty(oldValue)) {

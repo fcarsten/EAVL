@@ -262,7 +262,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                     width: '100%',
                     height: 45,
                     itemId : 'pdfield',
-                    emptyText : 'Select a numerator for the proxy ratio.',
+                    emptyText : 'Select a proxy.',
                     margin: '0 0 10 0',
                     allowBlank: false,
                     parameterDetails: allPds,
@@ -277,6 +277,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                             if (denoms.indexOf(newValue) < 0) {
                                 denoms = Ext.Array.clone(denoms); //Don't insert directly into internal array
                                 denoms.push(newValue);
+                                denoms = Ext.Array.remove(denoms, oldValue);
                                 tagField.setValue(denoms);
                             }
                         }
@@ -286,11 +287,25 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                     width: '100%',
                     title: config.title,
                     itemId : 'pdtagfield',
-                    emptyText : 'Select denominator(s) for the proxy ratio.',
+                    emptyText : 'Select sub composition(s) for the proxy ratio.',
                     margin: '0 0 10 0',
                     allowBlank: false,
                     value: denom,
-                    parameterDetails: allPds
+                    parameterDetails: allPds, 
+                    listeners: {
+                        change: function(tagfield, newValue, oldValue) {
+                            //The denominator must ALWAYS have a tag matching the numerator
+                            var pdField = tagfield.ownerCt.ownerCt.down("#pdfield");
+                            var numName = pdField.getValue();
+                            if (numName) {
+                                if (!Ext.Array.contains(newValue, numName)) {
+                                    updatedValues = Ext.Array.clone(newValue);
+                                    updatedValues.push(numName);
+                                    tagfield.setValue(updatedValues);
+                                }
+                            }
+                        }
+                    }
                 }]
             },{
                 xtype: 'proxypanel',
