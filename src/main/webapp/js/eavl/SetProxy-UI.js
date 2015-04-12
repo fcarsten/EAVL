@@ -35,7 +35,7 @@ Ext.application({
             var p1Value = null;
             var p2Value = null;
             var p3Value = null;
-            if (initialParams && initialParams.proxyParameters) {
+            if (initialParams && !Ext.isEmpty(initialParams.proxyParameters)) {
                 Ext.each(records, function(pd) {
                     if (pd.get('name') === initialParams.proxyParameters[0].numerator) {
                         p1Value = pd;
@@ -50,7 +50,7 @@ Ext.application({
             var p1Denoms = [];
             var p2Denoms = [];
             var p3Denoms = [];
-            if (initialParams && initialParams.proxyParameters) {
+            if (initialParams && !Ext.isEmpty(initialParams.proxyParameters)) {
                 
                 Ext.each(initialParams.proxyParameters[0].denom, function(pdName) {
                     var pd = eavl.models.ParameterDetails.extractFromArray(records, pdName, true);
