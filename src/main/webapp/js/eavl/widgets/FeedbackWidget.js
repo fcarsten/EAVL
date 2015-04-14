@@ -16,6 +16,7 @@ Ext.define('eavl.widgets.FeedbackWidget', {
     constructor : function(config) {
         this.callParent(arguments);
         
-        Feedback({h2cPath:'js/html2canvas/html2canvas.js'});
-    },
+        Feedback({h2cPath:'js/html2canvas/html2canvas.js',
+            url: 'feedback/sendFeedback.do'});
+    }
 });
