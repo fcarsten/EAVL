@@ -18,6 +18,7 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/FeedbackWidget.css">
         
         <script type="text/javascript" src="js/eavl/models/ParameterDetails.js"></script>
         <script type="text/javascript" src="js/eavl/models/EAVLJob.js"></script>
@@ -33,6 +34,7 @@
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/BaseParameterDetailsChart.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/ProbabilityDensityFunctionChart.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/FeedbackWidget.js"></script>
         <script type="text/javascript" src="js/eavl/Identify-UI.js"></script>
     </head>
     <body>

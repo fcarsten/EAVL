@@ -20,7 +20,7 @@ Ext.application({
         //Called if the init code fails badly
         var initError = function() {
             eavl.widgets.SplashScreen.hideLoadingScreen();
-            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting ' + eavl.widgets.FeedbackWidget.CONTACT + ' if the problem persists.');
         };
 
         var initNotReady = function(message, url) {

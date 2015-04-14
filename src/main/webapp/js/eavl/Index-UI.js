@@ -128,7 +128,7 @@ Ext.application({
                                             if (wf.get('resultsLink')) {
                                                 document.location.href = wf.get('resultsLink');
                                             } else {
-                                                Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                                Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact " + eavl.widgets.FeedbackWidget.CONTACT + ".");
                                             }
                                         }
                                     },{
@@ -140,7 +140,7 @@ Ext.application({
                                             if (wf.get('initialLink')) {
                                                 document.location.href = wf.get('initialLink');
                                             } else {
-                                                Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact cg-admin@csiro.au.");
+                                                Ext.Msg.alert('Coming soon...', "Thankyou for your interest in this workflow. The Early Access Virtual Laboratory is still in development and this workflow is not yet complete. If you\'d like more information please contact " + eavl.widgets.FeedbackWidget.CONTACT + ".");
                                             }
                                         }
                                     }]
