@@ -112,6 +112,8 @@ Ext.application({
                     }]
                 }]
             });
+            
+            var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
         };
 
         var jobStore = Ext.create('Ext.data.Store', {

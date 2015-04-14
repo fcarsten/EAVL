@@ -35,6 +35,9 @@
 			}
         </style>
         
+        <script type="text/javascript" src="js/feedback.js/feedback.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="js/feedback.js/feedback.css">
+        
         <script src="portal-core/js/d3/d3.min.js" type="text/javascript" ></script>
         <script src="portal-core/js/threejs/three.min.js" type="text/javascript"></script>
         <script src="portal-core/js/threejs/controls/OrbitControls.js" type="text/javascript"></script>

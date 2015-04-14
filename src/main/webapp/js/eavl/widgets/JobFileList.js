@@ -61,7 +61,7 @@ Ext.define('eavl.widgets.JobFileList', {
                 ptype: 'headericons',
                 icons: [{
                     location: 'left',
-                    src: 'img/download.svg',
+                    src: 'img/download.png',
                     tip: 'Click to download all files as a ZIP',
                     width: 32,
                     height: 32,
@@ -213,7 +213,7 @@ Ext.define('eavl.widgets.JobFileList', {
     _downloadClickHandler :  function(value, record, column, tip) {
         portal.util.FileDownloader.downloadFile("results/downloadFiles.do", {
             jobId : this.job.get('id'),
-            name : record.get('name')
+            name : [record.get('name')]
         });
     },
 
