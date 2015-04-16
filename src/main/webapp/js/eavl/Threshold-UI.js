@@ -105,6 +105,8 @@ Ext.application({
                 }]
             });
         };
+        
+        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
 
         //Before loading
         Ext.Ajax.request({

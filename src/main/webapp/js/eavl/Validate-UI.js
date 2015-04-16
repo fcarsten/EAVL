@@ -137,7 +137,7 @@ Ext.application({
                         align : 'stretch',
                         pack : 'center'
                     },
-                    bodyPadding : '10 10 10 10',
+                    bodyPadding : '10 40 10 40',
                     items: [{
                         xtype: 'container',
                         layout: {
@@ -236,7 +236,8 @@ Ext.application({
             });
         };
 
-
+        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
+        
         var pdStore = Ext.create('Ext.data.Store', {
             model : 'eavl.models.ParameterDetails',
             autoLoad : true,

@@ -112,7 +112,7 @@ Ext.application({
                         align : 'stretch',
                         pack : 'center'
                     },
-                    bodyPadding : '10 10 10 10',
+                    bodyPadding : '10 40 10 40',
                     items: [{
                         id : 'noncomppanel',
                         xtype : 'pdlist',
@@ -237,6 +237,8 @@ Ext.application({
             });
         };
 
+        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
+        
         Ext.Ajax.request({
             url : 'identify/getConfig.do',
             callback : function(options, success, response) {

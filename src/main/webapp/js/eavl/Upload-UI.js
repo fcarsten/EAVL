@@ -136,7 +136,6 @@ Ext.application({
             }]
         });
 
-
-
+        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
     }
 });
