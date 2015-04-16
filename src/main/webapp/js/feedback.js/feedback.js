@@ -375,11 +375,6 @@ window.Feedback.Form.prototype.end = function() {
 
 window.Feedback.Form.prototype.data = function() {
     
-    if ( this._data !== undefined ) {
-        // return cached value
-        return this._data;
-    }
-    
     var i = 0, len = this.elements.length, item, data = {};
     
     for (; i < len; i++) {
@@ -388,7 +383,7 @@ window.Feedback.Form.prototype.data = function() {
     }
     
     // cache and return data
-    return ( this._data = data );
+    return data;
 };
 
 
@@ -401,7 +396,7 @@ window.Feedback.Form.prototype.review = function( dom ) {
         
         if (item.element.value.length > 0) {
             dom.appendChild( element("label", item.name + ":") );
-            dom.appendChild( document.createTextNode( item.element.value.length ) );
+            dom.appendChild( document.createTextNode( item.element.value ) );
             dom.appendChild( document.createElement( "hr" ) );
         }
         
@@ -766,10 +761,6 @@ window.Feedback.Screenshot.prototype.render = function() {
 
 window.Feedback.Screenshot.prototype.data = function() {
 
-    if ( this._data !== undefined ) {
-        return this._data;
-    }
-
     if ( this.h2cCanvas !== undefined ) {
       
         var ctx = this.h2cCanvas.getContext("2d"),
@@ -833,7 +824,7 @@ window.Feedback.Screenshot.prototype.data = function() {
         // to avoid security error break for tainted canvas   
         try {
             // cache and return data
-            return ( this._data = this.h2cCanvas.toDataURL() );
+            return ( this.h2cCanvas.toDataURL() );
         } catch( e ) {}
         
     }
