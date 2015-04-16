@@ -124,11 +124,11 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             //outside D3js and do the appending manually using document fragments.
             var rectWidth = chartWidth / bh.values.length;
             var frag = document.createDocumentFragment(); //This is a virtual element so we can append everything in one hit
-            for (var j = 0; j < bh.values.length; j++) {
+            for (var j = bh.values.length - 1; j >= 0; j--) {
                 var rectEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 rectEl.setAttributeNS(null, 'x', this.textWidth + this.rowMargin + j * rectWidth);
                 rectEl.setAttributeNS(null, 'y', this.rowMargin);
-                rectEl.setAttributeNS(null, 'width', rectWidth)
+                rectEl.setAttributeNS(null, 'width', rectWidth + 1)
                 rectEl.setAttributeNS(null, 'estimate', Ext.util.Format.number(bh.values[j][0], '0.0000'));
                 rectEl.setAttributeNS(null, 'height', this.rowHeight - this.rowMargin * 2);
                 rectEl.setAttributeNS(null, 'fill', estimateToColor(bh.values[j][0]));            

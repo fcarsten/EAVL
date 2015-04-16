@@ -4,7 +4,7 @@
 }
 
 .bhe-group rect:hover {
-	stroke: #ff0000;
+	fill: #ff0000;
 }
 
 .bhe-group text {
