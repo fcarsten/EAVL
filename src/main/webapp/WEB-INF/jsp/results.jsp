@@ -35,6 +35,10 @@
 			}
         </style>
         
+        <script type="text/javascript">
+        var CONTACT_EMAIL = ${OBSCURED_CONTACT_EMAIL};
+        </script>
+        
         <script type="text/javascript" src="js/feedback.js/feedback.min.js"></script>
         <link rel="stylesheet" type="text/css" href="js/feedback.js/feedback.css">
         

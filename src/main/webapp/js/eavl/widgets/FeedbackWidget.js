@@ -5,7 +5,7 @@
 Ext.define('eavl.widgets.FeedbackWidget', {
     
     statics : {
-        CONTACT : 'cg-admin' + '@' + 'csiro.' + 'au'
+        CONTACT : CONTACT_EMAIL
     },
     
     /**
