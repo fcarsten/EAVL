@@ -129,7 +129,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
                 rectEl.setAttributeNS(null, 'x', this.textWidth + this.rowMargin + j * rectWidth);
                 rectEl.setAttributeNS(null, 'y', this.rowMargin);
                 rectEl.setAttributeNS(null, 'width', rectWidth)
-                rectEl.setAttributeNS(null, 'estimate', bh.values[j][0]);
+                rectEl.setAttributeNS(null, 'estimate', Ext.util.Format.number(bh.values[j][0], '0.0000'));
                 rectEl.setAttributeNS(null, 'height', this.rowHeight - this.rowMargin * 2);
                 rectEl.setAttributeNS(null, 'fill', estimateToColor(bh.values[j][0]));            
                 rectEl.addEventListener('mouseover', tip.show);

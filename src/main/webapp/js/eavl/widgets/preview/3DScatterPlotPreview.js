@@ -88,7 +88,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                                 xtype: 'datadisplayfield',
                                 fieldLabel: 'Estimate',
                                 margin : '10 0 0 0',
-                                value: data.estimate
+                                value: Ext.util.Format.number(data.estimate, '0.0000')
                             });
                         },
                         deselect: function(plot) {
