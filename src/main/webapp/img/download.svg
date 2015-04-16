@@ -44,8 +44,8 @@
      id="namedview20"
      showgrid="false"
      inkscape:zoom="0.944"
-     inkscape:cx="298.32029"
-     inkscape:cy="246.5436"
+     inkscape:cx="200.25224"
+     inkscape:cy="292.5793"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -78,6 +78,18 @@
          id="stop11" />
     </linearGradient>
   </defs>
+  <path
+     sodipodi:type="arc"
+     style="fill:#ffffff;fill-opacity:1;stroke:none"
+     id="path2994"
+     sodipodi:cx="251.05933"
+     sodipodi:cy="251.05933"
+     sodipodi:rx="209.74576"
+     sodipodi:ry="208.68645"
+     d="m 460.80508,251.05933 a 209.74576,208.68645 0 1 1 -0.003,-1.13866"
+     sodipodi:start="0"
+     sodipodi:end="6.277729"
+     sodipodi:open="true" />
   <path
      sodipodi:type="arc"
      style="fill:#ffffff;fill-opacity:1;stroke:none"

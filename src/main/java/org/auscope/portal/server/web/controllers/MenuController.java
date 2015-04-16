@@ -147,7 +147,13 @@ public class MenuController {
        //Give the user the view they are actually requesting
        ModelAndView mav = new ModelAndView(resourceName);
 
+       //We don't just want "email@domain" in the page. Let's obscure it slightly so it cant be
+       //scraped easily
+       String[] obscuredEmailParts = FeedbackController.CONTACT_EMAIL.split("@");
+       String obscuredEmail = "\"" + obscuredEmailParts[0] + "\" + \"@\" + \"" + obscuredEmailParts[1] + "\"";
+
        mav.addObject("isNewSession", isNewSession);
+       mav.addObject("OBSCURED_CONTACT_EMAIL", obscuredEmail);
 
        //Customise the model as required
        addGoogleKeys(mav); //always add the google keys

@@ -19,7 +19,7 @@ Ext.application({
         //Called if the init code fails badly
         var initError = function() {
             eavl.widgets.SplashScreen.hideLoadingScreen();
-            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting ' + eavl.widgets.FeedbackWidget.CONTACT + ' if the problem persists.');
         };
 
         var initNotReady = function(message, url) {
@@ -133,7 +133,7 @@ Ext.application({
                     xtype: 'panel',
                     region: 'center',
                     border: false,
-                    padding: '0 10 10 10',
+                    padding: '0 40 10 40',
                     style: {
                         'background-color' : 'white'
                     },
@@ -172,6 +172,8 @@ Ext.application({
                 }]
             });
         };
+        
+        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
 
         var pdStore = Ext.create('Ext.data.Store', {
             model : 'eavl.models.ParameterDetails',

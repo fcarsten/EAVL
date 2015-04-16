@@ -19,7 +19,7 @@ Ext.application({
         //Called if the init code fails badly
         var initError = function() {
             eavl.widgets.SplashScreen.hideLoadingScreen();
-            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting cg-admin@csiro.au if the problem persists.');
+            eavl.widgets.SplashScreen.showErrorSplash('There was an error loading your data. Please try refreshing the page or contacting ' + eavl.widgets.FeedbackWidget.CONTACT + ' if the problem persists.');
         };
 
         var initSuccess = function(parameterDetails) {
@@ -112,7 +112,7 @@ Ext.application({
                         align : 'stretch',
                         pack : 'center'
                     },
-                    bodyPadding : '10 10 10 10',
+                    bodyPadding : '10 40 10 40',
                     items: [{
                         id : 'noncomppanel',
                         xtype : 'pdlist',
@@ -237,6 +237,8 @@ Ext.application({
             });
         };
 
+        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
+        
         Ext.Ajax.request({
             url : 'identify/getConfig.do',
             callback : function(options, success, response) {

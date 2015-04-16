@@ -86,13 +86,13 @@
         <constructor-arg name="vmPool" ref="vmPool" />
     </bean>
 
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="${HOST.smtp.server}" />
+    </bean>
+
     <bean name="emailListener"
         class="org.auscope.portal.server.web.service.jobtask.EmailListener">
-        <constructor-arg name="mailSender">
-            <bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
-                <property name="host" value="${HOST.smtp.server}" />
-            </bean>
-        </constructor-arg>
+        <constructor-arg name="mailSender" ref="mailSender"/>
         <constructor-arg name="velocityEngine">
             <bean
                 class="org.springframework.ui.velocity.VelocityEngineFactoryBean">

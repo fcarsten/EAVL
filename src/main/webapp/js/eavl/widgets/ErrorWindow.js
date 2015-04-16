@@ -47,7 +47,7 @@ Ext.define('eavl.widgets.ErrorWindow', {
                     },{
                         tag: 'div',
                         cls: 'error-contact', 
-                        html: 'For support contact: <a href="mailto:cg-admin@csiro.au?Subject=EAVL%20error%20job%20' + escape(config.job.get('id')) + '&body=' + escape(config.message) + '">cg-admin@csiro.au</a>'
+                        html: 'For support contact: <a href="mailto:' + eavl.widgets.FeedbackWidget.CONTACT + '?Subject=EAVL%20error%20job%20' + escape(config.job.get('id')) + '&body=' + escape(config.message) + '">' + eavl.widgets.FeedbackWidget.CONTACT + '</a>'
                     }]
                 })
             },{
