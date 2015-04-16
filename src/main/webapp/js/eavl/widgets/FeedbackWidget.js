@@ -24,6 +24,7 @@ Ext.define('eavl.widgets.FeedbackWidget', {
         
         Feedback({h2cPath:'js/html2canvas/html2canvas.js',
             url: 'feedback/sendFeedback.do',
-            metadata: metadata});
+            metadata: metadata,
+            buttonCls: 'eavl-feedback-button'});
     }
 });

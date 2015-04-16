@@ -39,6 +39,10 @@ Ext.application({
                     xtype: 'panel',
                     region: 'center',
                     border: false,
+                    padding: '0 40 10 40',
+                    style: {
+                        'background-color': 'white'
+                    },
                     layout: {
                         type: 'hbox',
                         align : 'stretch',

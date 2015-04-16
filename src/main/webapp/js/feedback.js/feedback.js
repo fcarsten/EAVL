@@ -89,6 +89,7 @@ window.Feedback = function( options ) {
     options.url = options.url || "/";
     options.adapter = options.adapter || new window.Feedback.XHR( options.url );
     options.metadata = options.metadata || {};
+    options.buttonCls = options.buttonCls || "";
     
     options.nextLabel = options.nextLabel || "Continue";
     options.reviewLabel = options.reviewLabel || "Review";
@@ -284,7 +285,7 @@ window.Feedback = function( options ) {
     options = options || {};
 
     button = element( "button", options.label );
-    button.className = "feedback-btn feedback-bottom-right";
+    button.className = "feedback-btn " + options.buttonCls;
 
     button.setAttribute(H2C_IGNORE, true);
 
