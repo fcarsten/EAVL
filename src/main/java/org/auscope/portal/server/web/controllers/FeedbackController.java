@@ -34,7 +34,7 @@ import com.sun.istack.ByteArrayDataSource;
 @Controller
 public class FeedbackController extends BasePortalController {
 
-    public static String CONTACT_EMAIL = "Josh" + ".Vote" + "@" + "csiro" + ".au"; //Just so the email isn't easily scrapable off github
+    public static String CONTACT_EMAIL = "cg" + "-admin" + "@" + "csiro" + ".au"; //Just so the email isn't easily scrapable off github
 
     private JavaMailSender mailSender;
 
@@ -51,14 +51,11 @@ public class FeedbackController extends BasePortalController {
 
         try {
             // BACON - don't commit this commented out
-            /*if (user == null) {
+            if (user == null) {
                 log.warn("Unauthorized feedback request.");
                 response.sendError(HttpStatus.SC_UNAUTHORIZED);
                 return;
-            }*/
-            //BACON - this is test code
-            user = new EavlUser("BACON-fake-id");
-            user.setEmail("jjv" + "ote" + "@" + "gm" + "ail." + "c" + "om"); //security through obscurity!
+            }
 
             JSONObject metadata = JSONObject.fromObject(metadataString);
 
