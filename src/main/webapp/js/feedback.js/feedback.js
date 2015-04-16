@@ -88,6 +88,7 @@ window.Feedback = function( options ) {
     options.header = options.header || "Send Feedback";
     options.url = options.url || "/";
     options.adapter = options.adapter || new window.Feedback.XHR( options.url );
+    options.metadata = options.metadata || {};
     
     options.nextLabel = options.nextLabel || "Continue";
     options.reviewLabel = options.reviewLabel || "Review";
@@ -240,12 +241,12 @@ window.Feedback = function( options ) {
                 throw new Error( "Adapter is not an instance of Feedback.Send" );
             }
             
-            // fetch data from all pages   
-            for (var i = 0, len = options.pages.length, data = [], p = 0, tmp; i < len; i++) {
-                if ( (tmp = options.pages[ i ].data()) !== false ) {
-                    data[ p++ ] = tmp;
-                }
-            }
+            //Merge data into a consistent object
+            var data = {
+                issue: options.pages[ 0 ].data().Issue,
+                screenshot: options.pages[ 1 ].data(),
+                metadata: options.metadata
+            };
 
             nextButton.disabled = true;
                 
@@ -582,7 +583,7 @@ window.Feedback.Screenshot.prototype.start = function( modal, modalHeader, modal
 
         };
 
-        this.highlightClose = element("div", "×");
+        this.highlightClose = element("div", "x");
         this.blackoutBox = document.createElement('div');
         this.highlightBox = document.createElement( "canvas" );
         this.highlightContainer = document.createElement('div');
@@ -863,7 +864,9 @@ window.Feedback.XHR.prototype.send = function( data, callback ) {
     
     xhr.open( "POST", this.url, true);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhr.send( "data=" + encodeURIComponent( window.JSON.stringify( data ) ) );
-     
+    xhr.send( "issue=" + encodeURIComponent( data.issue ) +
+             "&screenshot=" + encodeURIComponent( data.screenshot ) +
+             "&metadata=" + encodeURIComponent( window.JSON.stringify( data.metadata ) ));
+
 };
 })( window, document );

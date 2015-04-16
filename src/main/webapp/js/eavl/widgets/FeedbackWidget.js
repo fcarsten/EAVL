@@ -5,7 +5,7 @@
 Ext.define('eavl.widgets.FeedbackWidget', {
     
     statics : {
-        CONTACT : CONTACT_EMAIL
+        CONTACT : Ext.isEmpty(window.CONTACT_EMAIL) ? '' : window.CONTACT_EMAIL
     },
     
     /**
@@ -14,9 +14,16 @@ Ext.define('eavl.widgets.FeedbackWidget', {
      * }
      */
     constructor : function(config) {
+        var metadata = config.metadata ? config.metadata : {};
+        
+        metadata.url = window.location.href;
+        metadata.platform = navigator.platform;
+        metadata.userAgent = navigator.userAgent;
+        
         this.callParent(arguments);
         
         Feedback({h2cPath:'js/html2canvas/html2canvas.js',
-            url: 'feedback/sendFeedback.do'});
+            url: 'feedback/sendFeedback.do',
+            metadata: metadata});
     }
 });

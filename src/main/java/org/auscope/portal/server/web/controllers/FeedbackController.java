@@ -8,12 +8,11 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.Charsets;
-import org.apache.velocity.app.VelocityEngine;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +37,6 @@ public class FeedbackController extends BasePortalController {
     public static String CONTACT_EMAIL = "Josh" + ".Vote" + "@" + "csiro" + ".au"; //Just so the email isn't easily scrapable off github
 
     private JavaMailSender mailSender;
-    private VelocityEngine velocityEngine;
-    private String templateFilePath;
-    private String templateFileEncoding;
 
     @Autowired
     public FeedbackController(JavaMailSender mailSender) {
@@ -49,7 +45,9 @@ public class FeedbackController extends BasePortalController {
 
     @RequestMapping("/sendFeedback.do")
     public void sendFeedback(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal EavlUser user,
-            @RequestParam("data") String dataString) {
+            @RequestParam("issue") String issue,
+            @RequestParam("screenshot") String screenshotString,
+            @RequestParam("metadata") String metadataString) {
 
         try {
             // BACON - don't commit this commented out
@@ -62,16 +60,41 @@ public class FeedbackController extends BasePortalController {
             user = new EavlUser("BACON-fake-id");
             user.setEmail("jjv" + "ote" + "@" + "gm" + "ail." + "c" + "om"); //security through obscurity!
 
-            JSONArray data = JSONArray.fromObject(dataString);
+            JSONObject metadata = JSONObject.fromObject(metadataString);
 
-            String issueText = data.getJSONObject(0).getString("Issue");
-            Matcher matcher = Pattern.compile("data:([^;]*);base64,(.*)").matcher(data.getString(1));
+            Matcher matcher = Pattern.compile("data:([^;]*);base64,(.*)").matcher(screenshotString);
             if (!matcher.matches()) {
-                log.error("Malformed feedback data string: " + dataString);
+                log.error("Malformed feedback screenshot: " + screenshotString);
                 response.sendError(HttpStatus.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
 
+            StringBuilder bodyText = new StringBuilder();
+            bodyText.append("<html><body><p><b>Issue:</b> ");
+            bodyText.append(issue);
+            bodyText.append("</p>");
+
+            bodyText.append("<p><b>Session Job ID:</b> ");
+            bodyText.append(request.getParameter("sessionJobId"));
+            bodyText.append("</p>");
+
+            bodyText.append("<p><b>User:</b> ");
+            bodyText.append(user.getFullName());
+            bodyText.append("</p>");
+
+            bodyText.append("<p><b>Email:</b> ");
+            bodyText.append(user.getEmail());
+            bodyText.append("</p>");
+
+            for (Object key : metadata.keySet()) {
+                bodyText.append("<p><b>");
+                bodyText.append(key.toString());
+                bodyText.append(":</b> ");
+                bodyText.append(metadata.get(key).toString());
+                bodyText.append("</p>");
+            }
+
+            bodyText.append("<img src='cid:screenshot'></body></html>");
             String imageContentType = matcher.group(1);
             String imageBase64Data = matcher.group(2);
 
@@ -84,7 +107,7 @@ public class FeedbackController extends BasePortalController {
             helper.setTo(CONTACT_EMAIL);
             helper.setCc(user.getEmail());
             helper.setSubject("EAVL Issue");
-            helper.setText("<html><body><p>" + issueText + "</p><img src='cid:screenshot'></body></html>", true);
+            helper.setText(bodyText.toString(), true);
             helper.addInline("screenshot", new ByteArrayDataSource(imageBytes, imageContentType));
 
             mailSender.send(msg);
