@@ -54,6 +54,9 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                     itemId : 'plot',
                     valueAttr : 'percentile',
                     valueRenderer : eavl.widgets.charts.BoreholeEstimateChart.percentileToColor,
+                    xHideValueLabel: true,
+                    yHideValueLabel: true,
+                    zHideValueLabel: true,
                     pointSize: 4,
                     allowSelection : true,
                     flex: 1,
@@ -68,19 +71,19 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 border: false,
-                                fieldLabel: plot.xLabel,
+                                fieldLabel: 'clr(' + plot.xLabel + ')',
                                 margin : '10 0 0 0',
                                 value: data.x
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',
-                                fieldLabel: plot.yLabel,
+                                fieldLabel: 'clr(' + plot.yLabel + ')',
                                 margin : '10 0 0 0',
                                 value: data.y
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',
-                                fieldLabel: plot.zLabel,
+                                fieldLabel: 'clr(' + plot.zLabel + ')',
                                 margin : '10 0 0 0',
                                 value: data.z
                             });
