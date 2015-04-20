@@ -169,9 +169,9 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
 
                 var scatterPlot = this.down('#plot');
 
-                scatterPlot.xLabel = responseObj.data.xLabel;
-                scatterPlot.yLabel = responseObj.data.yLabel;
-                scatterPlot.zLabel = responseObj.data.zLabel;
+                scatterPlot.xLabel = 'clr.' + responseObj.data.xLabel;
+                scatterPlot.yLabel = 'clr.' + responseObj.data.yLabel;
+                scatterPlot.zLabel = 'clr.' + responseObj.data.zLabel;
                 
                 //Calculate a percentile field based on incoming data
                 var totalItems = responseObj.data.points.length / 100; //we divide by 100 so our final result comes out *100 (i.e. a percentile) 
