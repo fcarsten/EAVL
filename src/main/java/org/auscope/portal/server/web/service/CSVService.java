@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.eavl.ParameterDetails;
@@ -975,19 +974,30 @@ public class CSVService {
      * @throws IOException
      */
     public void writeRawData(InputStream csvData, OutputStream replacedCsvData, double[][] data, List<Integer> headerColIndexes, boolean includeHeaderColIndexes) throws PortalServiceException {
+        String[] headerLine;
         try {
-            writeRawData(replacedCsvData, getHeaderLine(csvData, headerColIndexes, includeHeaderColIndexes), data);
+            headerLine = getHeaderLine(csvData, headerColIndexes, includeHeaderColIndexes);
         } catch (IOException e) {
-           throw new PortalServiceException(e.getMessage(), e);
+            IOUtils.closeQuietly(csvData);
+            IOUtils.closeQuietly(replacedCsvData);
+            throw new PortalServiceException(e.getMessage(), e);
         }
+
+        writeRawData(replacedCsvData, headerLine, data);
     }
 
-
+    /**
+     * Writes the specified headers into replacedCsvData followed by the entirety of data
+     * @param replacedCsvData Will be closed by this function
+     * @param headers
+     * @param data
+     * @throws PortalServiceException
+     */
     public void writeRawData(OutputStream replacedCsvData, String[] headers, double[][] data) throws PortalServiceException {
         CSVWriter writer = null;
 
         try {
-            writer = new CSVWriter(new OutputStreamWriter(replacedCsvData), ',', '\'');
+            writer = generateWriter(replacedCsvData);
 
             if(headers!=null)
                 writer.writeNext(headers);
