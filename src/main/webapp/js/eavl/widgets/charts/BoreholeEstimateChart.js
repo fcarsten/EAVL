@@ -12,6 +12,22 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
     rowHeight: 50,
     rowMargin: 3,
     textWidth: 100,
+    
+    statics : {
+        percentileToColor : function(e) {
+            if (e < 50) {
+                return '#227fb0';
+            } else if (e < 65) {
+                return '#39c0b3';
+            } else if (e < 80) {
+                return '#fbb735';
+            } else if (e < 95) {
+                return '#e98931';
+            } else {
+                return '#eb403b';
+            }
+        }
+    },
 
     /**
      * Adds the following config
@@ -88,20 +104,6 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
         var width = this.viewport.attr('width');
         var chartWidth = width - this.textWidth;
 
-        var estimateToColor = function(e) {
-            if (e < 0.1) {
-                return '#eeeeee';
-            } else if (e < 0.15) {
-                return '#cccccc';
-            } else if (e < 0.19) {
-                return '#aaaaaa';
-            } else if (e < 0.25) {
-                return '#777777';
-            } else {
-                return '#000000';
-            }
-        };
-
         var tip = d3.tip()
             .attr('class', 'd3-tip')
             .offset([-10, -20])
@@ -131,7 +133,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
                 rectEl.setAttributeNS(null, 'width', rectWidth + 1)
                 rectEl.setAttributeNS(null, 'estimate', Ext.util.Format.number(bh.values[j][0], '0.0000'));
                 rectEl.setAttributeNS(null, 'height', this.rowHeight - this.rowMargin * 2);
-                rectEl.setAttributeNS(null, 'fill', estimateToColor(bh.values[j][0]));            
+                rectEl.setAttributeNS(null, 'fill', eavl.widgets.charts.BoreholeEstimateChart.percentileToColor(bh.values[j][2])); //Percentile is used for colouring            
                 rectEl.addEventListener('mouseover', tip.show);
                 rectEl.addEventListener('mouseout', tip.hide);
                 frag.appendChild(rectEl);

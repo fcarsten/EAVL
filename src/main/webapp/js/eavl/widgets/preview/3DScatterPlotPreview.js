@@ -52,8 +52,8 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                     xtype : 'threedscatterplot',
                     border: false,
                     itemId : 'plot',
-                    valueAttr : 'estimate',
-                    valueScale : 'log',
+                    valueAttr : 'percentile',
+                    valueRenderer : eavl.widgets.charts.BoreholeEstimateChart.percentileToColor,
                     pointSize: 4,
                     allowSelection : true,
                     flex: 1,
@@ -89,6 +89,12 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                                 fieldLabel: 'Estimate',
                                 margin : '10 0 0 0',
                                 value: Ext.util.Format.number(data.estimate, '0.0000')
+                            });
+                            parent.add({
+                                xtype: 'datadisplayfield',
+                                fieldLabel: 'Percentile',
+                                margin : '10 0 0 0',
+                                value: Ext.util.Format.number(data.percentile, '0.00') + '%'
                             });
                         },
                         deselect: function(plot) {
@@ -163,6 +169,14 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                 scatterPlot.xLabel = responseObj.data.xLabel;
                 scatterPlot.yLabel = responseObj.data.yLabel;
                 scatterPlot.zLabel = responseObj.data.zLabel;
+                
+                //Calculate a percentile field based on incoming data
+                var totalItems = responseObj.data.points.length / 100; //we divide by 100 so our final result comes out *100 (i.e. a percentile) 
+                Ext.Array.sort(responseObj.data.points, function(a, b) { return a.estimate - b.estimate; });
+                Ext.each(responseObj.data.points, function(item, index) {
+                    item.percentile = (index / totalItems);
+                });
+                
                 scatterPlot.plot(responseObj.data.points);
             }
         });

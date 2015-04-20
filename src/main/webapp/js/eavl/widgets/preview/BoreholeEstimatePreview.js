@@ -45,6 +45,22 @@ Ext.define('eavl.widgets.preview.BoreholeEstimatePreview', {
                 if (!responseObj.success) {
                     return;
                 }
+                
+                //We want to calculate percentiles across the entire dataset but the values are grouped into seperate arrays
+                var allValues = [];
+                Ext.each(responseObj.data, function(grp, grpIndex) {                    
+                    allValues = allValues.concat(grp.values);
+                });
+                
+                //Sort our values by estimate
+                Ext.Array.sort(allValues, function(a, b) { return a[0] - b[0]; });
+                
+                //Add percentiles to each item
+                var totalValuesDenom = allValues.length / 100;
+                Ext.each(allValues, function(value, valueIndex) {
+                    value.push(valueIndex / totalValuesDenom);
+                });
+                
 
                 var chart = me.down('#chart');
                 chart.plot(responseObj.data)
