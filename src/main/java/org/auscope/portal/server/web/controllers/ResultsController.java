@@ -193,13 +193,32 @@ public class ResultsController extends BasePortalController {
                 responsePoints.add(point);
             }
 
+            //Now we need proxy names. Pulling from job.getProxyParameters() will be unstable
+            //Best bet is to lookup the proxy names from the place they were read (imputed-cenlr file)
+            //and use that for the ordering.
             Iterator<Proxy> proxies = job.getProxyParameters().iterator(); //TODO: This may potentially fail due to set order being undefined
+            String[] orderedProxies = new String[3];
+
+            String proxyNumeratorName = proxies.next().getNumerator();
+            IOUtils.closeQuietly(is);
+            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+            orderedProxies[csvService.columnNameToIndex(is, proxyNumeratorName) - 1] = proxyNumeratorName; //Col 0 will be the predicted param
+
+            proxyNumeratorName = proxies.next().getNumerator();
+            IOUtils.closeQuietly(is);
+            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+            orderedProxies[csvService.columnNameToIndex(is, proxyNumeratorName) - 1] = proxyNumeratorName; //Col 0 will be the predicted param
+
+            proxyNumeratorName = proxies.next().getNumerator();
+            IOUtils.closeQuietly(is);
+            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+            orderedProxies[csvService.columnNameToIndex(is, proxyNumeratorName) - 1] = proxyNumeratorName; //Col 0 will be the predicted param
 
             ModelMap response = new ModelMap();
             response.put("points", responsePoints);
-            response.put("xLabel", proxies.next().getNumerator());
-            response.put("yLabel", proxies.next().getNumerator());
-            response.put("zLabel", proxies.next().getNumerator());
+            response.put("xLabel", orderedProxies[0]);
+            response.put("yLabel", orderedProxies[1]);
+            response.put("zLabel", orderedProxies[2]);
 
             return generateJSONResponseMAV(true, response, "");
         } catch (Exception ex) {
