@@ -451,14 +451,17 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                 }
                 
                 var responseObj = Ext.JSON.decode(response.responseText);
-                if (!responseObj.success) {
+                if (!responseObj.success || !responseObj.data[0].conversion) {
                     editContainer.down('#scalefactor').setValue(null);
-                    editContainer.down('#editname').setValue( this._generateNewName(this.pd.get('name')));
-                    return;
+                } else {
+                    editContainer.down('#scalefactor').setValue(responseObj.data[0].conversion);
                 }
                 
-                editContainer.down('#scalefactor').setValue(responseObj.data.conversion);
-                editContainer.down('#editname').setValue(responseObj.data.element + '_' + eavl.models.ParameterDetails.UOM_PPM);
+                if (!responseObj.success || !responseObj.data[0].element) {
+                    editContainer.down('#editname').setValue( this._generateNewName(this.pd.get('name')));
+                } else {
+                    editContainer.down('#editname').setValue(responseObj.data[0].element + '_' + eavl.models.ParameterDetails.UOM_PPM);
+                }
             }
         });
     },

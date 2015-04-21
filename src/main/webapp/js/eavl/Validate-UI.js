@@ -57,7 +57,49 @@ Ext.application({
 
                 return;
             }
-
+            
+            var convertAllUom = function() {
+                var uomPds = [];
+                var uomPdNames = [];
+                
+                Ext.each(parameterDetails, function(pd) {
+                    if (pd.get('uom') !== eavl.models.ParameterDetails.UOM_PPM) {
+                        uomPds.push(pd);
+                        uomPdNames.push(pd.get('name'));
+                    }
+                });
+                
+                if (Ext.isEmpty(uomPdNames)) {
+                    return;
+                }
+                
+                Ext.Ajax.request({
+                    url: 'validation/oxidePctToTracePpm.do',
+                    params: {
+                        name: uomPdNames
+                    },
+                    callback: function(options, success, response) {
+                        if (!success) {
+                            return;
+                        }
+                        
+                        var responseObj = Ext.JSON.decode(response.responseText);
+                        if (!responseObj.success) {
+                            return;
+                        }
+                        
+                        for (var i = 0; i < responseObj.data.length; i++) {
+                            if (Ext.isEmpty(responseObj.data[i].element) || Ext.isEmpty(responseObj.data[i].conversion)) {
+                                continue;
+                            }
+                            
+                            uomPds[i].set('displayName', responseObj.data[i].element);
+                            uomPds[i].set('scaleFactor', responseObj.data[i].conversion);
+                            uomPds[i].set('uom', eavl.models.ParameterDetails.UOM_PPM);
+                        }
+                    }
+                });
+            };
 
             Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
                 layout: 'border',
@@ -172,6 +214,19 @@ Ext.application({
                                     }
                                     pdlist.getStore().remove(pd);
                                 }
+                            },{
+                                ptype: 'headericons',
+                                icons: [{
+                                    location: 'text',
+                                    src: 'img/convert-ppm-small.png',
+                                    tip: 'Click to convert all parameters to PPM using a lookup table. Unknown parameters will not be touched.',
+                                    width: 24,
+                                    height: 24,
+                                    style: {
+                                        'cursor': 'pointer'
+                                    },
+                                    handler: convertAllUom 
+                                }]
                             }],
                             listeners: {
                                 select: function(pdList, pd) {

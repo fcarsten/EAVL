@@ -110,7 +110,7 @@ Ext.define('eavl.widgets.plugins.HeaderIcons', {
         });
         
         Ext.each(me.iconsText, function(iconCfg) {
-            var newEl = textEl.appendChild(me._iconCfgToMarkup(iconCfg, false, containerHeight), true);
+            var newEl = textEl.appendChild(me._iconCfgToMarkup(iconCfg, false, containerHeight), false);
             if (iconCfg.handler) {
                 newEl.on('click', iconCfg.handler);
             }
