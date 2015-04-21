@@ -330,7 +330,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                 itemId: 'uom-container',
                 width: '100%',
                 height: 100,
-                html: '<div class="pdp-uom-container"><div class="pdp-uom-container-inner"><span>uom</span><img src="img/exclamation.svg" width="100"/></div></div>'
+                html: '<div class="pdp-uom-container"><div class="pdp-uom-container-inner"><span class="pdp-uom-text">uom</span><img src="img/exclamation.svg" width="100"/></div></div>'
             },{
                 xtype: 'container',
                 itemId: 'edit-container',
@@ -384,6 +384,12 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                     width: 60,
                     html: '<div class="pdp-convert-container"><div class="pdp-convert-container-inner"><img data-qtip="Convert all numerical values in this parameter to ppm using the specified scaling factor" src="img/convert-ppm.svg" width="50"/></div></div>'
                 }]
+            },{
+                xtype: 'container',
+                itemId: 'info-container',
+                width: '100%',
+                height: 100,
+                html: '<div class="pdp-uom-container pdp-uom-info-container"><div class="pdp-uom-container-inner"><p>Converted from <span class="pdp-uom-info-name">Au_assay</span> using scaling factor <span class="pdp-uom-info-scale">12345.6</span></p><div class="pdp-uom-info-undo"><img src="img/undo.png">Undo</div></div></div>'
             }]
         });
 
@@ -462,6 +468,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         
         var uomContainer = this.down('#uom-container');
         var editContainer = this.down('#edit-container');
+        var infoContainer = this.down('#info-container');
         
         var uomName = pd.get('uom');
         var valid = uomName === eavl.models.ParameterDetails.UOM_PPM;
@@ -493,6 +500,26 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         editContainer.setVisible(!valid);
         if (!valid) {
             this._lookupUomConversion(editContainer);
+        }
+        
+        if (this._undoListener) {
+            this._undoListener.destroy();
+            this._undoListener = null;
+        }
+        
+        //Update info container
+        if (valid && pd.get('scaleFactor')) {
+            infoContainer.getEl().down('.pdp-uom-info-name').setHtml(pd.get('name'));
+            infoContainer.getEl().down('.pdp-uom-info-scale').setHtml(pd.get('scaleFactor'));
+            infoContainer.getEl().down('.pdp-uom-info-undo').on('click', function() {
+                this.pd.set('scaleFactor', null);
+                this.pd.set('displayName', null);
+                this.pd.set('uom', eavl.models.ParameterDetails.nameToUom(this.pd.get('name')));
+                this.showParameterDetails(this.pd);
+            }, this, {destroyable: true});
+            infoContainer.setVisible(true);
+        } else {
+            infoContainer.setVisible(false);
         }
     }
 });

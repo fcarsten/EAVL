@@ -67,6 +67,22 @@ Ext.define('eavl.models.ParameterDetails', {
                 Ext.Array.erase(pdArray, index, 1);
             }
             return matchingPd;
+        },
+
+        /**
+         * Attempts to convert a string name to a unit of measure guess. Returns null if the name
+         * cannot be reliably converted into a uom
+         * 
+         * @param name String based name to look for a uom identifier
+         */
+        nameToUom : function(name) {
+            var lowerName = name.toLowerCase();
+            if (lowerName.indexOf('ppm') >= 0) {
+                return eavl.models.ParameterDetails.UOM_PPM;
+            } else if (lowerName.indexOf('pct') >= 0 || lowerName.indexOf('percent')  >= 0) {
+                return eavl.models.ParameterDetails.UOM_PCT;
+            }
+            return null;
         }
     },
 
@@ -91,14 +107,7 @@ Ext.define('eavl.models.ParameterDetails', {
             }
             
             //Generate the uom from the layer name by guessing
-            var lowerName = data.get('name').toLowerCase();
-            if (lowerName.indexOf('ppm') >= 0) {
-                return eavl.models.ParameterDetails.UOM_PPM;
-            } else if (lowerName.indexOf('pct') >= 0 || lowerName.indexOf('percent')  >= 0) {
-                return eavl.models.ParameterDetails.UOM_PCT;
-            }
-            
-            return null;
+            return eavl.models.ParameterDetails.nameToUom(data.get('name'));
         }} 
 
     ],
