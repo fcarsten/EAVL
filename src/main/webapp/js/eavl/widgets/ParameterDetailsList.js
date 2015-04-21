@@ -11,6 +11,8 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
      * {
      *  showUom : Boolean [Optional] - Whether the unit of measure for this PD should display. Defaults false
      *  parameterDetails : eavl.model.ParameterDetails[] [Optional] The set of parameter details to initialise this list with
+     *  forcedIconUrl : String [Optional] - If set, all icons will be forced to this value (instead of dynamic lookup)
+     *  forcedIconTip : String [Optional] - If set, all icons will be forced to have this tip value (instead of dynamic lookup)
      *  sortFn : function(a,b) - Sorter to apply to this list
      * }
      *
@@ -20,8 +22,11 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
      * }
      */
     constructor : function(config) {
+        var me = this;
         this.emptyText = config.emptyText ? config.emptyText : "";
         this.showUom = config.showUom === true ? true : false;
+        this.forcedIconUrl = Ext.isEmpty(config.forcedIconUrl) ? null : config.forcedIconUrl;
+        this.forcedIconTip = Ext.isEmpty(config.forcedIconTip) ? null : config.forcedIconTip;
         
         var sorters = [];
         if (config.sortFn) {
@@ -52,6 +57,14 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
                 } else if (status === eavl.models.ParameterDetails.STATUS_WARNING) {
                     img = 'img/error.png';
                     tip = 'This parameter less than 70% numeric values.';
+                }
+                
+                if (me.forcedIconUrl) {
+                    img = me.forcedIconUrl;
+                }
+                
+                if (me.forcedIconTip) {
+                    tip = me.forcedIconTip;
                 }
 
                 return Ext.DomHelper.markup({
