@@ -14,6 +14,7 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
      * {
      *  emptyText - Text to show if this field is empty,
      *  parameterDetails - The entire set of possible values for this tag field.
+     *  minimumSelections - The minimum number of tags that must be selected for this field to be valid. 0 Value will always be valid (Default 0)
      * }
      *
      * Adds the following events
@@ -22,6 +23,8 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
      * }
      */
     constructor : function(config) {
+        this.minimumSelections = Ext.isNumber(config.minimumSelections) ? config.minimumSelections : 0;
+        
         var items = [];
         Ext.each(config.parameterDetails, function(pd) {
             
@@ -170,5 +173,17 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
         }
 
         return me.multiSelectItemTpl.apply(me.valueCollection.getRange());
+    },
+    
+    getErrors: function(value) {
+        var errors = this.callParent(value);
+        
+        if (this.minimumSelections > 0) {
+            if (value && value.length < this.minimumSelections) {
+                errors.push('You must select at least ' + this.minimumSelections + ' tag(s).');
+            }
+        }
+        
+        return errors;
     }
 });

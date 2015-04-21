@@ -291,13 +291,12 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                             proxypanel.showParameterDetails(combo.getParameterDetails());
                             
                             var tagField = combo.ownerCt.ownerCt.down("#pdtagfield");
-                            var denoms = tagField.getValue();
-                            if (denoms.indexOf(newValue) < 0) {
-                                denoms = Ext.Array.clone(denoms); //Don't insert directly into internal array
-                                denoms.push(newValue);
-                                denoms = Ext.Array.remove(denoms, oldValue);
-                                tagField.setValue(denoms);
-                            }
+                            var allTags = [];
+                            Ext.each(allPds, function(pd) {
+                                allTags.push(pd.get('name'));
+                            });
+                            
+                            tagField.setValue(allTags);
                         }
                     }
                 },{
@@ -309,6 +308,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                     margin: '0 0 10 0',
                     allowBlank: false,
                     value: denom,
+                    minimumSelections: 2,
                     parameterDetails: allPds, 
                     listeners: {
                         change: function(tagfield, newValue, oldValue) {
