@@ -66,9 +66,7 @@ Ext.define('eavl.widgets.JobFileList', {
                     width: 32,
                     height: 32,
                     style: {
-                        'cursor': 'pointer',
-                        'margin-top': '-3px',
-                        'margin-left': '-3px'
+                        'cursor': 'pointer'
                     },
                     handler: Ext.bind(this._downloadAllClickHandler, this) 
                 }]
