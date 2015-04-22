@@ -15,6 +15,7 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
      *  emptyText - Text to show if this field is empty,
      *  parameterDetails - The entire set of possible values for this tag field.
      *  minimumSelections - The minimum number of tags that must be selected for this field to be valid. 0 Value will always be valid (Default 0)
+     *  readOnly - If set the field will render in readonly mode which will remove all triggers
      * }
      *
      * Adds the following events
@@ -24,6 +25,7 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
      */
     constructor : function(config) {
         this.minimumSelections = Ext.isNumber(config.minimumSelections) ? config.minimumSelections : 0;
+        this.readOnly = config.readOnly;
         
         var items = [];
         Ext.each(config.parameterDetails, function(pd) {
@@ -94,6 +96,18 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
                 this._emptyTextWorkaround(this, config.value, []);
             }
         }, this);
+        this.on('afterrender', function() {
+            if (config.readOnly) {
+                this.setTriggers([]);
+            }
+        }, this);
+    },
+    
+    applyTriggers : function(triggers) {
+        if (this.readOnly) {
+            return;
+        }
+        this.callParent(arguments);
     },
     
     _handleClearClicked : function() {
@@ -148,7 +162,7 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
                     '" qtip="{' + me.displayField + '}">' ,
                     '<img class="pdtf-tag-icon" data-qtip="{[this.getItemTip(values)]}" src="{[this.getItemIcon(values)]}">',
                     '<div class="' + cssPrefix + 'tagfield-item-text">{[this.getItemLabel(values)]}</div>',
-                    '<div class="' + cssPrefix + 'tagfield-item-close"></div>' ,
+                    '<div class="' + cssPrefix + 'tagfield-item-close" style="' + (me.readOnly ? 'display: none;' : '') + '"></div>' ,
                     '</li>' ,
                 '</tpl>',
                 {

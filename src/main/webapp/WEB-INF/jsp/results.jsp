@@ -68,6 +68,8 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/FilePreviewPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/FeedbackWidget.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/EAVLModalWindow.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsTagField.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ErrorWindow.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/Results-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/EAVL-Common.css">
@@ -87,12 +89,16 @@
         <script type="text/javascript" src="js/eavl/widgets/FeedbackWidget.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsList.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsField.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsTagField.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/BaseFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/CSVFilePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/3DScatterPlotPreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/preview/BoreholeEstimatePreview.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/FilePreviewPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/EAVLModalWindow.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/JobInfoWindow.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ErrorWindow.js"></script>
         
         <script type="text/javascript" src="js/eavl/Results-UI.js"></script>

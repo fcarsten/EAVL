@@ -154,7 +154,16 @@ Ext.define('eavl.widgets.EAVLJobList', {
     },
     
     _infoClick : function() {
+        var selection = this.getSelection();
+        if (!selection) {
+            return;
+        }
+
+        var popup = Ext.create('eavl.widgets.JobInfoWindow', {
+            job: selection[0]
+        });
         
+        popup.show();
     },
     
     _errorMessageClick : function() {
