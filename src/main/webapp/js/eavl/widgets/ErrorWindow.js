@@ -2,7 +2,7 @@
  * Window extension for rendering a simple error message with links to support emails.
  */
 Ext.define('eavl.widgets.ErrorWindow', {
-    extend: 'Ext.window.Window',
+    extend: 'eavl.widgets.EAVLModalWindow',
 
     alias: 'widget.errorwindow',
 
@@ -22,37 +22,11 @@ Ext.define('eavl.widgets.ErrorWindow', {
         var htmlMessage = '<pre><code>' + config.message.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</code></pre>';
         
         Ext.apply(config, {
-            layout: 'border',
             width: 800,
             height: 400,
-            plain: true,
-            header: false,
-            resizable: false,
-            modal: true,
-            bodyStyle: {
-                'background-color' : 'white'
-            },
+            subtitle: 'For support contact: <a href="mailto:' + eavl.widgets.FeedbackWidget.CONTACT + '?Subject=EAVL%20error%20job%20' + escape(config.job.get('id')) + '&body=' + escape(config.message) + '">' + eavl.widgets.FeedbackWidget.CONTACT + '</a>',
             items: [{
                 xtype: 'container',
-                region: 'north',
-                height: 60,
-                modal: true,
-                html: Ext.DomHelper.markup({
-                    tag: 'div',
-                    cls: 'error-title-container',
-                    children: [{
-                        tag: 'div',
-                        cls: 'error-title', 
-                        html: config.title
-                    },{
-                        tag: 'div',
-                        cls: 'error-contact', 
-                        html: 'For support contact: <a href="mailto:' + eavl.widgets.FeedbackWidget.CONTACT + '?Subject=EAVL%20error%20job%20' + escape(config.job.get('id')) + '&body=' + escape(config.message) + '">' + eavl.widgets.FeedbackWidget.CONTACT + '</a>'
-                    }]
-                })
-            },{
-                xtype: 'container',
-                region: 'center',
                 cls: 'error-message',
                 margin: '10',
                 html: htmlMessage
@@ -71,16 +45,7 @@ Ext.define('eavl.widgets.ErrorWindow', {
                         btn.findParentByType('errorwindow').close();
                     }
                 }]
-            }],
-            listeners: {
-                'afterrender' : function(win) {
-                    if (config.modal) {
-                        win.mon(Ext.getBody(), 'click', function(el, e){
-                            win.close(win.closeAction);
-                        }, win, { delegate: '.x-mask' });
-                    }
-                }
-            }
+            }]
         });
 
         this.callParent(arguments);

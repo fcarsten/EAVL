@@ -103,14 +103,11 @@ Ext.application({
                     workflows: [wfCp, test1],
                     listeners: {
                         select: function(panel, wf, e) {
-                            Ext.create('Ext.Window', {
-                                layout: 'fit',
-                                modal: true,
+                            Ext.create('eavl.widgets.EAVLModalWindow', {
                                 width: 1000,
                                 height: 600,
-                                plain: true,
-                                header: false,
-                                resizable: false,
+                                title: wf.get('name'),
+                                subtitle: wf.get('version'),
                                 items: [{
                                     xtype: 'workflowinspectpanel',
                                     workflow: wf
@@ -144,14 +141,7 @@ Ext.application({
                                             }
                                         }
                                     }]
-                                }],
-                                listeners: {
-                                    'afterrender' : function(win) {
-                                        win.mon(Ext.getBody(), 'click', function(el, e){
-                                            win.close(win.closeAction);
-                                        }, win, { delegate: '.x-mask' });
-                                    }
-                                }
+                                }]
                             }).show(e);
                         }
                     }

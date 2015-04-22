@@ -14,6 +14,7 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowSelectionPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/WorkflowInspectPanel.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/FeedbackWidget.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/EAVLModalWindow.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/EAVL-Common.css">
         
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
@@ -22,6 +23,7 @@
         <script type="text/javascript" src="js/eavl/models/Contact.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowSelectionPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowInspectPanel.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/EAVLModalWindow.js"></script>
         <script type="text/javascript" src="js/eavl/Index-UI.js"></script>
     </head>
     <body>

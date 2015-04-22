@@ -1,0 +1,16 @@
+.eavl-modal-title {
+    color: black;
+    font-size: 32px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+}
+
+.eavl-modal-subtitle {
+    color: #808080;
+    font-size: 23px;
+    font-weight: bold;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
