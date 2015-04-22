@@ -51,7 +51,7 @@ Ext.application({
                     items: [{
                         xtype : 'eavljoblist',
                         title : 'Available Jobs',
-                        width: 300,
+                        width: 320,
                         jobs : records,
                         margin: '0 10 0 0',
                         viewConfig : {

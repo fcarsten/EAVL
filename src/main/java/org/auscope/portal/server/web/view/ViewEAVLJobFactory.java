@@ -1,5 +1,9 @@
 package org.auscope.portal.server.web.view;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
+
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
@@ -73,6 +77,21 @@ public class ViewEAVLJobFactory {
         m.put("kdeTaskId", job.getKdeTaskId());
         m.put("kdeTaskError", job.getKdeTaskError());
         m.put("holeIdParameter", job.getHoleIdParameter());
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss zzz");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String imputationDateString = "";
+        if (job.getImputationSubmitDate() != null) {
+            imputationDateString = df.format(job.getImputationSubmitDate());
+        }
+        m.put("imputationSubmitDate", imputationDateString);
+
+        String kdeDateString = "";
+        if (job.getKdeSubmitDate() != null) {
+            kdeDateString = df.format(job.getKdeSubmitDate());
+        }
+        m.put("kdeSubmitDate", kdeDateString);
 
         return m;
     }

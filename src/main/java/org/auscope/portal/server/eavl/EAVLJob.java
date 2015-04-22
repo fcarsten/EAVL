@@ -63,10 +63,14 @@ public class EAVLJob implements StagedFileOwner {
     @Column(length=4096)
     private String imputationTaskError;
     @Basic
+    private Date imputationSubmitDate;
+    @Basic
     private String kdeTaskId;
     @Basic
     @Column(length=4096)
     private String kdeTaskError;
+    @Basic
+    private Date kdeSubmitDate;
     @Basic
     private String holeIdParameter;
 
@@ -299,6 +303,50 @@ public class EAVLJob implements StagedFileOwner {
      */
     public void setKdeTaskError(String kdeTaskError) {
         this.kdeTaskError = kdeTaskError;
+    }
+
+    /**
+     * Gets the Date when imputation was submitted. If this job has been submitted
+     * multiple times, this will show the most recent submission time. Can be null if no
+     * submission has been made.
+     * @return
+     */
+    public Date getImputationSubmitDate() {
+        return imputationSubmitDate;
+    }
+
+    /**
+     * Sets the Date when imputation was submitted. If this job has been submitted
+     * multiple times, this should show the most recent submission time. Can be null if no
+     * submission has been made.
+     *
+     * @param imputationSubmitDate Can be null
+     * @return
+     */
+    public void setImputationSubmitDate(Date imputationSubmitDate) {
+        this.imputationSubmitDate = imputationSubmitDate;
+    }
+
+    /**
+     * Gets the Date when kde was submitted. If this job has been submitted
+     * multiple times, this will show the most recent submission time. Can be null if no
+     * submission has been made.
+     * @return
+     */
+    public Date getKdeSubmitDate() {
+        return kdeSubmitDate;
+    }
+
+    /**
+     * Sets the Date when kde was submitted. If this job has been submitted
+     * multiple times, this should show the most recent submission time. Can be null if no
+     * submission has been made.
+     *
+     * @param imputationSubmitDate Can be null
+     * @return
+     */
+    public void setKdeSubmitDate(Date kdeSubmitDate) {
+        this.kdeSubmitDate = kdeSubmitDate;
     }
 
 

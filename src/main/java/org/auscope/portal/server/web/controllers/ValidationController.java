@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -350,6 +351,7 @@ public class ValidationController extends BasePortalController {
 
             job.setImputationTaskId(taskId);
             job.setImputationTaskError(null);
+            job.setImputationSubmitDate(new Date());
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");

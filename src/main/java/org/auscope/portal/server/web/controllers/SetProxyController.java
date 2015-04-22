@@ -1,5 +1,6 @@
 package org.auscope.portal.server.web.controllers;
 
+import java.util.Date;
 import java.util.HashSet;
 
 import javax.servlet.http.HttpServletRequest;
@@ -70,6 +71,7 @@ public class SetProxyController extends BasePortalController {
             String taskId = jobTaskService.submit(newTask);
             job.setKdeTaskId(taskId);
             job.setKdeTaskError(null);
+            job.setKdeSubmitDate(new Date());
             jobService.save(job);
 
             return generateJSONResponseMAV(true, taskId, "");

@@ -34,6 +34,14 @@ Ext.define('eavl.widgets.EAVLJobList', {
             handler: this._errorMessageClick
         });
         
+        this.jobInfoAction = new Ext.Action({
+            text: 'Info',
+            iconCls: 'joblist-info-icon',
+            cls: 'joblist-inline-button',
+            scope : this,
+            handler: this._infoClick
+        });
+        
         
         this.emptyText = config.emptyText ? config.emptyText : "";
 
@@ -48,7 +56,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
             plugins : [{
                 ptype : 'inlinecontextmenu',
                 align : 'right',
-                actions: [this.errorMessageAction, this.deleteJobAction]
+                actions: [this.errorMessageAction, this.jobInfoAction, this.deleteJobAction]
             }],
             columns : [{
                 dataIndex : 'name',
@@ -143,6 +151,10 @@ Ext.define('eavl.widgets.EAVLJobList', {
         } else {
             this.errorMessageAction.hide();
         }
+    },
+    
+    _infoClick : function() {
+        
     },
     
     _errorMessageClick : function() {

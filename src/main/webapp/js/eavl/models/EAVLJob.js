@@ -35,8 +35,24 @@ Ext.define('eavl.models.EAVLJob', {
         { name: 'proxyParameters', type: 'auto' }, //String[] Parameter names chosen as proxies
         { name: 'imputationTaskId', type: 'string' },
         { name: 'imputationTaskError', type: 'string' },
+        { name: 'imputationSubmitDate', convert: function(dateString) {
+                if (dateString) {
+                    return new Date(Date.parse(dateString.replace(' UTC', '')));
+                } else {
+                    return dateString;
+                }
+            }
+        },
         { name: 'kdeTaskId', type: 'string' },
         { name: 'kdeTaskError', type: 'string' },
+        { name: 'kdeSubmitDate', convert: function(dateString) {
+                if (dateString) {
+                    return new Date(Date.parse(dateString.replace(' UTC', '')));
+                } else {
+                    return dateString;
+                }
+            }
+        },
         { name: 'holeIdParameter', type: 'string' }
     ],
 

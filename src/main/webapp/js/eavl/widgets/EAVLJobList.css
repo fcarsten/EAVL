@@ -25,6 +25,13 @@
     height: 16px;
 }
 
+.joblist-info-icon {
+    background-image: url(../../../img/info.png);
+    background-size: 16px 16px;
+    width: 16px;
+    height: 16px;
+}
+
 .joblist-inline-button {
 	background-color: white;
 	background-image: none;
