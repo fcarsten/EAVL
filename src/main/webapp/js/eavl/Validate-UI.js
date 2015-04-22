@@ -73,12 +73,18 @@ Ext.application({
                     return;
                 }
                 
+                var loadMask = new Ext.LoadMask({
+                    target: Ext.getCmp('comppanel')
+                });
+                loadMask.show();
                 Ext.Ajax.request({
                     url: 'validation/oxidePctToTracePpm.do',
                     params: {
                         name: uomPdNames
                     },
                     callback: function(options, success, response) {
+                        loadMask.hide();
+                        loadMask.destroy();
                         if (!success) {
                             return;
                         }
@@ -88,14 +94,19 @@ Ext.application({
                             return;
                         }
                         
+                        var pdPanel = Ext.getCmp('pdpanel');
                         for (var i = 0; i < responseObj.data.length; i++) {
                             if (Ext.isEmpty(responseObj.data[i].element) || Ext.isEmpty(responseObj.data[i].conversion)) {
                                 continue;
                             }
                             
-                            uomPds[i].set('displayName', responseObj.data[i].element);
+                            uomPds[i].set('displayName', responseObj.data[i].element + '_' + eavl.models.ParameterDetails.UOM_PPM);
                             uomPds[i].set('scaleFactor', responseObj.data[i].conversion);
                             uomPds[i].set('uom', eavl.models.ParameterDetails.UOM_PPM);
+                            
+                            if (pdPanel.parameterDetails && pdPanel.parameterDetails.get('name') === uomPds[i].get('name')) {
+                                pdPanel.showParameterDetails(pdPanel.parameterDetails);
+                            }
                         }
                     }
                 });
@@ -223,7 +234,9 @@ Ext.application({
                                     width: 24,
                                     height: 24,
                                     style: {
-                                        'cursor': 'pointer'
+                                        'cursor': 'pointer',
+                                        'margin-top': 2,
+                                        'margin-left': 20
                                     },
                                     handler: convertAllUom 
                                 }]

@@ -3,6 +3,7 @@ package org.auscope.portal.server.web.controllers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -374,17 +375,16 @@ public class ValidationController extends BasePortalController {
      */
     @RequestMapping("/oxidePctToTracePpm.do")
     public ModelAndView oxidePctToTracePpm(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
-            @RequestParam("name") String name) {
+            @RequestParam("name") String[] names) {
 
-        TraceElementConversion conversion = uomService.oxidePctToTracePpm(name);
-        if (conversion == null) {
-            return generateJSONResponseMAV(false, null, "Lookup failed");
+        List<ModelMap> responses = new ArrayList<ModelMap>(names.length);
+        for (String name : names) {
+            TraceElementConversion conversion = uomService.oxidePctToTracePpm(name);
+            ModelMap response = new ModelMap();
+            response.put("element", conversion == null ? null : conversion.getTraceElement());
+            response.put("conversion", conversion == null ? null : conversion.getConversion());
+            responses.add(response);
         }
-
-        ModelMap response = new ModelMap();
-        response.put("element", conversion.getTraceElement());
-        response.put("conversion", conversion.getConversion());
-
-        return generateJSONResponseMAV(true, response, "");
+        return generateJSONResponseMAV(true, responses, "");
     }
 }
