@@ -145,7 +145,7 @@ Ext.application({
                     items: [{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy ratio 1',
+                        title: 'Proxy Ratio 1',
                         margin: '0 10 0 0',
                         id: 'setproxy-1',
                         allPds : records,
@@ -154,7 +154,7 @@ Ext.application({
                     },{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy ratio 2',
+                        title: 'Proxy Ratio 2',
                         margin: '0 10 0 0',
                         id: 'setproxy-2',
                         allPds : records,
@@ -163,7 +163,7 @@ Ext.application({
                     },{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy ratio 3',
+                        title: 'Proxy Ratio 3',
                         id: 'setproxy-3',
                         allPds : records,
                         pdNumerator: p3Value,
@@ -275,6 +275,10 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 width: '100%',
                 layout : 'anchor',
                 border: false,
+                plugins: [{
+                    ptype: 'headerhelp',
+                    text: 'A proxy ratio requires a single parameter to act as numerator and at least one other parameter to be compared against.'
+                }],
                 items: [{
                     xtype : 'pdcombo',
                     width: '100%',
@@ -329,7 +333,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 xtype: 'proxypanel',
                 itemId: 'proxy-panel',
                 width: '100%',
-                emptyText: 'Select a numerator above to examine it here.',
+                emptyText: 'Select a proxy above to examine it here.',
                 flex: 1,
                 targetChartWidth: 700,
                 targetChartHeight: 400,

@@ -33,6 +33,8 @@
         <script type="text/javascript" src="js/eavl/models/EAVLJob.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/utils/HighlightUtil.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/plugins/ModelDragDrop.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderIcons.js"></script>
+        <script type="text/javascript" src="js/eavl/widgets/plugins/HeaderHelp.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsCombo.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/ParameterDetailsField.js"></script>
