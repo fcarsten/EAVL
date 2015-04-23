@@ -7,34 +7,6 @@
         
         <jsp:include page="../../jsimports.htm"/>
         
-        <style>
-	        .x-form-value-field {
-			  margin: 0 0 0 0;
-			  padding: 0 0 0 0;
-			  font-size: 22px;
-			  font-weight: 700;
-			}
-			
-			.x-form-value-field-uom {
-			  margin: 0 0 0 0;
-			  padding: 0 0 0 0;
-			  font: normal 18px impact, sans-serif;
-			  color: #D05353;
-			}
-			
-			.x-form-value-field-label {
-			  margin: 0 0 0 0;
-			  padding: 0 0 0 0;
-			  font: normal 11px tahoma,arial,verdana,sans-serif;;
-			  text-align: center;
-			  color: black;
-			}
-			
-			.x-form-image-field {
-			  text-align: center;
-			}
-        </style>
-        
         <script type="text/javascript">
         var CONTACT_EMAIL = ${OBSCURED_CONTACT_EMAIL};
         </script>
@@ -71,6 +43,7 @@
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsTagField.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/widgets/ErrorWindow.css">
+        <link rel="stylesheet" type="text/css" href="js/eavl/widgets/JobInfoWindow.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/Results-UI.css">
         <link rel="stylesheet" type="text/css" href="js/eavl/EAVL-Common.css">
         

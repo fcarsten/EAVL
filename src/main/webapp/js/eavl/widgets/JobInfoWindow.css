@@ -1,0 +1,30 @@
+.eavl-job-info-window .x-form-value-field {
+    margin: 10 0 6 0;
+    padding: 0 0 0 0;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.eavl-job-info-window .x-form-value-field-uom {
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    font: normal 18px impact, sans-serif;
+    color: #D05353;
+}
+
+.eavl-job-info-window .x-form-value-field-label {
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    font: normal 16px tahoma,arial,verdana,sans-serif;;
+    text-align: center;
+    color: gray;
+}
+
+.eavl-job-info-window .x-form-image-field {
+    text-align: center;
+}
+
+.eavl-job-info-nothing-text {
+	font-size: 24px;
+	margin-top: 80px;
+}

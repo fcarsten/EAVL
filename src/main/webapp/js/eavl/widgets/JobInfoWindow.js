@@ -30,11 +30,50 @@ Ext.define('eavl.widgets.JobInfoWindow', {
             kdeDateString = 'N/A';
         }
         
+        var predictionString = config.job.get('predictionParameter');
+        if (Ext.isEmpty(predictionString)) {
+            predictionString = 'N/A';
+        }
+        
+        var thresholdString = '';
+        if (config.job.get('predictionCutoff') !== null) {
+            thresholdString = '~' + Ext.util.Format.number(config.job.get('predictionCutoff'), '0.0000');
+        } else {
+            thresholdString = 'N/A';
+        }
+        
+        var bottomPanelItems = null;
+        if (Ext.isEmpty(config.job.get('proxyParameters'))) {
+            bottomPanelItems = [{
+                xtype: 'container',
+                height: '100%',
+                html: '<div class="eavl-job-info-nothing-text">No proxies have been selected for this job.</div>'
+            }];
+        } else {
+            bottomPanelItems = [{
+                xtype: 'jobinfowindow-proxypanel',
+                title: 'Proxy Ratio 1',
+                flex: 1,
+                margin: '0 10 0 0',
+                pp: config.job.get('proxyParameters')[0]
+            },{
+                xtype: 'jobinfowindow-proxypanel',
+                title: 'Proxy Ratio 2',
+                flex: 1,
+                margin: '0 10 0 0',
+                pp: config.job.get('proxyParameters')[1]
+            },{
+                xtype: 'jobinfowindow-proxypanel',
+                title: 'Proxy Ratio 3',
+                flex: 1,
+                pp: config.job.get('proxyParameters')[2]
+            }];
+        }
+        
+        
         Ext.apply(config, {
             width: 1000,
             height: 600,
-            title: config.job.get('name'),
-            subtitle: config.job.get('status'),
             layout: 'fit',
             items: [{
                 xtype: 'container',
@@ -49,26 +88,28 @@ Ext.define('eavl.widgets.JobInfoWindow', {
                         type: 'hbox',
                         pack: 'center'
                     },
-                    height: 100,
+                    cls: 'eavl-job-info-window',
+                    height: 160,
+                    padding: '30 0 0 0',
                     items: [{
                         xtype: 'datadisplayfield',
                         fieldLabel: 'Predicted Parameter',
-                        margin: '0 10 0 0',
-                        value: config.job.get('predictionParameter')
+                        margin: '0 20 0 0',
+                        value: predictionString
                     },{
                         xtype: 'datadisplayfield',
                         fieldLabel: 'Threshold',
-                        margin: '0 10 0 10',
-                        value: '~' + Ext.util.Format.number(config.job.get('predictionCutoff'), '0.0000')
+                        margin: '0 20 0 20',
+                        value: thresholdString
                     },{
                         xtype: 'datadisplayfield',
                         fieldLabel: 'Imputation Submit Date',
-                        margin: '0 10 0 10',
+                        margin: '0 20 0 20',
                         value: impDateString
                     },{
                         xtype: 'datadisplayfield',
                         fieldLabel: 'KDE Submit Date',
-                        margin: '0 0 0 10',
+                        margin: '0 0 0 20',
                         value: kdeDateString
                     }]
                 },{
@@ -78,24 +119,7 @@ Ext.define('eavl.widgets.JobInfoWindow', {
                         type: 'hbox',
                         pack: 'center'
                     },
-                    items: [{
-                        xtype: 'jobinfowindow-proxypanel',
-                        title: 'Proxy Ratio 1',
-                        flex: 1,
-                        margin: '0 10 0 0',
-                        pp: config.job.get('proxyParameters')[0]
-                    },{
-                        xtype: 'jobinfowindow-proxypanel',
-                        title: 'Proxy Ratio 2',
-                        flex: 1,
-                        margin: '0 10 0 0',
-                        pp: config.job.get('proxyParameters')[1]
-                    },{
-                        xtype: 'jobinfowindow-proxypanel',
-                        title: 'Proxy Ratio 3',
-                        flex: 1,
-                        pp: config.job.get('proxyParameters')[2]
-                    }]
+                    items: bottomPanelItems
                 }]
             }],
             dockedItems: [{
@@ -161,7 +185,7 @@ Ext.define('eavl.widgets.JobInfoWindow.ProxyPanel', {
                 xtype: 'pdtagfield',
                 parameterDetails: fakePdList,
                 readOnly: true,
-                height: Math.floor(25 *  (1 + (fakePdList.length / 2))), //tagfield grow is broken in 5.1 This is our workaround
+                height: Math.floor(25 *  (1 + (fakePdList.length / 3))), //tagfield grow is broken in 5.1 This is our workaround
                 value: fakePdList,
             }]
         });

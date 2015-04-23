@@ -161,7 +161,7 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
                     '%}',
                     '" qtip="{' + me.displayField + '}">' ,
                     '<img class="pdtf-tag-icon" data-qtip="{[this.getItemTip(values)]}" src="{[this.getItemIcon(values)]}">',
-                    '<div class="' + cssPrefix + 'tagfield-item-text">{[this.getItemLabel(values)]}</div>',
+                    '<div class="' + cssPrefix + 'tagfield-item-text" style="' + (me.readOnly ? 'padding-right: 5px;' : '') + '">{[this.getItemLabel(values)]}</div>',
                     '<div class="' + cssPrefix + 'tagfield-item-close" style="' + (me.readOnly ? 'display: none;' : '') + '"></div>' ,
                     '</li>' ,
                 '</tpl>',
