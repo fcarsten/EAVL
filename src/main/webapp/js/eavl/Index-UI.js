@@ -122,6 +122,7 @@ Ext.application({
                                         scale: 'large',
                                         text: 'See existing jobs',
                                         handler: function() {
+                                            portal.util.PiwikAnalytic.trackevent('Navigation', 'Click', 'View Jobs', wf.get('id'));
                                             if (wf.get('resultsLink')) {
                                                 document.location.href = wf.get('resultsLink');
                                             } else {
@@ -134,6 +135,7 @@ Ext.application({
                                         scale: 'large',
                                         text: 'Start a new job',
                                         handler: function() {
+                                            portal.util.PiwikAnalytic.trackevent('Navigation', 'Click', 'Start Job', wf.get('id'));
                                             if (wf.get('initialLink')) {
                                                 document.location.href = wf.get('initialLink');
                                             } else {

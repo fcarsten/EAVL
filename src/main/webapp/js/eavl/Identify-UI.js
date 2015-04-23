@@ -99,6 +99,7 @@ Ext.application({
                                     return;
                                 }
 
+                                portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Identify', Ext.util.Format.format('Non Comp: {0}, Comp: {1}', saveColNames.length, parameterDetails.length));
                                 callback(true);
                             }
                         });

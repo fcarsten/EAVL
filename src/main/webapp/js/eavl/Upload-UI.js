@@ -18,6 +18,7 @@ Ext.application({
         eavl.widgets.SplashScreen.hideLoadingScreen();
         
         var jobId = null;
+        var filesUploaded = 0;
 
         var showCSVGrid = function(id, parameterDetails) {
             jobId = id;
@@ -62,6 +63,7 @@ Ext.application({
                         return;
                     }
 
+                    portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Upload', 'total uploads: ' + filesUploaded);
                     callback(true);
                 }
             },{
@@ -115,6 +117,8 @@ Ext.application({
                                             Ext.Msg.alert('Error uploading file. ' + action.result.error);
                                             return;
                                         }
+                                        
+                                        filesUploaded++;
 
                                         var pdList = [];
                                         Ext.each(action.result.data.parameterDetails, function(o) {

@@ -21,16 +21,22 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             }
         },
         handleAllowPrevious : function(url) {
+            var newUrl = null;
             if (!Ext.getCmp('workflow-location-panel').allowPrevious) {
-                window.location.href = url;
+                newUrl = url;
             } else {
                 Ext.getCmp('workflow-location-panel').allowPrevious(function(proceed) {
                     if (proceed === true) {
-                        window.location.href = url;
+                        newUrl = url;
                     } else if (proceed !== false) {
-                        window.location.href = proceed;
+                        newUrl = proceed;
                     }
                 });
+            }
+            
+            if (newUrl !== null) {
+                portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Backward', window.location.href, newUrl);
+                window.location.href = newUrl;
             }
         }
     },
