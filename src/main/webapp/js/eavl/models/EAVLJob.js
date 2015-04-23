@@ -14,7 +14,7 @@ Ext.define('eavl.models.EAVLJob', {
         STATUS_SUBMITTED : "submitted",
         STATUS_DONE : "done",
 
-        PARAMETER_ESTIMATE : "eavl-kde-estimate",
+        PARAMETER_ESTIMATE : "probability",
 
 
         FILE_DATA_CSV : "data.csv",

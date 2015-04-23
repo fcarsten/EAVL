@@ -52,5 +52,5 @@ public final class EAVLJobConstants {
     /**
      * The name of the estimate column encoded in the final results file
      */
-    public static final String PARAMETER_ESTIMATE = "eavl-kde-estimate";
+    public static final String PARAMETER_ESTIMATE = "probability";
 }
