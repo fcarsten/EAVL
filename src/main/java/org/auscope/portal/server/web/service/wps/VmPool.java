@@ -87,6 +87,7 @@ public class VmPool {
 
     private static final String TYPE_STRING = "openstack-nova";
     private static final String CLOUD_ENDPOINT = "https://keystone.rc.nectar.org.au:5000/v2.0";
+    private static final String KEY_PAIR_NAME = "vgl-developers";
 
     private static final String VM_ID = "Melbourne/132b7591-613f-4922-aee5-5039a6919297";
 
@@ -399,7 +400,7 @@ public class VmPool {
         TemplateOptions options = ((NovaTemplateOptions) computeService
                 .templateOptions())
         // .availabilityZone("NCI")
-        // .keyPairName(getKeypair())
+                .keyPairName(getKeypair())
                 .securityGroups("all");
 
         Template template = computeService.templateBuilder().imageId(VM_ID)
@@ -460,7 +461,7 @@ public class VmPool {
                 TemplateOptions options = ((NovaTemplateOptions) computeService
                         .templateOptions()).availabilityZone(
                         currentZone.getName())
-                // .keyPairName(getKeypair())
+                        .keyPairName(getKeypair())
                         .securityGroups("all");
 
                 Template template = computeService.templateBuilder()
@@ -500,7 +501,7 @@ public class VmPool {
     }
 
     protected String getKeypair() {
-        return keypair != null ? keypair : "vgl-developers";
+        return keypair != null ? keypair : KEY_PAIR_NAME;
     }
 
     protected void setKeypair(String keypair) {
