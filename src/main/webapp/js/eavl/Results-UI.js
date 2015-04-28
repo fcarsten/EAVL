@@ -88,7 +88,7 @@ Ext.application({
                                 return fileName.endsWith(".csv");
                             },
                             hasPreview: function(job, fileName) {
-                                return fileName.endsWith(".json") || fileName.endsWith("kde.csv");
+                                return fileName.endsWith(".json") || fileName.endsWith("cp.csv");
                             },
                             listeners: {
                                 dataview : function(jobFileList, fileName, job) {

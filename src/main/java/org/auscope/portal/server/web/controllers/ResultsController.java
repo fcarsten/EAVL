@@ -136,7 +136,7 @@ public class ResultsController extends BasePortalController {
                 case EAVLJobConstants.FILE_IMPUTED_CENLR_CSV:
                 case EAVLJobConstants.FILE_KDE_JSON_ALL:
                 case EAVLJobConstants.FILE_KDE_JSON_HIGH:
-                case EAVLJobConstants.FILE_KDE_CSV:
+                case EAVLJobConstants.FILE_CP_CSV:
                     m.put("group", "Conditional Probability Results");
                     break;
                 default:

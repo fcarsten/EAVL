@@ -201,7 +201,7 @@ public class KDECallable implements Callable<Object> {
             // Merge that fake CSV file with the imputed CSV data
             in = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
             in2 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-            os = this.fss.writeFile(job, EAVLJobConstants.FILE_KDE_CSV);
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_CP_CSV);
             csvService.mergeFiles(in, in2, os, null, null);
 
             return "";
