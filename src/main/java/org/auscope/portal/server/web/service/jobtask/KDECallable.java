@@ -204,6 +204,13 @@ public class KDECallable implements Callable<Object> {
             os = this.fss.writeFile(job, EAVLJobConstants.FILE_CP_CSV);
             csvService.mergeFiles(in, in2, os, null, null);
 
+            // Merge that fake CSV file with the cenlr CSV data
+            in = this.fss.readFile(job, EAVLJobConstants.FILE_TEMP_DATA_CSV);
+            in2 = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+            os = this.fss.writeFile(job, EAVLJobConstants.FILE_TEMP_DATA2_CSV);
+            csvService.mergeFiles(in, in2, os, null, null);
+            fss.renameStageInFile(job, EAVLJobConstants.FILE_TEMP_DATA2_CSV, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
+
             return "";
         } catch (Exception ex) {
             log.error("KDE Error: ", ex);

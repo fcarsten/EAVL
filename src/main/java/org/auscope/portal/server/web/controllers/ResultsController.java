@@ -2,7 +2,6 @@ package org.auscope.portal.server.web.controllers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +9,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -18,9 +16,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.IOUtils;
@@ -30,10 +25,12 @@ import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.eavl.ParameterDetails;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.JobTaskService;
+import org.auscope.portal.server.web.service.ParameterDetailsService;
 import org.auscope.portal.server.web.view.ViewEAVLJobFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
@@ -57,15 +54,19 @@ public class ResultsController extends BasePortalController {
     private FileStagingService fss;
     private ViewEAVLJobFactory viewFactory;
     private CSVService csvService;
+    private ParameterDetailsService pdService;
+
 
     @Autowired
     public ResultsController(EAVLJobService jobService,
-            JobTaskService jobTaskService, FileStagingService fss, ViewEAVLJobFactory viewFactory, CSVService csvService) {
+            JobTaskService jobTaskService, FileStagingService fss, ViewEAVLJobFactory viewFactory,
+            CSVService csvService, ParameterDetailsService pdService) {
         this.jobService = jobService;
         this.jobTaskService = jobTaskService;
         this.fss = fss;
         this.viewFactory = viewFactory;
         this.csvService = csvService;
+        this.pdService = pdService;
     }
 
     /**
@@ -154,8 +155,8 @@ public class ResultsController extends BasePortalController {
         }
     }
 
-    @RequestMapping("getKDEGeometry.do")
-    public ModelAndView getKDEGeometry(HttpServletRequest request,
+    @RequestMapping("getCPGeometry.do")
+    public ModelAndView getCPGeometry(HttpServletRequest request,
             @AuthenticationPrincipal EavlUser user,
             @RequestParam("jobId") Integer jobId,
             @RequestParam("name") String fileName) {
@@ -164,61 +165,43 @@ public class ResultsController extends BasePortalController {
         try {
             EAVLJob job = jobService.getUserJobById(request, user, jobId);
             if (job == null) {
-                log.warn(String.format("getKDEGeometry - User %1$s attempting to access job %2$s was rejected. (Job might not exist)", user, jobId));
+                log.warn(String.format("getCPGeometry - User %1$s attempting to access job %2$s was rejected. (Job might not exist)", user, jobId));
                 return generateJSONResponseMAV(false);
+            }
+
+
+            //We will have 5 columns. 1 probability, 1 predictor, 3 proxies
+            //We know the first column will be the probability column
+            List<ParameterDetails> clrPds = pdService.getParameterDetails(job, fileName);
+            for (int i = clrPds.size() - 1; i >= 0; i--) {
+                String name = clrPds.get(i).getName();
+                if (name.equals(job.getPredictionParameter()) ||
+                    name.equals(EAVLJobConstants.PARAMETER_ESTIMATE)) {
+                    clrPds.remove(i);
+                }
             }
 
             is = fss.readFile(job, fileName);
-            String jsonData = IOUtils.toString(is, StandardCharsets.UTF_8.name());
-            JSONObject json = JSONObject.fromObject(jsonData);
-            List<ModelMap> responsePoints = new ArrayList<ModelMap>();
+            double[][] rawData = csvService.getRawData(is);
 
-            JSONObject gkde = (JSONObject) json.get("gkde");
-            JSONArray x1 = (JSONArray) ((JSONObject) gkde.get("eval.points")).get("X1");
-            JSONArray x2 = (JSONArray) ((JSONObject) gkde.get("eval.points")).get("X2");
-            JSONArray x3 = (JSONArray) ((JSONObject) gkde.get("eval.points")).get("X3");
-            JSONObject estimate = (JSONObject) gkde.get("estimate");
-
-            if (x1.size() != x2.size() || x2.size() != x3.size()) {
-                log.error("JSON response points contain a differing number of X1/X2/X3 values for jobId:" + jobId);
-                return generateJSONResponseMAV(false);
-            }
-
-            for (int i = 0; i < x1.size(); i++) {
+            List<ModelMap> responsePoints = new ArrayList<ModelMap>(rawData.length);
+            int xIndex = clrPds.get(0).getColumnIndex();
+            int yIndex = clrPds.get(1).getColumnIndex();
+            int zIndex = clrPds.get(2).getColumnIndex();
+            for (double[] row : rawData) {
                 ModelMap point = new ModelMap();
-                point.put("x", x1.get(i));
-                point.put("y", x2.get(i));
-                point.put("z", x3.get(i));
-                point.put("estimate", estimate.get(Integer.toString((i + 1))));
+                point.put("x", row[xIndex]);
+                point.put("y", row[yIndex]);
+                point.put("z", row[zIndex]);
+                point.put("estimate", row[0]); //first col is prob
                 responsePoints.add(point);
             }
 
-            //Now we need proxy names. Pulling from job.getProxyParameters() will be unstable
-            //Best bet is to lookup the proxy names from the place they were read (imputed-cenlr file)
-            //and use that for the ordering.
-            Iterator<Proxy> proxies = job.getProxyParameters().iterator(); //TODO: This may potentially fail due to set order being undefined
-            String[] orderedProxies = new String[3];
-
-            String proxyNumeratorName = proxies.next().getNumerator();
-            IOUtils.closeQuietly(is);
-            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-            orderedProxies[csvService.columnNameToIndex(is, proxyNumeratorName) - 1] = proxyNumeratorName; //Col 0 will be the predicted param
-
-            proxyNumeratorName = proxies.next().getNumerator();
-            IOUtils.closeQuietly(is);
-            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-            orderedProxies[csvService.columnNameToIndex(is, proxyNumeratorName) - 1] = proxyNumeratorName; //Col 0 will be the predicted param
-
-            proxyNumeratorName = proxies.next().getNumerator();
-            IOUtils.closeQuietly(is);
-            is = fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_CENLR_CSV);
-            orderedProxies[csvService.columnNameToIndex(is, proxyNumeratorName) - 1] = proxyNumeratorName; //Col 0 will be the predicted param
-
             ModelMap response = new ModelMap();
             response.put("points", responsePoints);
-            response.put("xLabel", orderedProxies[0]);
-            response.put("yLabel", orderedProxies[1]);
-            response.put("zLabel", orderedProxies[2]);
+            response.put("xLabel", clrPds.get(0).getName());
+            response.put("yLabel", clrPds.get(1).getName());
+            response.put("zLabel", clrPds.get(2).getName());
 
             return generateJSONResponseMAV(true, response, "");
         } catch (Exception ex) {

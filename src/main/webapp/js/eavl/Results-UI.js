@@ -88,7 +88,7 @@ Ext.application({
                                 return fileName.endsWith(".csv");
                             },
                             hasPreview: function(job, fileName) {
-                                return fileName.endsWith(".json") || fileName.endsWith("cp.csv");
+                                return fileName.endsWith("cenlr.csv") || fileName.endsWith("cp.csv");
                             },
                             listeners: {
                                 dataview : function(jobFileList, fileName, job) {
@@ -97,9 +97,9 @@ Ext.application({
                                     }
                                 },
                                 preview : function(jobFileList, fileName, job) {
-                                    if (fileName.endsWith(".json")) {
+                                    if (fileName === eavl.models.EAVLJob.FILE_IMPUTED_CENLR_CSV) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "threedscatterplot");
-                                    } else if (fileName.endsWith(".csv")) {
+                                    } else if (fileName === eavl.models.EAVLJob.FILE_CP_CSV) {
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "bhestimate");
                                     }
                                 }
