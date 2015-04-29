@@ -549,7 +549,7 @@ window.Feedback.Screenshot.prototype.start = function( modal, modalHeader, modal
         this.mouseClickEvent = function( e ){
 
             e.preventDefault();
-
+            e.stopPropagation();
 
             if ( action === false) {
                 if ( blackoutBox.getAttribute(dataExclude) === "false") {
