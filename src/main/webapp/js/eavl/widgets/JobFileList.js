@@ -195,6 +195,7 @@ Ext.define('eavl.widgets.JobFileList', {
             return;
         }
         
+        portal.util.PiwikAnalytic.trackevent('Feature', 'Download', 'jobfile', 'all');
         var ds = this.getStore();
         
         var fileNames = [];
@@ -209,9 +210,11 @@ Ext.define('eavl.widgets.JobFileList', {
     },
     
     _downloadClickHandler :  function(value, record, column, tip) {
+        var name = record.get('name');
+        portal.util.PiwikAnalytic.trackevent('Feature', 'Download', 'jobfile', name);
         portal.util.FileDownloader.downloadFile("results/downloadFiles.do", {
             jobId : this.job.get('id'),
-            name : [record.get('name')]
+            name : [name]
         });
     },
 
