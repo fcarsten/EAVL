@@ -149,7 +149,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
         });
         mask.show();
         Ext.Ajax.request({
-            url : 'results/getKDEGeometry.do',
+            url : 'results/getCPGeometry.do',
             params : {
                 jobId : job.get('id'),
                 name : fileName

@@ -46,7 +46,7 @@ public class ViewEAVLJobFactory {
 
         if (jobTaskService.isExecuting(job.getKdeTaskId())) {
             status = STATUS_SUBMITTED;
-        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_KDE_CSV)) {
+        } else if (fss.stageInFileExists(job, EAVLJobConstants.FILE_CP_CSV)) {
             status = STATUS_DONE;
         } else if (job.getKdeTaskId() != null) {
             status = STATUS_KDE_ERROR;
