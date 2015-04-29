@@ -433,7 +433,10 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
     
     _lookupUomConversion : function(editContainer) {
         
-        var loadMask = new Ext.LoadMask(editContainer, {msg:"Please wait..."});
+        var loadMask = new Ext.LoadMask({
+            target: editContainer,
+            msg:"Please wait..."
+        });
         loadMask.show();
         Ext.Ajax.request({
             url: 'validation/oxidePctToTracePpm.do',

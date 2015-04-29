@@ -16,7 +16,10 @@ Ext.define('eavl.widgets.preview.CSVFilePreview', {
 
     preview: function(job, fileName) {
         var me = this;
-        var mask = new Ext.LoadMask(me, {msg:"Please wait..."});
+        var mask = new Ext.LoadMask({
+            target: me,
+            msg:"Please wait..."
+        });
         mask.show();
         Ext.Ajax.request({
             url: "validation/getParameterDetails.do",
