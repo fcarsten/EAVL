@@ -18,6 +18,8 @@
     height: 32px;
     
     text-shadow: none;
+    
+    z-index: 100000;
 }
 
 .eavl-feedback-button.feedback-btn:hover {
