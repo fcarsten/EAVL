@@ -95,19 +95,19 @@ Ext.define('eavl.widgets.ParameterDetailsTagField', {
             if (config.value) {
                 this._emptyTextWorkaround(this, config.value, []);
             }
+            
+            //Another Ext workaround
+            //Overriding applyTriggers in the "normal" way and using callParent
+            //fails when readOnly == false. 
+            if (config.readOnly) {
+                this.applyTriggers = Ext.emptyFn;
+            }
         }, this);
         this.on('afterrender', function() {
             if (config.readOnly) {
                 this.setTriggers([]);
             }
         }, this);
-    },
-    
-    applyTriggers : function(triggers) {
-        if (this.readOnly) {
-            return;
-        }
-        this.callParent(arguments);
     },
     
     _handleClearClicked : function() {

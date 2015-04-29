@@ -24,18 +24,23 @@ Ext.application({
             contacts: [
                 Ext.create('eavl.models.Contact', {
                     name: 'Joshua Vote',
-                    email: 'Josh.Vote@csiro.au',
+                    email: ['Josh.Vote', 'csiro.au'].join('@'),
                     group: 'Developers'
                 }),
                 Ext.create('eavl.models.Contact', {
                     name: 'Carsten Friedrich',
-                    email: 'Carsten.Friedrich@csiro.au',
+                    email: ['Carsten.Friedrich', 'csiro.au'].join('@'),
                     group: 'Developers'
                 }),
                 Ext.create('eavl.models.Contact', {
                     name: 'June Hill',
-                    email: 'June.Hill@csiro.au',
+                    email: ['June.Hill', 'csiro.au'].join('@'),
                     group: 'Researchers'
+                }),
+                Ext.create('eavl.models.Contact', {
+                    name: 'Andrew Rodger',
+                    email: ['Andrew.Rodger', 'csiro.au'].join('@'),
+                    group: 'Project Lead'
                 })
             ]
         });
@@ -50,7 +55,7 @@ Ext.application({
             contacts: [
                 Ext.create('eavl.models.Contact', {
                     name: 'Joshua Vote',
-                    email: 'Josh.Vote@csiro.au',
+                    email: ['Josh.Vote', 'csiro.au'].join('@'),
                     group: 'Developers'
                 })
             ]

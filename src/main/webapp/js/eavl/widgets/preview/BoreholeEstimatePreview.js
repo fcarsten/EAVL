@@ -23,7 +23,10 @@ Ext.define('eavl.widgets.preview.BoreholeEstimatePreview', {
         var paramsToGroup = [eavl.models.EAVLJob.PARAMETER_ESTIMATE, job.get('predictionParameter')];
         
         var me = this;
-        var mask = new Ext.LoadMask(me, {msg:"Please wait..."});
+        var mask = new Ext.LoadMask({
+            target: me,
+            msg:"Please wait..."
+        });
         mask.show();
         Ext.Ajax.request({
             url: "results/getGroupedNumericValues.do",

@@ -10,10 +10,17 @@ public final class EAVLJobConstants {
      * The filename of the current working CSV file
      */
     public static final String FILE_DATA_CSV = "data.csv";
+
     /**
      * Temporary filename for the data file (TODO - make this auto generate)
      */
     public static final String FILE_TEMP_DATA_CSV = "data-tmp.csv";
+
+    /**
+     * Temporary filename for the data file (TODO - make this auto generate)
+     */
+    public static final String FILE_TEMP_DATA2_CSV = "data-tmp2.csv";
+
     /**
      * The output of the data validation (post culling, pre imputation)
      */
@@ -40,9 +47,9 @@ public final class EAVLJobConstants {
     public static final String FILE_KDE_JSON_HIGH = "data-kde-high.json";
 
     /**
-     * The filename containing the kernel density estimate outputs (encoded with the CSV data)
+     * The filename containing the conditional probability outputs (encoded with the CSV data)
      */
-    public static final String FILE_KDE_CSV = "data-kde.csv";
+    public static final String FILE_CP_CSV = "data-cp.csv";
 
     /**
      * The parameter details cache suffix

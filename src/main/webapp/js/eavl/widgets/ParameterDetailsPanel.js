@@ -44,7 +44,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                 itemId : 'card-empty',
                 border: false,
                 xtype : 'container',
-                html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
+                html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect-large.png" width="100"/><br>{0}</div></div>', this.emptyText)
             },{
                 itemId : 'card-inspect',
                 layout : 'fit',
@@ -433,7 +433,10 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
     
     _lookupUomConversion : function(editContainer) {
         
-        var loadMask = new Ext.LoadMask(editContainer, {msg:"Please wait..."});
+        var loadMask = new Ext.LoadMask({
+            target: editContainer,
+            msg:"Please wait..."
+        });
         loadMask.show();
         Ext.Ajax.request({
             url: 'validation/oxidePctToTracePpm.do',

@@ -144,12 +144,13 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
      */
     preview : function(job, fileName) {
         var me = this;
-        var mask = new Ext.LoadMask(me, {
+        var mask = new Ext.LoadMask({
+            target: me,
             msg : "Please wait..."
         });
         mask.show();
         Ext.Ajax.request({
-            url : 'results/getKDEGeometry.do',
+            url : 'results/getCPGeometry.do',
             params : {
                 jobId : job.get('id'),
                 name : fileName
