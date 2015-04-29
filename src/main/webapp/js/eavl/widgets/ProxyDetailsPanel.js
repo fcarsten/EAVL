@@ -36,7 +36,7 @@ Ext.define('eavl.widgets.ProxyDetailsPanel', {
             itemId : 'card-empty',
             xtype : 'container',
             border: false,
-            html : Ext.util.Format.format('<div class="proxydp-empty-container"><div class="proxydp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
+            html : Ext.util.Format.format('<div class="proxydp-empty-container"><div class="proxydp-empty-container-inner"><img src="img/inspect-large.png" width="100"/><br>{0}</div></div>', this.emptyText)
         };
 
         var inspectCard = {
