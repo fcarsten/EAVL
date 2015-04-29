@@ -22,7 +22,7 @@ Ext.define('eavl.widgets.FeedbackWidget', {
         
         this.callParent(arguments);
         
-        Feedback({h2cPath:'js/html2canvas/html2canvas.js',
+        Feedback({h2cPath:'js/html2canvas/html2canvas.min.js',
             url: 'feedback/sendFeedback.do',
             metadata: metadata,
             buttonCls: 'eavl-feedback-button'});

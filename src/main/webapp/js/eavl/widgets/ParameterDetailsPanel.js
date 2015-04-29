@@ -44,7 +44,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                 itemId : 'card-empty',
                 border: false,
                 xtype : 'container',
-                html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect.svg" width="100"/><br>{0}</div></div>', this.emptyText)
+                html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect-large.png" width="100"/><br>{0}</div></div>', this.emptyText)
             },{
                 itemId : 'card-inspect',
                 layout : 'fit',
