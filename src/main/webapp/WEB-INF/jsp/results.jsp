@@ -58,7 +58,6 @@
         <script type="text/javascript" src="js/eavl/widgets/JobFileList.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/charts/BoreholeEstimateChart.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/CSVGrid.js"></script>
-        <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/FeedbackWidget.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/WorkflowLocationPanel.js"></script>
         <script type="text/javascript" src="js/eavl/widgets/SplashScreen.js"></script>
