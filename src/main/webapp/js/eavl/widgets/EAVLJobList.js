@@ -106,7 +106,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
         case eavl.models.EAVLJob.STATUS_UNSUBMITTED:
             details.img = 'img/edit.png';
             details.tip = 'This job hasn\'t been submitted for imputation.';
-            details.imgLink = "validate.html?" + Ext.Object.toQueryString({sessionJobId: job.get('id')});
+            details.imgLink = "identify.html?" + Ext.Object.toQueryString({sessionJobId: job.get('id')});
             break;
         case eavl.models.EAVLJob.STATUS_KDE_ERROR:
             details.img = 'img/exclamation.png';
