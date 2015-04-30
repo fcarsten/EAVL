@@ -139,6 +139,7 @@ public class ValidationController extends BasePortalController {
             ModelMap response = new ModelMap();
             response.put("id", job.getId());
             response.put("parameterDetails", pdList);
+            response.put("name", job.getName());
 
             //We have to use a HTML response due to ExtJS's use of a hidden iframe for file uploads
             //Failure to do this will result in the upload working BUT the user will also get prompted
@@ -388,5 +389,42 @@ public class ValidationController extends BasePortalController {
             responses.add(response);
         }
         return generateJSONResponseMAV(true, responses, "");
+    }
+
+    /**
+     * Attempts to rename a job with a specific ID. If the jobId doesn't belong to the current user,
+     * this request will be rejected.
+     * @param request
+     * @param user
+     * @param jobId
+     * @param name
+     * @return
+     */
+    @RequestMapping("/renameJob.do")
+    public ModelAndView renameJob(HttpServletRequest request,
+            @AuthenticationPrincipal EavlUser user,
+            @RequestParam("jobId") Integer jobId,
+            @RequestParam("name") String name) {
+
+        name = name.trim();
+        if (name.isEmpty()) {
+            return generateJSONResponseMAV(false);
+        }
+
+        try {
+            EAVLJob job = jobService.getUserJobById(request, user, jobId);
+            if (job == null) {
+                log.warn(String.format("Unable to lookup job %1$s for user %2$s", jobId, user));
+                return generateJSONResponseMAV(false);
+            }
+
+            job.setName(name);
+            jobService.save(job);
+            return generateJSONResponseMAV(true);
+        } catch (PortalServiceException e) {
+            log.error(String.format("Error updating job name for id: %1$s and user %2$s and name '%3$s'", jobId, user, name));
+            return generateJSONResponseMAV(false);
+        }
+
     }
 }
