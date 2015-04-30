@@ -35,6 +35,7 @@ Ext.application({
                 region: 'north',
                 height: 200,
                 hideNavigator : true,
+                hideText : true,
                 urlOverride : next,
                 allowNext : function(callback) {
                     callback(Ext.getCmp('upload-form').getForm().isValid());

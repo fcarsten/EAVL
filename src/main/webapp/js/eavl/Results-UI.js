@@ -34,7 +34,9 @@ Ext.application({
                 layout: 'border',
                 items: [{
                     xtype: 'workflowpanel',
-                    region: 'north'
+                    region: 'north',
+                    hideNavigator: true,
+                    height: 200
                 },{
                     xtype: 'panel',
                     region: 'center',

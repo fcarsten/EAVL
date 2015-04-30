@@ -54,6 +54,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
      *  allowPrevious : function(callback) - A function that should return a boolean (via the callback argument) if the user is allowed to proceed (defaults to always true)
      *                                       If a string is returned, its value will be used as the URL instead.
      *  hideNavigator : boolean - If true, the Navigator panel (big left/right arrows) will be omitted
+     *  hideText : boolean - If true, the big test will be omitted
      *  urlOverride : String - if set, highlight location based on this string rather than window.location
      * }
      *
@@ -73,6 +74,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
         }
 
         this.hideNavigator = config.hideNavigator ? true : false;
+        this.hideText = config.hideText ? true : false;
 
         var currentIndex = this.getActiveStepIndex(config.urlOverride ? config.urlOverride : undefined);
 
@@ -145,7 +147,7 @@ Ext.define('eavl.widgets.WorkflowLocationPanel', {
             },{
                 tag: 'div',
                 id: 'text-container',
-                style : this.hideNavigator ? 'display:none;' : '',
+                style : this.hideText ? 'display:none;' : '',
                 children: [{
                     tag: 'div',
                     id: 'text-internal',

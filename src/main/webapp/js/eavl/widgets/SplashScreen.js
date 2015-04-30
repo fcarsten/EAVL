@@ -58,6 +58,7 @@ Ext.define('eavl.widgets.SplashScreen', {
                 region: 'north',
                 height: 200,
                 hideNavigator : true,
+                hideText : true,
                 allowNext : function(callback) {
                     callback(false);
                 }
