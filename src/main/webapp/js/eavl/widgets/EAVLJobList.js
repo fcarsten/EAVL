@@ -185,11 +185,78 @@ Ext.define('eavl.widgets.EAVLJobList', {
                         cls: 'job-row-img'
                     }],
                 },{
-                    tag : 'span',
+                    tag : 'div',
+                    id: 'eavl-jobtitle-editable',
                     html : selection[0].get('name')
                 }]
             }),
-            subtitle: 'Status: ' + selection[0].get('status') 
+            subtitle: 'Status: ' + selection[0].get('status'),
+            listeners: {
+                //This adds our editable functionality to the div's onclick handler
+                afterrender: function(jobInfoWindow) {
+                    var titleEl = Ext.get('eavl-jobtitle-editable');
+                    titleEl.on('click', function(evt, el) {
+                        var returnToDiv = function() {
+                            titleEl.setStyle('display', '');
+                            
+                            var editParent = Ext.get('eavl-jobtitle-editparent');
+                            if (editParent) {
+                                var inputValue = editParent.down('input', true).value;
+                                
+                                if (inputValue !== selection[0].get('name')) {
+                                    var mask = new Ext.LoadMask({
+                                        msg: 'Renaming...',
+                                        target: jobInfoWindow
+                                    });
+                                    Ext.Ajax.request({
+                                        url: 'validation/renameJob.do',
+                                        params: {
+                                            jobId: selection[0].get('id'),
+                                            name: inputValue
+                                        },
+                                        callback: function(options, success, response) {
+                                            mask.hide();
+                                            if (!success) {
+                                                return;
+                                            }
+                                            
+                                            var responseObj = Ext.JSON.decode(response.responseText);
+                                            if (!responseObj.success) {
+                                                return;
+                                            }
+                                            
+                                            titleEl.setHtml(inputValue);
+                                            selection[0].set('name', inputValue);
+                                        }
+                                    });
+                                }
+                                
+                                editParent.destroy();
+                            }
+                        };
+                        
+                        var parentNode = el.parentNode;
+
+                        //Hide our current node and put an input over the top of it
+                        Ext.fly(el).setStyle('display', 'none');
+                        var formEl = Ext.fly(parentNode).createChild({
+                            tag: 'form',
+                            id: 'eavl-jobtitle-editparent',
+                            children: [{
+                                tag: 'input',
+                                name: 'name',
+                                value: el.textContent
+                            }]
+                        });
+
+                        //Let's setup our new form/input 
+                        var inputEl = formEl.down('input');
+                        formEl.on('submit', returnToDiv);
+                        inputEl.on('blur', returnToDiv);
+                        inputEl.dom.select();
+                    });
+                }
+            }
         });
         
         popup.show();
