@@ -51,6 +51,8 @@ Ext.define('eavl.widgets.FilePreviewPanel', {
         l.setActiveItem(type);
         var previewer = l.getActiveItem();
         previewer.preview(job, fileName);
+        
+        this.setTitle(Ext.util.Format.format('Previewing - {0}', fileName));
     },
 
 
@@ -59,5 +61,7 @@ Ext.define('eavl.widgets.FilePreviewPanel', {
      */
     clearPreview : function() {
         this.getLayout().setActiveItem('empty');
+        
+        this.setTitle(this.initialConfig.title);
     }
 });
