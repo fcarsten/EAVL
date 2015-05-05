@@ -125,7 +125,7 @@ Ext.application({
                         forcedIconTip : 'Non compositional parameters have no constraints on their values.',
                         viewConfig : {
                             deferEmptyText : false,
-                            emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a parameter here to exclude it from calculations but include it in the final results.</div></div>'
+                            emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner"><img src="img/save.svg" width="100" height="100"/><br>Drag a parameter here to exclude it from calculations but include it in the final results.</div></div>'
                         },
                         plugins : [{
                             ptype : 'modeldnd',

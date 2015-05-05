@@ -35,10 +35,12 @@ Ext.application({
                 itemId: 'job-name',
                 hideLabel: true,
                 margin: '20 0 10 0',
+                height: 60,
                 fieldStyle: {
                     'font-family': 'helvetica,​arial,​verdana,​sans-serif',
                     'font-size': 32,
-                    'font-weight': 700
+                    'font-weight': 700,
+                    'line-height': '40px'
                 },
                 value: jobName
             }));

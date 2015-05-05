@@ -61,7 +61,10 @@ Ext.application({
                         cls : 'loading-box',
                         children : [{
                             tag : 'img',
-                            src : 'img/loading-bars.svg'
+                            style: {
+                                height: (Ext.isIE ? 41 : '')
+                            },
+                            src : (Ext.isIE ? 'img/loading-bars.gif' : 'img/loading-bars.svg') 
                         },{
                             tag : 'h1',
                             html : taskName
