@@ -7,4 +7,10 @@
 		memoryStoreEvictionPolicy="LRU">
 		<persistence strategy="localTempSwap"/>
 	</cache>
+	
+	<cache name="adminCache" eternal="false" maxElementsInMemory="100"
+        timeToIdleSeconds="3600" timeToLiveSeconds="3600"
+        memoryStoreEvictionPolicy="LRU">
+        <persistence strategy="localTempSwap"/>
+    </cache>
 </ehcache>

@@ -6,6 +6,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
@@ -526,6 +527,24 @@ public class VmPool {
             executor.submit(new VerifyVmAndCheckPoolTask(vm));
         }
 
+    }
+
+    /**
+     * This is an expensive blocking method, it will iterate over every VM in the internal pool
+     * and forcibly update its status by firing off HTTP requests.
+     *
+     *
+     * @return
+     */
+    public List<VmStatus> calculatePoolStatus() {
+        synchronized (vmPool) {
+            List<VmStatus> statusList = new ArrayList<VmStatus>(vmPool.size());
+            for (WpsVm vm : vmPool) {
+                vm.updateStatus();
+                statusList.add(vm.getStatus());
+            }
+            return statusList;
+        }
     }
 
     private WpsVm findVm(String endpoint) {
