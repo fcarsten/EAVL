@@ -62,10 +62,14 @@
     </bean>
 
     <bean id="vmPool" class="org.auscope.portal.server.web.service.wps.VmPool">
-        <constructor-arg name="accessKey"
+        <constructor-arg name="accessKeyNectar"
             value="${env.nectar.ec2.accesskey}" />
-        <constructor-arg name="secretKey"
+        <constructor-arg name="secretKeyNectar"
             value="${env.nectar.ec2.secretkey}" />
+        <constructor-arg name="accessKeyAws"
+            value="${env.aws.ec2.accesskey}" />
+        <constructor-arg name="secretKeyAws"
+            value="${env.aws.ec2.secretkey}" />
         <constructor-arg name="executor" ref="executor" />
         <property name="skippedZones">
             <set>
