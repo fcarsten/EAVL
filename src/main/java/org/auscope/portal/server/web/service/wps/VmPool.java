@@ -13,8 +13,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 
@@ -115,7 +115,7 @@ public class VmPool {
 
     private String keypair = null;
 
-    private ThreadPoolExecutor executor;
+    private ExecutorService executor;
     private Set<String> skippedZones = new HashSet<String>();
 
     private NovaApi lowLevelApi;
@@ -169,7 +169,7 @@ public class VmPool {
     }
 
     @Autowired
-    public VmPool(String accessKeyNectar, String secretKeyNectar, String accessKeyAws, String secretKeyAws, ThreadPoolExecutor executor) {
+    public VmPool(String accessKeyNectar, String secretKeyNectar, String accessKeyAws, String secretKeyAws, ExecutorService executor) {
         this.executor = executor;
         Properties overrides = new Properties();
 
@@ -464,7 +464,7 @@ public class VmPool {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
         runInstancesRequest.withImageId("ami-b706798d")
-                .withInstanceType("m1.small").withMinCount(1).withMaxCount(1)
+                .withInstanceType("t2.small").withMinCount(1).withMaxCount(1)
                 .withKeyName("eavlaws").withSecurityGroups("WPS Server");
         RunInstancesResult runResult = ec2Client
                 .runInstances(runInstancesRequest);
