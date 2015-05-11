@@ -13,8 +13,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import javax.annotation.PostConstruct;
 
@@ -37,11 +37,21 @@ import org.jclouds.openstack.nova.v2_0.extensions.AvailabilityZoneApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.InstanceProfileCredentialsProvider;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.ec2.model.RunInstancesRequest;
+import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.google.common.base.Optional;
 
 @ThreadSafe
 public class VmPool {
 
+    public enum CloudProvider {
+        AWS,
+        NeCTAR;
+    };
     /**
      * @author fri096
      *
@@ -88,7 +98,7 @@ public class VmPool {
 
     private static final String TYPE_STRING = "openstack-nova";
     private static final String CLOUD_ENDPOINT = "https://keystone.rc.nectar.org.au:5000/v2.0";
-    private static final String KEY_PAIR_NAME = "vgl-developers";
+//    private static final String KEY_PAIR_NAME = "vgl-developers";
 
     private static final String VM_ID = "Melbourne/132b7591-613f-4922-aee5-5039a6919297";
 
@@ -109,7 +119,7 @@ public class VmPool {
 
     private String keypair = null;
 
-    private ThreadPoolExecutor executor;
+    private ExecutorService executor;
     private Set<String> skippedZones = new HashSet<String>();
 
     private NovaApi lowLevelApi;
@@ -134,7 +144,37 @@ public class VmPool {
         this.skippedZones = skippedZones;
     }
 
-    private boolean initComlete=false;;
+    private boolean initComlete=false;
+
+    private String accessKeyAws;
+
+    private String secretKeyAws;;
+
+    private CloudProvider cloudProvider;
+
+    /**
+     * @return the cloudProvider
+     */
+    public CloudProvider getCloudProvider() {
+        return cloudProvider;
+    }
+
+    /**
+     * @param cloudProvider the cloudProvider to set
+     */
+    public void setCloudProvider(String cloudProvider) {
+        if(cloudProvider!=null) {
+            if(cloudProvider.equalsIgnoreCase("AWS")) {
+                this.cloudProvider= CloudProvider.AWS;
+            } else if (cloudProvider.equalsIgnoreCase("NECTAR")) {
+                this.cloudProvider= CloudProvider.NeCTAR;
+            } else {
+                throw new IllegalArgumentException("Unknown or invalid cloud provider: "+cloudProvider);
+            }
+        } else {
+            throw new IllegalArgumentException("Cloud provider can't be null");
+        }
+    }
 
     @PostConstruct
     public void postInit() {
@@ -159,13 +199,16 @@ public class VmPool {
     }
 
     @Autowired
-    public VmPool(String accessKey, String secretKey, ThreadPoolExecutor executor) {
+    public VmPool(String accessKeyNectar, String secretKeyNectar, String accessKeyAws, String secretKeyAws, ExecutorService executor) {
         this.executor = executor;
         Properties overrides = new Properties();
 
         ContextBuilder b = ContextBuilder.newBuilder(TYPE_STRING)
                 .endpoint(CLOUD_ENDPOINT).overrides(overrides)
-                .credentials(accessKey, secretKey);
+                .credentials(accessKeyNectar, secretKeyNectar);
+
+        this.accessKeyAws=accessKeyAws;
+        this.secretKeyAws=secretKeyAws;
 
         ComputeServiceContext context = b
                 .buildView(ComputeServiceContext.class);
@@ -333,7 +376,17 @@ public class VmPool {
         VmStatus state;
         try {
             log.info("Trying to start new VM");
-            vm = startVmOnCloudNova();
+            switch(this.cloudProvider) {
+            case AWS:
+                vm = startVmOnAWS();
+                break;
+            case NeCTAR:
+                vm = startVmOnCloudNova();
+                break;
+            default:
+                throw new PortalServiceException("Can't create WPS VM as no cloud provider specified.");
+            }
+
             log.info(" VM " + vm.getId() + " (" + vm.getIpAddress()
                     + ") has started. Getting status...");
             state = vm.getOrWaitForStableState();
@@ -401,7 +454,7 @@ public class VmPool {
         TemplateOptions options = ((NovaTemplateOptions) computeService
                 .templateOptions())
         // .availabilityZone("NCI")
-                .keyPairName(getKeypair())
+        //        .keyPairName(getKeypair())
                 .securityGroups("all");
 
         Template template = computeService.templateBuilder().imageId(VM_ID)
@@ -435,6 +488,38 @@ public class VmPool {
         return res;
     }
 
+    private WpsVm startVmOnAWS() throws PortalServiceException {
+        AmazonEC2Client ec2Client = null;
+        if (secretKeyAws == null || secretKeyAws.length() == 0
+                || accessKeyAws == null || accessKeyAws.length() == 0) {
+            // Assume we run on AWS and this instance has the right IAM role
+            ec2Client = new AmazonEC2Client(
+                    new InstanceProfileCredentialsProvider());
+        } else {
+            ec2Client = new AmazonEC2Client(new BasicAWSCredentials(
+                    accessKeyAws, secretKeyAws));
+        }
+
+        ec2Client.setEndpoint("ec2.ap-southeast-2.amazonaws.com");
+        RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
+
+        runInstancesRequest.withImageId("ami-b706798d")
+                .withInstanceType("t2.small").withMinCount(1).withMaxCount(1)
+                .withKeyName("eavlaws").withSecurityGroups("WPS Server");
+        RunInstancesResult runResult = ec2Client
+                .runInstances(runInstancesRequest);
+
+        Instance instance = runResult.getReservation().getInstances().get(0);
+
+        String ipAddress = instance.getPrivateIpAddress();
+        String id = instance.getInstanceId();
+        log.info(id + ": " + ipAddress);
+        WpsVm res = new WpsVm(id, ipAddress);
+        res.setOrderTime(System.currentTimeMillis());
+        res.setStatus(VmStatus.STARTING);
+        return res;
+    }
+
     private WpsVm startVmOnCloudNova() throws PortalServiceException {
         for (String location : lowLevelApi.getConfiguredZones()) {
             Optional<? extends AvailabilityZoneApi> serverApi = lowLevelApi
@@ -462,7 +547,7 @@ public class VmPool {
                 TemplateOptions options = ((NovaTemplateOptions) computeService
                         .templateOptions()).availabilityZone(
                         currentZone.getName())
-                        .keyPairName(getKeypair())
+             //           .keyPairName(getKeypair())
                         .securityGroups("all");
 
                 Template template = computeService.templateBuilder()
@@ -502,7 +587,7 @@ public class VmPool {
     }
 
     protected String getKeypair() {
-        return keypair != null ? keypair : KEY_PAIR_NAME;
+        return keypair;// != null ? keypair : KEY_PAIR_NAME;
     }
 
     protected void setKeypair(String keypair) {

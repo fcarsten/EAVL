@@ -62,11 +62,16 @@
     </bean>
 
     <bean id="vmPool" class="org.auscope.portal.server.web.service.wps.VmPool">
-        <constructor-arg name="accessKey"
+        <constructor-arg name="accessKeyNectar"
             value="${env.nectar.ec2.accesskey}" />
-        <constructor-arg name="secretKey"
+        <constructor-arg name="secretKeyNectar"
             value="${env.nectar.ec2.secretkey}" />
+        <constructor-arg name="accessKeyAws"
+            value="${env.aws.ec2.accesskey}" />
+        <constructor-arg name="secretKeyAws"
+            value="${env.aws.ec2.secretkey}" />
         <constructor-arg name="executor" ref="executor" />
+        <property name="cloudProvider" value="${HOST.cloud}"/>
         <property name="skippedZones">
             <set>
                 <value>monash</value>
@@ -88,6 +93,17 @@
 
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="${HOST.smtp.server}" />
+        <property name="username" value="${env.smtp.username}"/>
+        <property name="password" value="${env.smtp.password}"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">${HOST.smtp.auth}</prop>
+                <prop key="mail.smtp.starttls.enable">${HOST.smtp.ttls}</prop>
+                <prop key="mail.debug">false</prop>
+            </props>
+        </property>
+
     </bean>
 
     <bean name="emailListener"
@@ -109,7 +125,7 @@
         <constructor-arg name="templateFileEncoding"
             value="UTF-8" />
         <constructor-arg name="emailSender">
-            <value><![CDATA[EAVL Admin <noreply-cg-admin@csiro.au>]]></value>
+            <value><![CDATA[EAVL Admin <Eavl-support@lists.csiro.au>]]></value>
         </constructor-arg>
     </bean>
 
