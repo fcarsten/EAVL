@@ -48,6 +48,10 @@ import com.google.common.base.Optional;
 @ThreadSafe
 public class VmPool {
 
+    public enum CloudProvider {
+        AWS,
+        NeCTAR;
+    };
     /**
      * @author fri096
      *
@@ -145,6 +149,32 @@ public class VmPool {
     private String accessKeyAws;
 
     private String secretKeyAws;;
+
+    private CloudProvider cloudProvider;
+
+    /**
+     * @return the cloudProvider
+     */
+    public CloudProvider getCloudProvider() {
+        return cloudProvider;
+    }
+
+    /**
+     * @param cloudProvider the cloudProvider to set
+     */
+    public void setCloudProvider(String cloudProvider) {
+        if(cloudProvider!=null) {
+            if(cloudProvider.equalsIgnoreCase("AWS")) {
+                this.cloudProvider= CloudProvider.AWS;
+            } else if (cloudProvider.equalsIgnoreCase("NECTAR")) {
+                this.cloudProvider= CloudProvider.NeCTAR;
+            } else {
+                throw new IllegalArgumentException("Unknown or invalid cloud provider: "+cloudProvider);
+            }
+        } else {
+            throw new IllegalArgumentException("Cloud provider can't be null");
+        }
+    }
 
     @PostConstruct
     public void postInit() {
@@ -346,7 +376,17 @@ public class VmPool {
         VmStatus state;
         try {
             log.info("Trying to start new VM");
-            vm = startVmOnAWS();
+            switch(this.cloudProvider) {
+            case AWS:
+                vm = startVmOnAWS();
+                break;
+            case NeCTAR:
+                vm = startVmOnCloudNova();
+                break;
+            default:
+                throw new PortalServiceException("Can't create WPS VM as no cloud provider specified.");
+            }
+
             log.info(" VM " + vm.getId() + " (" + vm.getIpAddress()
                     + ") has started. Getting status...");
             state = vm.getOrWaitForStableState();
