@@ -149,7 +149,7 @@ public class MenuController {
 
        //We don't just want "email@domain" in the page. Let's obscure it slightly so it cant be
        //scraped easily
-       String[] obscuredEmailParts = FeedbackController.CONTACT_EMAIL.split("@");
+       String[] obscuredEmailParts = hostConfigurer.resolvePlaceholder("env.feedback.email").split("@");
        String obscuredEmail = "\"" + obscuredEmailParts[0] + "\" + \"@\" + \"" + obscuredEmailParts[1] + "\"";
 
        mav.addObject("isNewSession", isNewSession);
