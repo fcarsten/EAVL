@@ -94,7 +94,16 @@
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="${HOST.smtp.server}" />
         <property name="username" value="${env.smtp.username}"/>
-        <property name="password" value="${env.smtp.password}"></property>
+        <property name="password" value="${env.smtp.password}"/>
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+                <prop key="mail.debug">true</prop>
+            </props>
+        </property>
+        
     </bean>
 
     <bean name="emailListener"
