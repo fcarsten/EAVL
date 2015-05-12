@@ -45,7 +45,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Josh Vote
  *
  */
-@RequestMapping("results")
+@RequestMapping("cp/results")
 @Controller
 public class ResultsController extends BasePortalController {
 

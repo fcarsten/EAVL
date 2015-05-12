@@ -61,7 +61,7 @@ Ext.define('eavl.widgets.JobFileList', {
                 ptype: 'headericons',
                 icons: [{
                     location: 'left',
-                    src: 'img/download.png',
+                    src: '../img/download.png',
                     tip: 'Click to download all files as a ZIP',
                     width: 32,
                     height: 32,
@@ -83,7 +83,7 @@ Ext.define('eavl.widgets.JobFileList', {
                         style: {
                             cursor: 'pointer'
                         },
-                        src: 'img/download.png'
+                        src: '../img/download.png'
                     });
                 }, this),
                 hasTip : true,
@@ -109,7 +109,7 @@ Ext.define('eavl.widgets.JobFileList', {
                         style: {
                             cursor: 'pointer'
                         },
-                        src: 'portal-core/img/binary.png'
+                        src: '../portal-core/img/binary.png'
                     });
                 }, this),
                 hasTip : true,
@@ -139,7 +139,7 @@ Ext.define('eavl.widgets.JobFileList', {
                         style: {
                             cursor: 'pointer'
                         },
-                        src: 'img/inspect.png'
+                        src: '../img/inspect.png'
                     });
                 }, this),
                 hasTip : true,

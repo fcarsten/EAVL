@@ -49,13 +49,13 @@ Ext.define('eavl.widgets.ParameterDetailsList', {
                 var emptyString = name === '';
                 var status = record.calculateStatus();
 
-                var img = 'img/tick.png';
+                var img = '../img/tick.png';
                 var tip = 'This parameter contains more than 70% numeric values';
                 if (status === eavl.models.ParameterDetails.STATUS_ERROR) {
-                    img = 'img/exclamation.png';
+                    img = '../img/exclamation.png';
                     tip = 'This parameter contains non numeric values.';
                 } else if (status === eavl.models.ParameterDetails.STATUS_WARNING) {
-                    img = 'img/error.png';
+                    img = '../img/error.png';
                     tip = 'This parameter less than 70% numeric values.';
                 }
                 

@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("wps")
+@RequestMapping("cp/wps")
 public class WPSController extends BasePortalController {
 
     public static final int MAX_RETRIES = 3;

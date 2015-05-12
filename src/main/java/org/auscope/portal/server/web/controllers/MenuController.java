@@ -22,6 +22,7 @@ import org.auscope.portal.server.web.service.EAVLJobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -105,26 +106,33 @@ public class MenuController {
     * @return
     * @throws IOException
     */
-   @RequestMapping("/*.html")
-   public ModelAndView handleHtmlToView(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal EavlUser user) throws IOException {
+   @RequestMapping("/{name}.html")
+   public ModelAndView handleHtmlToView(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal EavlUser user,
+           @PathVariable String name) throws IOException {
+       return handleHtmlToView(request, response, user, null, name);
+   }
+
+   /**
+    * Handles all HTML page requests by mapping them to an appropriate view (and adding other details).
+    * @param request
+    * @param response
+    * @return
+    * @throws IOException
+    */
+   @RequestMapping("/{directory}/{name}.html")
+   public ModelAndView handleHtmlToView(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal EavlUser user,
+           @PathVariable String directory, @PathVariable String name) throws IOException {
        //Detect whether this is a new session or not...
        HttpSession session = request.getSession();
        boolean isNewSession = session.getAttribute("existingSession") == null;
        session.setAttribute("existingSession", true);
 
        //Decode our request to get the view name we are actually requesting
-       String requestUri = request.getRequestURI();
-       String[] requestComponents = requestUri.split("/");
-       if (requestComponents.length == 0) {
-           logger.debug(String.format("request '%1$s' doesnt contain any extractable components", requestUri));
-           response.sendError(HttpStatus.SC_NOT_FOUND, "Resource not found : " + requestUri);
+       if (name == null || name.isEmpty()) {
+           response.sendError(HttpStatus.SC_NOT_FOUND, "Resource not found");
            return null;
        }
-       String requestedResource = requestComponents[requestComponents.length - 1];
-       String resourceName = requestedResource.replace(".html", "");
-
-       logger.trace(String.format("view name '%1$s' extracted from request '%2$s'", resourceName, requestUri));
-
+       String resourceName = (directory == null || directory.isEmpty()) ? name : directory + "/" + name ;
 
        //If the sessionJobId parameter is set, let's update the session job transparently
        String sessionJobId = request.getParameter("sessionJobId");

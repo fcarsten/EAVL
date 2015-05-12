@@ -31,7 +31,7 @@ import com.sun.istack.ByteArrayDataSource;
  * @author Josh Vote
  *
  */
-@RequestMapping("feedback")
+@RequestMapping("eavl/feedback")
 @Controller
 public class FeedbackController extends BasePortalController {
 
