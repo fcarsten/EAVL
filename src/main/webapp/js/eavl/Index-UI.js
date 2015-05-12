@@ -14,8 +14,8 @@ Ext.application({
             name: 'Conditional Probability',
             version: '0.0.1-BETA',
             background: 'img/workflows/cp.png',
-            initialLink: 'upload.html',
-            resultsLink: 'results.html',
+            initialLink: 'cp/upload.html',
+            resultsLink: 'cp/results.html',
             description: '<a href="docs/Hill2014.pdf">Research Paper</a><br>' + 
                          '<p>Gold distribution in vein-hosted hydrothermal ore deposits is commonly nuggety (i.e. occurs as very localised concentrations of gold). In such cases, samples for gold assay from diamond drill core may return low gold grades despite their host rocks being mineralised. It is common practice in nuggety orebodies to use more spatially continuous proxies for mineralisation to help define the boundaries of mineralised regions. </p>' +
                          '<p>This workflow provides a method for automating the use of geochemical data as a proxy for mineralisation. Automation has the advantage of repeatability and fast processing time. The workflow uses a probabilistic approach to quantify the relationship between gold assay values and a chemical sub-composition. The conditional probability method allows several chemical elements or ratios to be combined to produce a single numerical indicator of probability of mineralisation for each sample. The probability is calculated using Bayes theorem:</p>' +

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("threshold")
+@RequestMapping("cp/threshold")
 public class ThresholdController extends BasePortalController {
 
     private EAVLJobService jobService;

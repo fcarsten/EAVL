@@ -46,7 +46,7 @@ import com.hp.hpl.jena.util.iterator.ArrayIterator;
  *
  */
 @Controller
-@RequestMapping("validation")
+@RequestMapping("cp/validation")
 public class ValidationController extends BasePortalController {
 
     private FileStagingService fss;

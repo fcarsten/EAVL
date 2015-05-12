@@ -229,7 +229,7 @@ Ext.application({
                                 ptype: 'headericons',
                                 icons: [{
                                     location: 'text',
-                                    src: 'img/convert-ppm-small.png',
+                                    src: '../img/convert-ppm-small.png',
                                     tip: 'Click to convert all parameters to PPM using a lookup table. Unknown parameters will not be touched.',
                                     width: 24,
                                     height: 24,
@@ -256,7 +256,7 @@ Ext.application({
                             sortFn : eavl.models.ParameterDetails.sortSeverityFn,
                             viewConfig : {
                                 deferEmptyText : false,
-                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="img/trash.svg" width="100"/><br>Drag a parameter here to delete it.</div></div>'
+                                emptyText : '<div class="trash-empty-container"><div class="trash-empty-container-inner"><img src="../img/trash.svg" width="100"/><br>Drag a parameter here to delete it.</div></div>'
                             },
                             plugins : [{
                                 ptype : 'modeldnd',

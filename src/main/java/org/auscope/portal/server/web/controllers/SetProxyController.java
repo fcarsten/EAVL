@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping("setproxy")
+@RequestMapping("cp/setproxy")
 public class SetProxyController extends BasePortalController {
     private JobTaskService jobTaskService;
     private EAVLJobService jobService;

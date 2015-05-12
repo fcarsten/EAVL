@@ -96,7 +96,7 @@ Ext.define('eavl.widgets.EAVLJobList', {
     
     _jobRenderDetails : function(job) {
         var details = {
-            img: 'img/tick.png',
+            img: '../img/tick.png',
             tip: 'This job has finished and its results are ready.',
             imgLink: '#'
         };
@@ -104,39 +104,39 @@ Ext.define('eavl.widgets.EAVLJobList', {
 
         switch(job.get('status')) {
         case eavl.models.EAVLJob.STATUS_UNSUBMITTED:
-            details.img = 'img/edit.png';
+            details.img = '../img/edit.png';
             details.tip = 'This job hasn\'t been submitted for imputation.';
             details.imgLink = "identify.html?" + Ext.Object.toQueryString({sessionJobId: job.get('id')});
             break;
         case eavl.models.EAVLJob.STATUS_KDE_ERROR:
-            details.img = 'img/exclamation.png';
+            details.img = '../img/exclamation.png';
             details.tip = 'There was an error during the conditional probability calculations.';
             details.imgLink = "setproxy.html?" + Ext.Object.toQueryString({sessionJobId: job.get('id')});
             break;
         case eavl.models.EAVLJob.STATUS_IMPUTE_ERROR:
-            details.img = 'img/exclamation.png';
+            details.img = '../img/exclamation.png';
             details.tip = 'There was an error during the imputation calculations.';
             details.imgLink = "validate.html?" + Ext.Object.toQueryString({sessionJobId: job.get('id')});
             break;
         case eavl.models.EAVLJob.STATUS_IMPUTING:
-            details.img = 'img/loading-bars.svg';
+            details.img = '../img/loading-bars.svg';
             details.tip = 'This job is currently undergoing imputation.';
-            details.imgLink = "taskwait.html?" + Ext.Object.toQueryString({taskId: job.get('imputationTaskId'), next: 'predictor.html'});
+            details.imgLink = "../taskwait.html?" + Ext.Object.toQueryString({taskId: job.get('imputationTaskId'), next: 'cp/predictor.html'});
             break;
         case eavl.models.EAVLJob.STATUS_THRESHOLD:
-            details.img = 'img/edit.png';
+            details.img = '../img/edit.png';
             details.tip = 'This has finished imputation and is awaiting threshold selection.';
             details.imgLink = "threshold.html?" + Ext.Object.toQueryString({sessionJobId: job.get('id')});
             break;
         case eavl.models.EAVLJob.STATUS_PROXY:
-            details.img = 'img/edit.png';
+            details.img = '../img/edit.png';
             details.tip = 'This has finished imputation and is awaiting proxy selection.';
             details.imgLink = "setproxy.html?" + Ext.Object.toQueryString({sessionJobId: job.get('id')});
             break;
         case eavl.models.EAVLJob.STATUS_SUBMITTED:
-            details.img = 'img/loading-bars.svg';
+            details.img = '../img/loading-bars.svg';
             details.tip = 'This job is currently undergoing conditional probability calculations.';
-            details.imgLink = "taskwait.html?" + Ext.Object.toQueryString({taskId: job.get('kdeTaskId'), next: 'results.html'});
+            details.imgLink = "../taskwait.html?" + Ext.Object.toQueryString({taskId: job.get('kdeTaskId'), next: 'cp/results.html'});
             break;
         }
         

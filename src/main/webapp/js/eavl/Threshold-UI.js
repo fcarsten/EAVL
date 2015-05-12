@@ -150,7 +150,7 @@ Ext.application({
 
                 //OK imputation is running - shift to loading page
                 if (responseObj.data.job.status === eavl.models.EAVLJob.STATUS_IMPUTING) {
-                    window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data.job.imputationTaskId, next: 'threshold.html'});
+                    window.location.href = "../taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data.job.imputationTaskId, next: 'cp/threshold.html'});
                 }
             }
         });
