@@ -11,6 +11,8 @@ Ext.define('eavl.widgets.FeedbackWidget', {
     /**
      * {
      *  metadata - Object - KVP store for metadata to be recorded in the feedback request
+     *  disabled - Boolean - If true the feedback widget will disabled any attempts to open it
+     *  disabledCallback - function() - Called if disabled is true and the feedback widget is clicked.
      * }
      */
     constructor : function(config) {
@@ -25,6 +27,8 @@ Ext.define('eavl.widgets.FeedbackWidget', {
         Feedback({h2cPath: window.WEB_CONTEXT + '/js/html2canvas/html2canvas.min.js',
             url: window.WEB_CONTEXT + '/eavl/feedback/sendFeedback.do',
             metadata: metadata,
+            disabled: config.disabled,
+            disabledCallback: config.disabledCallback,
             buttonCls: 'eavl-feedback-button'});
     }
 });

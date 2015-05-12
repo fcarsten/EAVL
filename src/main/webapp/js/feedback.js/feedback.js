@@ -96,6 +96,9 @@ window.Feedback = function( options ) {
     options.sendLabel = options.sendLabel || "Send";
     options.closeLabel = options.closeLabel || "Close";
     
+    options.disabled = options.disabled || false;
+    options.disabledCallback = options.disabledCallback || null;
+    
     options.messageSuccess = options.messageSuccess || "Your feedback was sent succesfully.";
     options.messageError = options.messageError || "There was an error sending your feedback to the server.";
     
@@ -116,6 +119,13 @@ window.Feedback = function( options ) {
 
         // open send feedback modal window
         open: function() {
+            if (options.disabled) {
+                if (options.disabledCallback) {
+                    options.disabledCallback();
+                }
+                return;
+            }
+            
             var len = options.pages.length;
             currentPage = 0;
             for (; currentPage < len; currentPage++) {

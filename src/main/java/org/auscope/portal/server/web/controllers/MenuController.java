@@ -169,6 +169,8 @@ public class MenuController {
            addManifest(mav, request); //The manifest details aren't really required by much
        }
 
+
+
        return mav;
    }
 }

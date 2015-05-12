@@ -154,6 +154,14 @@ Ext.application({
             }]
         });
         
-        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {});
+        var feedback = Ext.create('eavl.widgets.FeedbackWidget', {
+            disabled : !window.AUTHENTICATED_USER,
+            disabledCallback : function() {
+                Ext.Msg.alert('Login Required', 'In order to cut down on spam we require you to please <a href="login.html">login</a> before attempting to send feedback.');
+            }
+        });
+        if (window.ANON_USER) {
+            
+        }
     }
 });

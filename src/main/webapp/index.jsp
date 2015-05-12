@@ -1,12 +1,19 @@
 <%@ page session="false"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> 
+<%@ taglib prefix='security' uri='http://www.springframework.org/security/tags' %>
 
 <html xmlns:v="urn:schemas-microsoft-com:vml">
     <head>
         <title>EAVL Portal</title>
         
         <jsp:include page="jsimports.htm"/>
-        
+                
+        <security:authorize ifAllGranted="ROLE_USER">
+            <script type="text/javascript">
+            var AUTHENTICATED_USER = true;
+		    </script>
+         </security:authorize>
+
         <script type="text/javascript" src="js/feedback.js/feedback.min.js"></script>
         <link rel="stylesheet" type="text/css" href="js/feedback.js/feedback.css">
         

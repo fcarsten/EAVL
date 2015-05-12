@@ -11,6 +11,7 @@
    <http entry-point-ref="oAuth2EntryPoint">
        <s:intercept-url pattern="/cp/*" access="ROLE_USER"/>
        <s:intercept-url pattern="/eavl/*" access="ROLE_USER"/>
+       <s:intercept-url pattern="/login.html" access="ROLE_USER"/>
         <custom-filter ref="oauth2AuthFilter" after="EXCEPTION_TRANSLATION_FILTER"/>
         <logout logout-success-url="/index.html"/>
     </http>
