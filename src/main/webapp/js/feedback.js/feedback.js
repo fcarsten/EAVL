@@ -253,8 +253,10 @@ window.Feedback = function( options ) {
             }
             
             //Merge data into a consistent object
+            var fbData = options.pages[ 0 ].data();
             var data = {
-                issue: options.pages[ 0 ].data().Issue,
+                issue: fbData.Issue,
+                email: fbData.Email,
                 screenshot: options.pages[ 1 ].data(),
                 metadata: options.metadata
             };
@@ -339,6 +341,11 @@ window.Feedback.Form = function( elements ) {
         name: "Issue",
         label: "Please describe the issue you are experiencing",
         required: false
+    },{
+        type: "checkbox",
+        name: "Email",
+        label: "I'm happy to receive emails about this issue",
+        required: false
     }];
 
     this.dom = document.createElement("div");
@@ -355,6 +362,16 @@ window.Feedback.Form.prototype.render = function() {
         item = this.elements[ i ];
 
         switch( item.type ) {
+            case "checkbox":
+                item.element = this.dom.appendChild(element("input"));                
+                item.element.setAttribute("type", "checkbox");
+                item.element.setAttribute("checked", "true");
+                item.element.setAttribute("name", item.name);
+                
+                this.dom.appendChild( element("label", item.label + ":"));
+                this.dom.appendChild(element("br"));
+                break;
+        		
             case "textarea":
                 this.dom.appendChild( element("label", item.label + ":" + (( item.required === true ) ? " *" : "")) );
                 this.dom.appendChild( ( item.element = document.createElement("textarea")) );
@@ -391,7 +408,18 @@ window.Feedback.Form.prototype.data = function() {
     
     for (; i < len; i++) {
         item = this.elements[ i ];
-        data[ item.name ] = item.element.value;
+        switch( item.type ) {
+            case "checkbox":
+                data[ item.name ] = item.element.checked ? true : false;
+                break;
+                
+            case "textarea":
+                data[ item.name ] = item.element.value;
+                break;
+        }
+        
+        
+        
     }
     
     // cache and return data
@@ -406,14 +434,28 @@ window.Feedback.Form.prototype.review = function( dom ) {
     for (; i < len; i++) {
         item = this.elements[ i ];
         
-        if (item.element.value.length > 0) {
-            dom.appendChild( element("label", item.name + ":") );
-            dom.appendChild( document.createTextNode( item.element.value ) );
-            dom.appendChild( document.createElement( "hr" ) );
+        switch( item.type ) {
+        case "checkbox":
+            if (item.element.checked) {
+                dom.appendChild( element("label", "Email Contact: Yes") );
+                dom.appendChild( document.createElement( "br" ) );
+            } else {
+                dom.appendChild( element("label", "Email Contact: No") );
+                dom.appendChild( document.createElement( "br" ) );
+            }
+            break;
+            
+        case "textarea":
+            if (item.element.value.length > 0) {
+                dom.appendChild( element("label", item.name + ":") );
+                dom.appendChild( document.createTextNode( item.element.value ) );
+                dom.appendChild( document.createElement( "br" ) );
+            }
+            break;
+         
         }
-        
     }
-    
+    dom.appendChild( document.createElement( "hr" ) );
     return dom;
      
 };
@@ -880,6 +922,7 @@ window.Feedback.XHR.prototype.send = function( data, callback ) {
     xhr.open( "POST", this.url, true);
     xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhr.send( "issue=" + encodeURIComponent( data.issue ) +
+             "&email=" + encodeURIComponent( data.email ) +
              "&screenshot=" + encodeURIComponent( data.screenshot ) +
              "&metadata=" + encodeURIComponent( window.JSON.stringify( data.metadata ) ));
 

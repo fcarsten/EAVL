@@ -47,6 +47,7 @@ public class FeedbackController extends BasePortalController {
     @RequestMapping("/sendFeedback.do")
     public void sendFeedback(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal EavlUser user,
             @RequestParam("issue") String issue,
+            @RequestParam("email") boolean email,
             @RequestParam("screenshot") String screenshotString,
             @RequestParam("metadata") String metadataString) {
 
@@ -84,6 +85,10 @@ public class FeedbackController extends BasePortalController {
             bodyText.append(user.getEmail());
             bodyText.append("</p>");
 
+            bodyText.append("<p><b>Contact Me:</b> ");
+            bodyText.append(email ? "Yes" : "No");
+            bodyText.append("</p>");
+
             for (Object key : metadata.keySet()) {
                 bodyText.append("<p><b>");
                 bodyText.append(key.toString());
@@ -103,7 +108,9 @@ public class FeedbackController extends BasePortalController {
 
             helper.setFrom(properties.resolvePlaceholder("env.feedback.email"));
             helper.setTo(properties.resolvePlaceholder("env.feedback.email"));
-            helper.setCc(user.getEmail());
+            if (email) {
+                helper.setCc(user.getEmail());
+            }
             helper.setSubject("EAVL Issue");
             helper.setText(bodyText.toString(), true);
             helper.addInline("screenshot", new ByteArrayDataSource(imageBytes, imageContentType));
