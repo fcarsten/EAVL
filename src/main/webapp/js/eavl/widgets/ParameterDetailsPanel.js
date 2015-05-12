@@ -44,7 +44,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                 itemId : 'card-empty',
                 border: false,
                 xtype : 'container',
-                html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="img/inspect-large.png" width="100"/><br>{0}</div></div>', this.emptyText)
+                html : Ext.util.Format.format('<div class="pdp-empty-container"><div class="pdp-empty-container-inner"><img src="../img/inspect-large.png" width="100"/><br>{0}</div></div>', this.emptyText)
             },{
                 itemId : 'card-inspect',
                 layout : 'fit',
@@ -113,7 +113,7 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
                         maxHeight: 400,
                         viewConfig : {
                             deferEmptyText : false,
-                            emptyText : '<div class="text-empty-container"><div class="text-empty-container-inner"><img src="img/check.svg" width="100"/><br>No invalid values!</div></div>'
+                            emptyText : '<div class="text-empty-container"><div class="text-empty-container-inner"><img src="../img/check.svg" width="100"/><br>No invalid values!</div></div>'
                         },
                         listeners : {
                             cellclick : Ext.bind(this._handleTextValueClick, this)
@@ -330,7 +330,7 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                 itemId: 'uom-container',
                 width: '100%',
                 height: 100,
-                html: '<div class="pdp-uom-container"><div class="pdp-uom-container-inner"><span class="pdp-uom-text">uom</span><img src="img/exclamation.svg" width="100"/></div></div>'
+                html: '<div class="pdp-uom-container"><div class="pdp-uom-container-inner"><span class="pdp-uom-text">uom</span><img src="../img/exclamation.svg" width="100"/></div></div>'
             },{
                 xtype: 'container',
                 itemId: 'edit-container',
@@ -382,14 +382,14 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
                 },{
                     xtype: 'container',
                     width: 60,
-                    html: '<div class="pdp-convert-container"><div class="pdp-convert-container-inner"><img data-qtip="Convert all numerical values in this parameter to ppm using the specified scaling factor" src="img/convert-ppm.svg" width="50"/></div></div>'
+                    html: '<div class="pdp-convert-container"><div class="pdp-convert-container-inner"><img data-qtip="Convert all numerical values in this parameter to ppm using the specified scaling factor" src="../img/convert-ppm.svg" width="50"/></div></div>'
                 }]
             },{
                 xtype: 'container',
                 itemId: 'info-container',
                 width: '100%',
                 height: 100,
-                html: '<div class="pdp-uom-container pdp-uom-info-container"><div class="pdp-uom-container-inner"><p>Converted from <span class="pdp-uom-info-name">Au_assay</span> using scaling factor <span class="pdp-uom-info-scale">12345.6</span></p><div class="pdp-uom-info-undo"><img src="img/undo.png">Undo</div></div></div>'
+                html: '<div class="pdp-uom-container pdp-uom-info-container"><div class="pdp-uom-container-inner"><p>Converted from <span class="pdp-uom-info-name">Au_assay</span> using scaling factor <span class="pdp-uom-info-scale">12345.6</span></p><div class="pdp-uom-info-undo"><img src="../img/undo.png">Undo</div></div></div>'
             }]
         });
 
@@ -495,10 +495,10 @@ Ext.define('eavl.widgets.ParameterDetailsUomPanel', {
         spanEl.setHtml(uomName);
         
         if (valid) {
-            imgEl.set({'src': 'img/check.svg'});
+            imgEl.set({'src': '../img/check.svg'});
             imgEl.set({'data-qtip': 'The parameter has the correct unit of measure.'});
         } else {
-            imgEl.set({'src': 'img/exclamation.svg'});
+            imgEl.set({'src': '../img/exclamation.svg'});
             imgEl.set({'data-qtip': 'All compositional parameters must have \'ppm\' as the unit of measure.'});
         }
         

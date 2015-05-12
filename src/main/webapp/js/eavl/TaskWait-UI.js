@@ -92,7 +92,7 @@ Ext.application({
                                 cb.ownerCt.down('#loadingimg').show();
                                 cb.ownerCt.down('#statuslabel').hide();
                                 Ext.Ajax.request({
-                                    url: 'taskwait/setEmailNotification.do',
+                                    url: 'eavl/taskwait/setEmailNotification.do',
                                     params: {
                                         notify: newValue ? 'true' : 'false',
                                         taskId: taskId
@@ -136,7 +136,7 @@ Ext.application({
             interval: 1000 * 10, //every 10 seconds
             run: function() {
                 Ext.Ajax.request({
-                    url: 'taskwait/isExecuting.do',
+                    url: 'eavl/taskwait/isExecuting.do',
                     params: {
                         taskId: taskId
                     },

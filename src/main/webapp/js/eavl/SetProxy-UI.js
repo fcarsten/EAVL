@@ -125,7 +125,7 @@ Ext.application({
                                     return;
                                 }
 
-                                callback("taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data, next: 'results.html'}));
+                                callback("../taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data, next: 'cp/results.html'}));
                             }
                         });
                     }
@@ -237,7 +237,7 @@ Ext.application({
 
                 //OK imputation is running - shift to loading page
                 if (responseObj.data.status === eavl.models.EAVLJob.STATUS_IMPUTING) {
-                    window.location.href = "taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data.imputationTaskId, next: 'predictor.html'});
+                    window.location.href = "../taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data.imputationTaskId, next: 'cp/predictor.html'});
                 }
             }
         });

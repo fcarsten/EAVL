@@ -17,7 +17,7 @@ Ext.define('eavl.widgets.plugins.HeaderHelp', {
         cfg.icons = [{
             location: 'text',
             tip: cfg.text,
-            src: 'img/info.svg',
+            src: '../img/info.svg',
             width: 24,
             height: 24
         }];
