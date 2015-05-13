@@ -162,6 +162,8 @@ public class MenuController {
 
        mav.addObject("isNewSession", isNewSession);
        mav.addObject("OBSCURED_CONTACT_EMAIL", obscuredEmail);
+       mav.addObject("CURRENT_USER_EMAIL", (user == null) ? "null" : ("'" + user.getEmail() + "'"));
+
 
        //Customise the model as required
        addGoogleKeys(mav); //always add the google keys

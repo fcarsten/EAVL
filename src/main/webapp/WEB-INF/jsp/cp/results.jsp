@@ -76,7 +76,7 @@
         <script type="text/javascript" src="../js/eavl/Results-UI.js"></script>
     </head>
     <body>
-        
+        <%@ include file="../login_widget.jsp" %>
     </body>
 </html>
 

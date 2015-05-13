@@ -39,7 +39,7 @@
         <script type="text/javascript" src="../js/eavl/Threshold-UI.js"></script>
     </head>
     <body>
-        
+        <%@ include file="../login_widget.jsp" %>
     </body>
 </html>
 

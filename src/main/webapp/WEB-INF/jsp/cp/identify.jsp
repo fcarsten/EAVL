@@ -45,7 +45,7 @@
         <script type="text/javascript" src="../js/eavl/Identify-UI.js"></script>
     </head>
     <body>
-        
+        <%@ include file="../login_widget.jsp" %>
     </body>
 </html>
 

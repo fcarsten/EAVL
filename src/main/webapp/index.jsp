@@ -34,7 +34,7 @@
         <script type="text/javascript" src="js/eavl/Index-UI.js"></script>
     </head>
     <body>
-        
+        <%@ include file="WEB-INF/jsp/login_widget.jsp" %>
     </body>
 </html>
 
