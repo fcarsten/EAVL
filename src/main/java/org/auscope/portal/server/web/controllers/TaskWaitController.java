@@ -34,10 +34,6 @@ public class TaskWaitController extends BasePortalController {
         String email = null;
         if (!notify) {
             email = null;
-        } else if (user == null) {
-            //TODO - this should not be defaulting
-            log.error("TODO - please dont leave this default email here");
-            email = "Josh.Vote@csiro.au";
         } else {
             email = user.getEmail();
         }
