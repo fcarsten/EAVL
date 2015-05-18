@@ -18,6 +18,7 @@ Ext.application({
         eavl.widgets.SplashScreen.hideLoadingScreen();
         
         var jobId = null;
+        var filesUploaded = 0;
 
         var showCSVGrid = function(id, parameterDetails, jobName) {
             jobId = id;
@@ -79,7 +80,7 @@ Ext.application({
                         eavl.widgets.util.HighlightUtil.highlight(Ext.getCmp('upload-form'), eavl.widgets.util.HighlightUtil.ERROR_COLOR);
                         callback(false);
                         return;
-                    }
+                    }    
                     
                     var parent = Ext.getCmp('parent-container');
                     var nameField = parent.down('#job-name');
@@ -108,12 +109,10 @@ Ext.application({
                                 return;
                             }
                             
+                            portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Upload', 'total uploads: ' + filesUploaded);
                             callback(true);
                         }
                     });
-                    
-
-                    
                 }
             },{
                 xtype: 'container',
@@ -168,6 +167,8 @@ Ext.application({
                                             Ext.Msg.alert('Error uploading file. ' + action.result.error);
                                             return;
                                         }
+                                        
+                                        filesUploaded++;
 
                                         var pdList = [];
                                         Ext.each(action.result.data.parameterDetails, function(o) {
