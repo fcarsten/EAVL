@@ -49,3 +49,30 @@
 .joblist-inline-button span.x-btn-inner {
     color: black;
 }
+
+#eavl-jobtitle-editable {
+	display: inline-block;
+    height: 40px;
+    margin-top: 2px;
+}
+
+#eavl-jobtitle-editable:hover {
+    text-decoration: underline;
+}
+
+#eavl-jobtitle-editable:hover:after {
+	content: url("../../../img/edit-plain.png");
+    position: relative;
+    top: -5px;
+}
+
+#eavl-jobtitle-editparent {
+	width: 600px;
+	display: inline-block;
+}
+
+#eavl-jobtitle-editparent  input {
+	width: 600px;
+    font-size: 32px;
+    font-weight: bold;
+}

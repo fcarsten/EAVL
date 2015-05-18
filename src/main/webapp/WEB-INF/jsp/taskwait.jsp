@@ -24,7 +24,7 @@
         <script type="text/javascript" src="js/eavl/TaskWait-UI.js"></script>
     </head>
     <body>
-        
+        <%@ include file="login_widget.jsp" %>
     </body>
 </html>
 

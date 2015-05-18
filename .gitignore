@@ -6,3 +6,4 @@ src/main/webapp/META-INF/
 src/main/resources/env.properties
 env.properties
 wps.vms.json
+src/test/java/org/auscope/portal/aws/TestAws.java

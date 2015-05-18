@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-@RequestMapping("taskwait")
+@RequestMapping("eavl/taskwait")
 @Controller
 public class TaskWaitController extends BasePortalController {
 
@@ -34,10 +34,6 @@ public class TaskWaitController extends BasePortalController {
         String email = null;
         if (!notify) {
             email = null;
-        } else if (user == null) {
-            //TODO - this should not be defaulting
-            log.error("TODO - please dont leave this default email here");
-            email = "Josh.Vote@csiro.au";
         } else {
             email = user.getEmail();
         }

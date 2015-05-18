@@ -1,11 +1,14 @@
 package org.auscope.portal.server.web.service;
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.web.service.wps.VmPool;
 import org.auscope.portal.server.web.service.wps.WpsServiceClient;
 import org.auscope.portal.server.web.service.wps.WpsVm;
+import org.auscope.portal.server.web.service.wps.WpsVm.VmStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -42,4 +45,14 @@ public class WpsService {
         vmPool.verifyVm(wpsClient);
     }
 
+    /**
+     * Passthrough method to VmPool.calculatePoolStatus. This is a blocking method,
+     * use sparingly.
+     *
+     * @see org.auscope.portal.server.web.service.wps.VmPool
+     * @return
+     */
+    public List<VmStatus> calculatePoolStatus() {
+        return vmPool.calculatePoolStatus();
+    }
 }

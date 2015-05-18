@@ -71,21 +71,21 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                             parent.add({
                                 xtype: 'datadisplayfield',
                                 border: false,
-                                fieldLabel: 'clr(' + plot.xLabel + ')',
+                                fieldLabel: plot.xLabel,
                                 margin : '10 0 0 0',
-                                value: data.x
+                                value: Ext.util.Format.number(data.x, '0.0000')
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',
-                                fieldLabel: 'clr(' + plot.yLabel + ')',
+                                fieldLabel: plot.yLabel,
                                 margin : '10 0 0 0',
-                                value: data.y
+                                value: Ext.util.Format.number(data.y, '0.0000')
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',
-                                fieldLabel: 'clr(' + plot.zLabel + ')',
+                                fieldLabel: plot.zLabel,
                                 margin : '10 0 0 0',
-                                value: data.z
+                                value: Ext.util.Format.number(data.z, '0.0000')
                             });
                             parent.add({
                                 xtype: 'datadisplayfield',

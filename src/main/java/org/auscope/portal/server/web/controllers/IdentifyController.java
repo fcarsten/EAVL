@@ -27,7 +27,7 @@ import com.google.common.collect.Sets;
  *
  */
 @Controller
-@RequestMapping("identify")
+@RequestMapping("cp/identify")
 public class IdentifyController extends BasePortalController {
 
     private EAVLJobService jobService;

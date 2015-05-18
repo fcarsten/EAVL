@@ -35,6 +35,7 @@ Ext.application({
                 region: 'north',
                 height: 200,
                 hideNavigator : true,
+                hideText : true,
                 urlOverride : next,
                 allowNext : function(callback) {
                     callback(Ext.getCmp('upload-form').getForm().isValid());
@@ -60,7 +61,10 @@ Ext.application({
                         cls : 'loading-box',
                         children : [{
                             tag : 'img',
-                            src : 'img/loading-bars.svg'
+                            style: {
+                                height: (Ext.isIE ? 41 : '')
+                            },
+                            src : (Ext.isIE ? 'img/loading-bars.gif' : 'img/loading-bars.svg') 
                         },{
                             tag : 'h1',
                             html : taskName
@@ -88,7 +92,7 @@ Ext.application({
                                 cb.ownerCt.down('#loadingimg').show();
                                 cb.ownerCt.down('#statuslabel').hide();
                                 Ext.Ajax.request({
-                                    url: 'taskwait/setEmailNotification.do',
+                                    url: 'eavl/taskwait/setEmailNotification.do',
                                     params: {
                                         notify: newValue ? 'true' : 'false',
                                         taskId: taskId
@@ -132,7 +136,7 @@ Ext.application({
             interval: 1000 * 10, //every 10 seconds
             run: function() {
                 Ext.Ajax.request({
-                    url: 'taskwait/isExecuting.do',
+                    url: 'eavl/taskwait/isExecuting.do',
                     params: {
                         taskId: taskId
                     },

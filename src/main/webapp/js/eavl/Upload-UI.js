@@ -20,13 +20,32 @@ Ext.application({
         var jobId = null;
         var filesUploaded = 0;
 
-        var showCSVGrid = function(id, parameterDetails) {
+        var showCSVGrid = function(id, parameterDetails, jobName) {
             jobId = id;
             var parent = Ext.getCmp('parent-container');
             if (parent.down('#csvGrid')) {
                 parent.down('#csvGrid').destroy();
             }
 
+            
+            parent.down('#upload-field').destroy();
+            parent.down('#upload-label').setText('Choose a name for this job');
+            parent.down('#upload-form').setWidth(600);
+            parent.down('#upload-form').add(Ext.create('Ext.form.field.Text', {
+                anchor : '100%',
+                itemId: 'job-name',
+                hideLabel: true,
+                margin: '20 0 10 0',
+                height: 60,
+                fieldStyle: {
+                    'font-family': 'helvetica,​arial,​verdana,​sans-serif',
+                    'font-size': 32,
+                    'font-weight': 700,
+                    'line-height': '40px'
+                },
+                value: jobName
+            }));
+            
             //I've been having troubles with ExtJS layout and dynamically adding a flex component
             //This is the workaround I'm going with...
             var width = window.innerWidth - 120;
@@ -61,10 +80,40 @@ Ext.application({
                         eavl.widgets.util.HighlightUtil.highlight(Ext.getCmp('upload-form'), eavl.widgets.util.HighlightUtil.ERROR_COLOR);
                         callback(false);
                         return;
+                    }                    
+                    var nameField = parent.down('#job-name');
+                    var name = nameField.getValue().trim();
+                    if (Ext.isEmpty(name)) {
+                        eavl.widgets.util.HighlightUtil.highlight(nameField, eavl.widgets.util.HighlightUtil.ERROR_COLOR);
+                        callback(false);
+                        return;
                     }
+                    
+                    Ext.Ajax.request({
+                        url: 'validation/renameJob.do',
+                        params: {
+                            name : name,
+                            jobId: jobId
+                        },
+                        callback : function(options, success, response) {
+                            if (!success) {
+                                callback(false);
+                                return;
+                            }
+                            
+                            var obj = Ext.JSON.decode(response.responseText);
+                            if (!obj.success) {
+                                callback(false);
+                                return;
+                            }
+                            
+                            portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Upload', 'total uploads: ' + filesUploaded);
+                            callback(true);
+                        }
+                    });
+                    
 
-                    portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Upload', 'total uploads: ' + filesUploaded);
-                    callback(true);
+                    
                 }
             },{
                 xtype: 'container',
@@ -87,6 +136,7 @@ Ext.application({
                     bodyPadding : '30 10 10 10',
                     items : [{
                         xtype: 'label',
+                        itemId: 'upload-label',
                         style: {
                             'font-size': '15px'
                         },
@@ -94,6 +144,7 @@ Ext.application({
                     },{
                         xtype: 'filefield',
                         name: 'file',
+                        itemId: 'upload-field',
                         anchor : '100%',
                         hideLabel: true,
                         margin: '20 0 10 0',
@@ -125,7 +176,7 @@ Ext.application({
                                             pdList.push(Ext.create('eavl.models.ParameterDetails', o));
                                         });
 
-                                        showCSVGrid(action.result.data.id, pdList);
+                                        showCSVGrid(action.result.data.id, pdList, action.result.data.name);
                                     },
                                     failure: function() {
                                         Ext.Msg.alert('Failure', 'File upload failed. Please try again in a few minutes.');

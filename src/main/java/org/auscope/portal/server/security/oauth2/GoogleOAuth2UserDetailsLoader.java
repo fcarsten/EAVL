@@ -16,11 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.racquettrack.security.oauth.OAuth2UserDetailsLoader;
 
 /**
- * A class for loading user details from google OAuth2 authentication.
- *
- * This class does NOT persist any user details. They are created on demand (update
- * is identical to createUser). For a true persistence layer, extend this class
- * and override methods.
+ * A class for loading user details from google OAuth2 authentication and matching them
+ * to an internal database of roles.
  *
  * Additional roles can be configured for select users based on user ID
  *
@@ -31,7 +28,7 @@ public class GoogleOAuth2UserDetailsLoader implements
         OAuth2UserDetailsLoader<EavlUser> {
 
     protected String defaultRole;
-    protected Map<String, List<SimpleGrantedAuthority>> rolesByUser;
+    protected Map<String, List<SimpleGrantedAuthority>> rolesByEmail;
 
     @Autowired
     private UserRepository userRepository;
@@ -50,19 +47,19 @@ public class GoogleOAuth2UserDetailsLoader implements
      * @param defaultRole
      * @param rolesByUser
      */
-    public GoogleOAuth2UserDetailsLoader(String defaultRole, Map<String, List<String>> rolesByUser) {
+    public GoogleOAuth2UserDetailsLoader(String defaultRole, Map<String, List<String>> rolesByEmail) {
         this.defaultRole = defaultRole;
-        this.rolesByUser = new HashMap<String, List<SimpleGrantedAuthority>>();
+        this.rolesByEmail = new HashMap<String, List<SimpleGrantedAuthority>>();
 
-        if (rolesByUser != null) {
-            for (Entry<String, List<String>> entry : rolesByUser.entrySet()) {
+        if (rolesByEmail != null) {
+            for (Entry<String, List<String>> entry : rolesByEmail.entrySet()) {
                 List<String> authorityStrings = entry.getValue();
                 List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>(authorityStrings.size());
                 for (String authority : authorityStrings) {
                     authorities.add(new SimpleGrantedAuthority(authority));
                 }
 
-                this.rolesByUser.put(entry.getKey(), authorities);
+                this.rolesByEmail.put(entry.getKey(), authorities);
             }
         }
     }
@@ -106,8 +103,8 @@ public class GoogleOAuth2UserDetailsLoader implements
     private void applyAuthorities(EavlUser u) {
         Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
         authorities.add(new SimpleGrantedAuthority(defaultRole));
-        if (rolesByUser != null) {
-            List<SimpleGrantedAuthority> additionalAuthorities = rolesByUser.get(u.getUsername());
+        if (rolesByEmail != null) {
+            List<SimpleGrantedAuthority> additionalAuthorities = rolesByEmail.get(u.getEmail());
             if (additionalAuthorities != null) {
                 authorities.addAll(additionalAuthorities);
             }

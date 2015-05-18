@@ -122,11 +122,11 @@ Ext.application({
                         width: 300,
                         sortFn : eavl.models.ParameterDetails.sortColIndexFn,
                         parameterDetails: savedParamDetails,
-                        forcedIconUrl : 'img/tick-grey.png',
+                        forcedIconUrl : '../img/tick-grey.png',
                         forcedIconTip : 'Non compositional parameters have no constraints on their values.',
                         viewConfig : {
                             deferEmptyText : false,
-                            emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner"><img src="img/save.svg" width="100"/><br>Drag a parameter here to exclude it from calculations but include it in the final results.</div></div>'
+                            emptyText : '<div class="save-empty-container"><div class="save-empty-container-inner"><img src="../img/save.svg" width="100" height="100"/><br>Drag a parameter here to exclude it from calculations but include it in the final results.</div></div>'
                         },
                         plugins : [{
                             ptype : 'modeldnd',
@@ -186,7 +186,7 @@ Ext.application({
                             title: 'Hole Identifier',
                             height: 85,
                             emptyText : 'Drag a parameter here to select it.',
-                            forcedIconUrl : 'img/tick-grey.png',
+                            forcedIconUrl : '../img/tick-grey.png',
                             forcedIconTip : 'Non compositional parameters have no constraints on their values.',
                             margin: '0 0 10 0',
                             allowBlank: false,

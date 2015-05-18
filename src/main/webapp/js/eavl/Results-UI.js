@@ -34,7 +34,9 @@ Ext.application({
                 layout: 'border',
                 items: [{
                     xtype: 'workflowpanel',
-                    region: 'north'
+                    region: 'north',
+                    hideNavigator: true,
+                    height: 200
                 },{
                     xtype: 'panel',
                     region: 'center',
@@ -61,6 +63,7 @@ Ext.application({
                         listeners: {
                             select: function(sm, job) {
                                 Ext.getCmp('jobfilelist').showFilesForJob(job);
+                                Ext.getCmp('filepreviewpanel').clearPreview();
                             },
                             jobdelete: function(sm, job) {
                                 Ext.getCmp('jobfilelist').showFilesForJob(null);

@@ -58,6 +58,7 @@ Ext.define('eavl.widgets.SplashScreen', {
                 region: 'north',
                 height: 200,
                 hideNavigator : true,
+                hideText : true,
                 allowNext : function(callback) {
                     callback(false);
                 }
@@ -76,7 +77,7 @@ Ext.define('eavl.widgets.SplashScreen', {
                     xtype : 'image',
                     width: 500,
                     height: 500,
-                    src : 'img/alert.svg',
+                    src : '../img/alert.svg'
                 },{
                     xtype: 'panel',
                     width: '100%',
