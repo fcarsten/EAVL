@@ -177,6 +177,7 @@ Ext.application({
                                     return;
                                 }
 
+                                portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Validate', Ext.util.Format.format('Deleted total: {0}', deleteColIndexes.length));
                                 callback(true);
                             }
                         });

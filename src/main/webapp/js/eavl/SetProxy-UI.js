@@ -125,6 +125,7 @@ Ext.application({
                                     return;
                                 }
 
+                                portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Set Proxy');
                                 callback("../taskwait.html?" + Ext.Object.toQueryString({taskId: responseObj.data, next: 'cp/results.html'}));
                             }
                         });
