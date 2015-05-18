@@ -80,7 +80,9 @@ Ext.application({
                         eavl.widgets.util.HighlightUtil.highlight(Ext.getCmp('upload-form'), eavl.widgets.util.HighlightUtil.ERROR_COLOR);
                         callback(false);
                         return;
-                    }                    
+                    }    
+                    
+                    var parent = Ext.getCmp('parent-container');
                     var nameField = parent.down('#job-name');
                     var name = nameField.getValue().trim();
                     if (Ext.isEmpty(name)) {
@@ -111,9 +113,6 @@ Ext.application({
                             callback(true);
                         }
                     });
-                    
-
-                    
                 }
             },{
                 xtype: 'container',
