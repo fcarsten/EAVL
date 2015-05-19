@@ -8,14 +8,7 @@
     <head>
         <title>Access Denied</title>
         
-        <link rel="stylesheet" type="text/css" href="${context}/portal-core/js/ext-5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css">
-		<script type="text/javascript" src="${context}/portal-core/js/ext-5.1.0/build/ext-all-debug.js"></script>
-		<script type="text/javascript" src="${context}/portal-core/js/ext-5.1.0/build/packages/ext-ux/build/ext-ux-debug.js"></script>
-		
-		<script type="text/javascript" src="${context}/portal-core/js/portal/Compatibility.js"></script>
-		<script type="text/javascript" src="${context}/portal-core/js/portal/util/URL.js"></script>
-		
-		<link rel="shortcut icon" href="${context}/img/favicon.ico" type="image/x-icon" />
+        <%@ include file="../../jsimports.htm"%>
                 
         <script type="text/javascript">
         var CONTACT_EMAIL = ${OBSCURED_CONTACT_EMAIL};

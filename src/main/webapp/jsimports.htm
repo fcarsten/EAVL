@@ -1,12 +1,19 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="context" value="${pageContext.request.contextPath}" />
+
+<script type="text/javascript">
+var WEB_CONTEXT = "${context}";
+</script>
+
 <!-- link extjs 5 -->
-<link rel="stylesheet" type="text/css" href="portal-core/js/ext-5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css">
-<script type="text/javascript" src="portal-core/js/ext-5.1.0/build/ext-all-debug.js"></script>
-<script type="text/javascript" src="portal-core/js/ext-5.1.0/build/packages/ext-ux/build/ext-ux-debug.js"></script>
+<link rel="stylesheet" type="text/css" href="${context}/portal-core/js/ext-5.1.0/build/packages/ext-theme-neptune/build/resources/ext-theme-neptune-all.css">
+<script type="text/javascript" src="${context}/portal-core/js/ext-5.1.0/build/ext-all-debug.js"></script>
+<script type="text/javascript" src="${context}/portal-core/js/ext-5.1.0/build/packages/ext-ux/build/ext-ux-debug.js"></script>
 
-<script type="text/javascript" src="portal-core/js/portal/Compatibility.js"></script>
+<script type="text/javascript" src="${context}/portal-core/js/portal/Compatibility.js"></script>
 
-<script type="text/javascript" src="portal-core/js/portal/util/PiwikAnalytic.js" ></script>
-<script type="text/javascript" src="portal-core/js/portal/util/URL.js"></script>
+<script type="text/javascript" src="${context}/portal-core/js/portal/util/PiwikAnalytic.js" ></script>
+<script type="text/javascript" src="${context}/portal-core/js/portal/util/URL.js"></script>
 
 <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon" />
 
