@@ -61,6 +61,30 @@ Ext.application({
             ]
         });
         
+        var test2 = Ext.create('eavl.models.Workflow', {
+            id: 'eavl-data',
+            name: 'Data Browser',
+            version: '0.0.1-BETA',
+            background: 'img/workflows/data.png',
+            description: '<p>This workflow is still a work in progress. Please check back later.</p>',
+            contacts: [
+                Ext.create('eavl.models.Contact', {
+                    name: 'Joshua Vote',
+                    email: ['Josh.Vote', 'csiro.au'].join('@'),
+                    group: 'Developers'
+                }),
+                Ext.create('eavl.models.Contact', {
+                    name: 'Carsten Friedrich',
+                    email: ['Carsten.Friedrich', 'csiro.au'].join('@'),
+                    group: 'Developers'
+                }),
+                Ext.create('eavl.models.Contact', {
+                    name: 'Robert Woodcock',
+                    email: ['Rober.Woodcock', 'csiro.au'].join('@'),
+                    group: 'Project Lead'
+                })
+            ]
+        });
         
         Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
             layout: 'border',
@@ -105,7 +129,7 @@ Ext.application({
                 items: [{
                     title: 'Workflows',
                     xtype: 'workflowselectionpanel',
-                    workflows: [wfCp, test1],
+                    workflows: [wfCp, test1, test2],
                     listeners: {
                         select: function(panel, wf, e) {
                             Ext.create('eavl.widgets.EAVLModalWindow', {
