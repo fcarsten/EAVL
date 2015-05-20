@@ -25,7 +25,8 @@ Ext.define('eavl.widgets.WorkflowInspectPanel', {
         
         var contactStore = Ext.create('Ext.data.Store',{
             model: 'eavl.models.Contact',
-            groupField: 'group'
+            groupField: 'group',
+            groupDir: 'DESC'
         });
         contactStore.loadData(config.workflow.get('contacts'));
         
