@@ -5,7 +5,7 @@
     <head>
         <title>EAVL - Prediction</title>
         
-        <jsp:include page="jsimports.htm"/>
+        <%@ include file="../../../jsimports.htm"%>
         
         <script type="text/javascript">
         var CONTACT_EMAIL = ${OBSCURED_CONTACT_EMAIL};

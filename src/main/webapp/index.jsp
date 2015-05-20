@@ -6,7 +6,7 @@
     <head>
         <title>EAVL Portal</title>
         
-        <jsp:include page="jsimports.htm"/>
+        <%@ include file="jsimports.htm"%>
                 
         <security:authorize ifAllGranted="ROLE_USER">
             <script type="text/javascript">

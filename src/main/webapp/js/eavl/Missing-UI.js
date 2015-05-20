@@ -27,7 +27,7 @@ Ext.application({
                         id : 'top-bar-container',
                         children: [{
                             tag : 'a',
-                            href: WEB_CONTEXT  + "/index.jsp",
+                            href: WEB_CONTEXT + "/index.jsp",
                             id: 'top-bar-logo',
                             style: {
                                 top: '0px'
@@ -65,10 +65,10 @@ Ext.application({
                         cls: 'loading-box', //we repurpose the TaskWait-UI 
                         children: [{
                             tag : 'h1',
-                            html : 'Access Denied'
+                            html : 'Page not found'
                         },{
                             tag : 'div',
-                            html : Ext.util.Format.format('If you believe this is an error, please contact: <a href="mailto:{0}?Subject=Access%20Denied&body={1}">{0}</a>', CONTACT_EMAIL, escape('I was trying to access: ' + window.location.href))
+                            html : Ext.util.Format.format('Whoops, this page doesnt exist. If you\'d to speak to someone about it please contact : <a href="mailto:{0}?Subject=Page%20not%20found&body={1}">{0}</a>', CONTACT_EMAIL, escape('I was trying to access: ' + window.location.href))
                         }]
                     })
                 }]
