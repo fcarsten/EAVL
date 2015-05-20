@@ -101,8 +101,10 @@ Ext.application({
                                 },
                                 preview : function(jobFileList, fileName, job) {
                                     if (fileName === eavl.models.EAVLJob.FILE_IMPUTED_CENLR_CSV) {
+                                        portal.util.PiwikAnalytic.trackevent('Feature', 'Preview', 'threedscatterplot', fileName);
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "threedscatterplot");
                                     } else if (fileName === eavl.models.EAVLJob.FILE_CP_CSV) {
+                                        portal.util.PiwikAnalytic.trackevent('Feature', 'Preview', 'bhestimate', fileName);
                                         Ext.getCmp('filepreviewpanel').preview(job, fileName, "bhestimate");
                                     }
                                 }

@@ -68,6 +68,7 @@ Ext.application({
                                     return;
                                 }
 
+                                portal.util.PiwikAnalytic.trackevent('Navigation', 'Workflow Forward', 'Threshold');
                                 callback(true);
                             }
                         });
