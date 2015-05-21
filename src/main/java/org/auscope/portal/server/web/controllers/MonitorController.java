@@ -15,21 +15,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
- * Controller methods for various admin tasks
+ * Controller methods for various monitoring hooks
  * @author Josh Vote
  *
  */
-@RequestMapping("admin")
+@RequestMapping("monitor")
 @Controller
-public class AdminController extends BasePortalController {
-    private static final String VM_STATUS_LIST_KEY = "AdminController.vmPoolStatus.do";
+public class MonitorController extends BasePortalController {
+    private static final String VM_STATUS_LIST_KEY = "MonitorController.vmPoolStatus.do";
 
     @Autowired
     private ApplicationContext appContext;
     private WpsService wpsService;
 
     @Autowired
-    public AdminController(WpsService wpsService) {
+    public MonitorController(WpsService wpsService) {
         super();
         this.wpsService = wpsService;
     }
