@@ -1,16 +1,15 @@
 package org.auscope.portal.server.security.oauth2;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.racquettrack.security.oauth.OAuth2UserDetailsLoader;
@@ -28,7 +27,7 @@ public class GoogleOAuth2UserDetailsLoader implements
         OAuth2UserDetailsLoader<EavlUser> {
 
     protected String defaultRole;
-    protected Map<String, List<SimpleGrantedAuthority>> rolesByEmail;
+    protected Map<String, List<EAVLAuthority>> rolesByEmail;
 
     @Autowired
     private UserRepository userRepository;
@@ -49,14 +48,14 @@ public class GoogleOAuth2UserDetailsLoader implements
      */
     public GoogleOAuth2UserDetailsLoader(String defaultRole, Map<String, List<String>> rolesByEmail) {
         this.defaultRole = defaultRole;
-        this.rolesByEmail = new HashMap<String, List<SimpleGrantedAuthority>>();
+        this.rolesByEmail = new HashMap<String, List<EAVLAuthority>>();
 
         if (rolesByEmail != null) {
             for (Entry<String, List<String>> entry : rolesByEmail.entrySet()) {
                 List<String> authorityStrings = entry.getValue();
-                List<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>(authorityStrings.size());
+                List<EAVLAuthority> authorities = new ArrayList<EAVLAuthority>(authorityStrings.size());
                 for (String authority : authorityStrings) {
-                    authorities.add(new SimpleGrantedAuthority(authority));
+                    authorities.add(new EAVLAuthority(authority));
                 }
 
                 this.rolesByEmail.put(entry.getKey(), authorities);
@@ -70,9 +69,15 @@ public class GoogleOAuth2UserDetailsLoader implements
     @Override
     public EavlUser getUserByUserId(String id) {
         EavlUser res = userRepository.findOne(id);
-        if(res!=null) {
-            applyAuthorities(res);
+        
+        //Always ensure that the default role is set
+        if (res != null) {
+            if (!res.getAuthorities().contains(defaultRole)) {
+                Collection<EAVLAuthority> authorities = (Collection<EAVLAuthority>) res.getAuthorities();
+                authorities.add(new EAVLAuthority(defaultRole));
+            }
         }
+        
         return res;
     }
 
@@ -89,28 +94,29 @@ public class GoogleOAuth2UserDetailsLoader implements
     protected void applyInfoToUser(EavlUser user,  Map<String, Object> userInfo) {
         user.setEmail(userInfo.get("email").toString());
         user.setFullName(userInfo.get("name").toString());
-        userRepository.saveAndFlush(user);
     }
 
     @Override
     public UserDetails createUser(String id, Map<String, Object> userInfo) {
         EavlUser newUser = new EavlUser(id);
         applyInfoToUser(newUser, userInfo);
-        applyAuthorities(newUser);
-        return newUser;
-    }
 
-    private void applyAuthorities(EavlUser u) {
-        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority(defaultRole));
+        //Apply default authorities
+        HashSet<EAVLAuthority> authorities = new HashSet<EAVLAuthority>();
+        authorities.add(new EAVLAuthority(defaultRole));
+
         if (rolesByEmail != null) {
-            List<SimpleGrantedAuthority> additionalAuthorities = rolesByEmail.get(u.getEmail());
+            List<EAVLAuthority> additionalAuthorities = rolesByEmail.get(newUser.getEmail());
             if (additionalAuthorities != null) {
                 authorities.addAll(additionalAuthorities);
             }
         }
-        u.setAuthorities(authorities);
+        newUser.setAuthorities(authorities);
+
+        userRepository.saveAndFlush(newUser);
+        return newUser;
     }
+
 
     @Override
     public UserDetails updateUser(UserDetails userDetails,
@@ -118,6 +124,7 @@ public class GoogleOAuth2UserDetailsLoader implements
 
         if (userDetails instanceof EavlUser) {
             applyInfoToUser((EavlUser) userDetails, userInfo);
+            userRepository.saveAndFlush((EavlUser) userDetails);
         }
 
         return userDetails;

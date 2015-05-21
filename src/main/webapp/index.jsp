@@ -9,8 +9,12 @@
         <%@ include file="jsimports.htm"%>
                 
         <security:authorize ifAllGranted="ROLE_USER">
+            <security:authentication property="principal.authorities"/>
+            
             <script type="text/javascript">
             var AUTHENTICATED_USER = true;
+            
+            alert("${principal.authorities}");
 		    </script>
          </security:authorize>
 
