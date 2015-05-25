@@ -2,8 +2,10 @@ package org.auscope.portal.server.web.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.auscope.portal.core.server.controllers.BasePortalController;
+import org.auscope.portal.server.security.oauth2.EAVLAuthority;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.security.oauth2.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -55,5 +58,39 @@ public class AdminController extends BasePortalController {
         }
 
         return generateJSONResponseMAV(true, users, "");
+    }
+
+    @RequestMapping("addUserRole.do")
+    public ModelAndView addUserRole(@RequestParam("userName") String userName, @RequestParam("role") String role) {
+        EavlUser user = userRepository.getOne(userName);
+        if (user == null) {
+            return generateJSONResponseMAV(false);
+        }
+
+        Set<EAVLAuthority> authorities = (Set<EAVLAuthority>) user.getAuthorities();
+        if (authorities.contains(role)) {
+            return generateJSONResponseMAV(true);
+        }
+
+        authorities.add(new EAVLAuthority(role));
+        userRepository.saveAndFlush(user);
+        return generateJSONResponseMAV(true);
+    }
+
+    @RequestMapping("deleteUserRole.do")
+    public ModelAndView deleteUserRole(@RequestParam("userName") String userName, @RequestParam("role") String role) {
+        EavlUser user = userRepository.getOne(userName);
+        if (user == null) {
+            return generateJSONResponseMAV(false);
+        }
+
+        Set<EAVLAuthority> authorities = (Set<EAVLAuthority>) user.getAuthorities();
+        if (!authorities.contains(role)) {
+            return generateJSONResponseMAV(true);
+        }
+
+        authorities.remove(role);
+        userRepository.saveAndFlush(user);
+        return generateJSONResponseMAV(true);
     }
 }

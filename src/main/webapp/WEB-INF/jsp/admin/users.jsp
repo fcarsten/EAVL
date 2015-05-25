@@ -12,6 +12,7 @@
         </script>
         
         <link rel="stylesheet" type="text/css" href="../js/eavl/widgets/WorkflowLocationPanel.css">
+        <link rel="stylesheet" type="text/css" href="../js/eavl/EAVL-Common.css">
         
         <script type="text/javascript" src="../js/eavl/widgets/plugins/HeaderIcons.js"></script>
         <script type="text/javascript" src="../js/eavl/widgets/plugins/HeaderHelp.js"></script>

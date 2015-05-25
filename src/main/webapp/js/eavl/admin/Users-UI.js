@@ -22,6 +22,92 @@ Ext.application({
             },
         });
         
+        var roleStore = Ext.create('Ext.data.Store', {
+            fields: ['role'],
+            autoLoad: false
+        });
+        
+        var handleAddRole =  function(btn) {
+            var user = Ext.getCmp('usercombo').getSelection();
+            if (user) {
+                Ext.MessageBox.show({
+                    title: 'New Role',
+                    msg: Ext.util.Format.format('Enter a new user role to add to user <b>{0}</b>: ', user.get('email')),
+                    animateTarget: btn.getEl(),
+                    icon: Ext.window.MessageBox.QUESTION,
+                    prompt: true,
+                    scope : this,
+                    buttons : Ext.MessageBox.OK,
+                    fn : function(buttonId, text, opt) {
+                        if (buttonId === 'ok' && text) {
+                            Ext.Ajax.request({
+                                url: "addUserRole.do",
+                                params: {
+                                    userName: user.get('userName'),
+                                    role: text
+                                },
+                                callback: function(options, success, response) {
+                                    if (!success) {
+                                        return;
+                                    }
+                                    
+                                    var responseObj = Ext.JSON.decode(response.responseText);
+                                    if (!responseObj.success) {
+                                        return;
+                                    }
+                                    
+                                    roleStore.loadData([{role: text}], true);
+                                    user.get('authorities').push(text);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        };
+        
+        var handleDeleteRole =  function(btn) {
+            var user = Ext.getCmp('usercombo').getSelection();
+            var roles = Ext.getCmp('rolegrid').getSelection();
+            
+            if (!Ext.isEmpty(roles) && user) {
+                var role = roles[0].role;
+                Ext.MessageBox.show({
+                    title: 'New Role',
+                    msg: Ext.util.Format.format('Really delete role <b>{1}</b> from user <b>{0}</b>: ', user.get('email'), role),
+                    animateTarget: btn.getEl(),
+                    icon: Ext.window.MessageBox.QUESTION,
+                    scope : this,
+                    buttons : Ext.MessageBox.OK,
+                    fn : function(buttonId) {
+                        if (buttonId === 'ok') {
+                            Ext.Ajax.request({
+                                url: "deleteUserRole.do",
+                                params: {
+                                    userName: user.get('userName'),
+                                    role: role
+                                },
+                                callback: function(options, success, response) {
+                                    if (!success) {
+                                        return;
+                                    }
+                                    
+                                    var responseObj = Ext.JSON.decode(response.responseText);
+                                    if (!responseObj.success) {
+                                        return;
+                                    }
+                                    
+                                    
+                                    roleStore.remove(roles[0]);
+                                    Ext.Array.remove(user.get('authorities'), role);
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        };
+        
         Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
             layout: 'border',
             style: {
@@ -60,8 +146,63 @@ Ext.application({
                 xtype: 'container',
                 region: 'center',
                 margin: '10 0 0 0',
-                html: 'todo'
-                //items: []
+                border: false,
+                layout: { type: 'hbox', pack : 'center'},
+                items: [{
+                    xtype: 'form',
+                    width: 800,
+                    height: 600,
+                    border: false,
+                    layout: { type: 'vbox', pack : 'start', align: 'stretch'},
+                    items: [{
+                        xtype: 'combo',
+                        model: 'eavl.admin.EAVLUser',
+                        store: userStore,
+                        queryMode: 'local',
+                        displayField: 'email',
+                        id: 'usercombo',
+                        editable: false,
+                        anchor: '100%',
+                        emptyText: 'Select a user to edit their permissions',
+                        listeners: {
+                            select: function(combo, newValue) {
+                                roleStore.removeAll();
+                                if (newValue) {
+                                    var auths = [];
+                                    Ext.each(newValue.get('authorities'), function(auth) {
+                                        auths.push({role: auth});
+                                    });
+                                    roleStore.loadData(auths);
+                                }
+                            }
+                        }
+                    },{
+                        xtype: 'grid',
+                        store: roleStore,
+                        flex: 1,
+                        id: 'rolegrid',
+                        hideHeaders: true,
+                        columns: [{dataIndex: 'role', flex: 1}],
+                        dockedItems: [{
+                            xtype: 'toolbar',
+                            dock: 'bottom',
+                            items: [{
+                                xtype: 'tbfill'
+                            },{
+                                xtype: 'button',
+                                scale: 'large',
+                                text: 'Delete Role',
+                                handler: handleDeleteRole
+                            },{
+                                xtype: 'button',
+                                cls: 'important-button',
+                                scale: 'large',
+                                text: 'Add Role',
+                                handler: handleAddRole
+                            }]
+                        }]
+                    }]
+                }]
             }]
         });
         
