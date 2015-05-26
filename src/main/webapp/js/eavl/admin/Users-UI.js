@@ -71,21 +71,21 @@ Ext.application({
             var roles = Ext.getCmp('rolegrid').getSelection();
             
             if (!Ext.isEmpty(roles) && user) {
-                var role = roles[0].role;
+                var roleText = roles[0].get('role');
                 Ext.MessageBox.show({
                     title: 'New Role',
-                    msg: Ext.util.Format.format('Really delete role <b>{1}</b> from user <b>{0}</b>: ', user.get('email'), role),
+                    msg: Ext.util.Format.format('Really delete <b>{1}</b> from user <b>{0}</b>: ', user.get('email'), roleText),
                     animateTarget: btn.getEl(),
                     icon: Ext.window.MessageBox.QUESTION,
                     scope : this,
-                    buttons : Ext.MessageBox.OK,
+                    buttons : Ext.MessageBox.OKCANCEL,
                     fn : function(buttonId) {
                         if (buttonId === 'ok') {
                             Ext.Ajax.request({
                                 url: "deleteUserRole.do",
                                 params: {
                                     userName: user.get('userName'),
-                                    role: role
+                                    role: roleText
                                 },
                                 callback: function(options, success, response) {
                                     if (!success) {
@@ -97,9 +97,8 @@ Ext.application({
                                         return;
                                     }
                                     
-                                    
                                     roleStore.remove(roles[0]);
-                                    Ext.Array.remove(user.get('authorities'), role);
+                                    Ext.Array.remove(user.get('authorities'), roleText);
                                 }
                             });
                         }

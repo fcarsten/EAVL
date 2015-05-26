@@ -60,36 +60,51 @@ public class AdminController extends BasePortalController {
         return generateJSONResponseMAV(true, users, "");
     }
 
+    /**
+     * Adds a role to a specified user. If the role already exists, this has no effect
+     * @param userName
+     * @param role
+     * @return
+     */
     @RequestMapping("addUserRole.do")
     public ModelAndView addUserRole(@RequestParam("userName") String userName, @RequestParam("role") String role) {
-        EavlUser user = userRepository.getOne(userName);
+        EavlUser user = userRepository.findOne(userName);
         if (user == null) {
             return generateJSONResponseMAV(false);
         }
 
         Set<EAVLAuthority> authorities = (Set<EAVLAuthority>) user.getAuthorities();
-        if (authorities.contains(role)) {
+        EAVLAuthority auth = new EAVLAuthority(role);
+        if (authorities.contains(auth)) {
             return generateJSONResponseMAV(true);
         }
 
-        authorities.add(new EAVLAuthority(role));
+        authorities.add(auth);
         userRepository.saveAndFlush(user);
         return generateJSONResponseMAV(true);
     }
 
+    /**
+     * Deletes a role from the specified user. If the role doesn't exist, this has no effect
+     * @param userName
+     * @param role
+     * @return
+     */
     @RequestMapping("deleteUserRole.do")
     public ModelAndView deleteUserRole(@RequestParam("userName") String userName, @RequestParam("role") String role) {
-        EavlUser user = userRepository.getOne(userName);
+        EavlUser user = userRepository.findOne(userName);
         if (user == null) {
             return generateJSONResponseMAV(false);
         }
 
+
         Set<EAVLAuthority> authorities = (Set<EAVLAuthority>) user.getAuthorities();
-        if (!authorities.contains(role)) {
+        EAVLAuthority auth = new EAVLAuthority(role);
+        if (!authorities.contains(auth)) {
             return generateJSONResponseMAV(true);
         }
 
-        authorities.remove(role);
+        authorities.remove(auth);
         userRepository.saveAndFlush(user);
         return generateJSONResponseMAV(true);
     }

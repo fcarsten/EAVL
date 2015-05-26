@@ -19,7 +19,7 @@ public class EAVLAuthority implements GrantedAuthority {
     private static final long serialVersionUID = 151022306510042949L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Integer id;
     private String role;
 

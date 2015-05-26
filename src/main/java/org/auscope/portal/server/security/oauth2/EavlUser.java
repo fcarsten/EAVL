@@ -24,10 +24,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Entity
 public class EavlUser implements UserDetails, CredentialsContainer {
 
+    private static final long serialVersionUID = 5483133230772661314L;
+
     @Id
     private String username;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
     private Set<EAVLAuthority> authorities;
 
     /**

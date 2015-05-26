@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.racquettrack.security.oauth.OAuth2UserDetailsLoader;
@@ -69,7 +68,7 @@ public class GoogleOAuth2UserDetailsLoader implements
     @Override
     public EavlUser getUserByUserId(String id) {
         EavlUser res = userRepository.findOne(id);
-        
+
         //Always ensure that the default role is set
         if (res != null) {
             if (!res.getAuthorities().contains(defaultRole)) {
@@ -77,7 +76,7 @@ public class GoogleOAuth2UserDetailsLoader implements
                 authorities.add(new EAVLAuthority(defaultRole));
             }
         }
-        
+
         return res;
     }
 
