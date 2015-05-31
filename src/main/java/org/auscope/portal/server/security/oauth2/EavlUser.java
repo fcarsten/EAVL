@@ -7,9 +7,11 @@ import java.util.Collection;
 import java.util.Set;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.OneToMany;
 
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,11 +24,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Entity
 public class EavlUser implements UserDetails, CredentialsContainer {
 
+    private static final long serialVersionUID = 5483133230772661314L;
+
     @Id
     private String username;
 
-    @Transient
-    private Set<GrantedAuthority> authorities;
+    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL, orphanRemoval = true)
+    private Set<EAVLAuthority> authorities;
 
     /**
      * @return the email
@@ -38,7 +42,7 @@ public class EavlUser implements UserDetails, CredentialsContainer {
     /**
      * @param authorities the authorities to set
      */
-    public void setAuthorities(Set<GrantedAuthority> authorities) {
+    public void setAuthorities(Set<EAVLAuthority> authorities) {
         this.authorities = authorities;
     }
 
