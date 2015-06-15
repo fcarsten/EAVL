@@ -82,6 +82,7 @@
                 <value>melbourne-qh2</value>
                 <value>tasmania</value>
                 <value>tasmania-s</value>
+                <value>QRIScloud</value>
             </set>
         </property>
         <property name="vmPoolSize" value="2" />
