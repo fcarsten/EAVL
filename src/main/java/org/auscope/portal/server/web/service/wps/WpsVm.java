@@ -15,8 +15,17 @@ import javax.persistence.Transient;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.params.BasicHttpParams;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
@@ -129,23 +138,39 @@ public class WpsVm {
 		if (status == VmStatus.DECOMMISSIONED)
 			return;
 
-		HttpClient client = new HttpClient();
-
+		 CloseableHttpClient client = HttpClients.createDefault();
+		RequestConfig requestConfig = RequestConfig.custom()
+		        .setConnectionRequestTimeout(30*1000)
+		        .setConnectTimeout(30*1000)
+		        .setSocketTimeout(30*1000)
+		        .build();
 		log.info("Updating status of VM: "+id + " ("+ipAddress+")");
-		GetMethod method = new GetMethod("http://" + ipAddress + ":8080/wps");
+		HttpGet method = new HttpGet("http://" + ipAddress + ":8080/wps");
+		method.setConfig(requestConfig);
 		try {
-			int statusCode = client.executeMethod(method);
-			if (statusCode == HttpStatus.SC_OK) {
-				status = VmStatus.READY;
-				log.info(" VM: "+id + " ("+ipAddress+") is ready.");
-			} else if (status == VmStatus.STARTING) {
-				log.info(" VM: "+id + " ("+ipAddress+") no ready yet.");
-			} else if (status == VmStatus.STARTING && System.currentTimeMillis()-getOrderTime()>VM_STARTUP_TIMEOUT){
-				status = VmStatus.FAILED;
-				log.info(" VM: "+id + " ("+ipAddress+") has failed to start up within " +(VM_STARTUP_TIMEOUT/1000)+ " seconds. Giving up.");
-			} else { // TODO: Handle other status codes
-				status = VmStatus.FAILED;
-				log.info(" VM: "+id + " ("+ipAddress+") has failed.");
+			CloseableHttpResponse response = client.execute(method);
+            try {
+                int statusCode = response.getStatusLine().getStatusCode();
+                if (statusCode == HttpStatus.SC_OK) {
+                    status = VmStatus.READY;
+                    log.info(" VM: " + id + " (" + ipAddress + ") is ready.");
+                } else if (status == VmStatus.STARTING) {
+                    log.info(" VM: " + id + " (" + ipAddress
+                            + ") no ready yet.");
+                } else if (status == VmStatus.STARTING
+                        && System.currentTimeMillis() - getOrderTime() > VM_STARTUP_TIMEOUT) {
+                    status = VmStatus.FAILED;
+                    log.info(" VM: " + id + " (" + ipAddress
+                            + ") has failed to start up within "
+                            + (VM_STARTUP_TIMEOUT / 1000)
+                            + " seconds. Giving up.");
+                } else { // TODO: Handle other status codes
+                    status = VmStatus.FAILED;
+                    log.info(" VM: " + id + " (" + ipAddress + ") has failed.");
+                }
+            }
+			finally {
+			    response.close();
 			}
 		} catch (ConnectException e) {
 			if (status == VmStatus.UNKNOWN) {
@@ -155,7 +180,7 @@ public class WpsVm {
 				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). Will try again shortly. Error: "+e.getMessage());
 			}
 		} catch (IOException e) {
-			log.error("Error connecting to VM: "+id + " ("+ipAddress+"): "+e.getMessage(), e);
+			log.error("Error connecting to VM: "+id + " ("+ipAddress+"): "+e.getMessage());
 		}
 
 	}
