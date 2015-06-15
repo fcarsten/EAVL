@@ -622,14 +622,16 @@ public class VmPool {
      * @return
      */
     public List<VmStatus> calculatePoolStatus() {
+        ArrayList<WpsVm> testPool;
         synchronized (vmPool) {
-            List<VmStatus> statusList = new ArrayList<VmStatus>(vmPool.size());
-            for (WpsVm vm : vmPool) {
+            testPool = new ArrayList<>(vmPool);
+        }
+            List<VmStatus> statusList = new ArrayList<VmStatus>(testPool.size());
+            for (WpsVm vm : testPool) {
                 vm.updateStatus();
                 statusList.add(vm.getStatus());
             }
             return statusList;
-        }
     }
 
     private WpsVm findVm(String endpoint) {
