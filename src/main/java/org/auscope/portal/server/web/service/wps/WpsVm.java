@@ -44,8 +44,14 @@ public class WpsVm {
 	 * Maximum time in milliseconds that we wait for VM start-up until we give up.
 	 *
 	 */
+    @JsonIgnore
 	@Transient
 	final public int VM_STARTUP_TIMEOUT = 1000*60*10;
+
+    @JsonIgnore
+    @Transient
+    final public int VM_UNRESPONSIVE_TIMEOUT = 1000*60*3;
+
 	/**
 	 * @author fri096
 	 *
@@ -154,9 +160,6 @@ public class WpsVm {
                 if (statusCode == HttpStatus.SC_OK) {
                     status = VmStatus.READY;
                     log.info(" VM: " + id + " (" + ipAddress + ") is ready.");
-                } else if (status == VmStatus.STARTING) {
-                    log.info(" VM: " + id + " (" + ipAddress
-                            + ") no ready yet.");
                 } else if (status == VmStatus.STARTING
                         && System.currentTimeMillis() - getOrderTime() > VM_STARTUP_TIMEOUT) {
                     status = VmStatus.FAILED;
@@ -164,6 +167,9 @@ public class WpsVm {
                             + ") has failed to start up within "
                             + (VM_STARTUP_TIMEOUT / 1000)
                             + " seconds. Giving up.");
+                } else if (status == VmStatus.STARTING) {
+                    log.info(" VM: " + id + " (" + ipAddress
+                            + ") no ready yet.");
                 } else { // TODO: Handle other status codes
                     status = VmStatus.FAILED;
                     log.info(" VM: " + id + " (" + ipAddress + ") has failed.");
@@ -172,17 +178,14 @@ public class WpsVm {
 			finally {
 			    response.close();
 			}
-		} catch (ConnectException e) {
-			if (status == VmStatus.UNKNOWN) {
+		} catch (IOException e) {
+			if (status == VmStatus.UNKNOWN && System.currentTimeMillis() - getOrderTime() > VM_UNRESPONSIVE_TIMEOUT) {
 				status = VmStatus.FAILED;
 				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). I assume its dead and will remove from VM Pool. Error: "+e.getMessage());
 			} else {
 				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). Will try again shortly. Error: "+e.getMessage());
 			}
-		} catch (IOException e) {
-			log.error("Error connecting to VM: "+id + " ("+ipAddress+"): "+e.getMessage());
 		}
-
 	}
 
 	private boolean isStable(VmStatus s) {
