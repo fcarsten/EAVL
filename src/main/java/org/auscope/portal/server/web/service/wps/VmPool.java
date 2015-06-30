@@ -504,7 +504,7 @@ public class VmPool {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
         runInstancesRequest.withImageId("ami-b706798d")
-                .withInstanceType("t2.small").withMinCount(1).withMaxCount(1)
+                .withInstanceType("t2.large").withMinCount(1).withMaxCount(1)
                 .withKeyName("eavlaws").withSecurityGroups("WPS Server");
         RunInstancesResult runResult = ec2Client
                 .runInstances(runInstancesRequest);
