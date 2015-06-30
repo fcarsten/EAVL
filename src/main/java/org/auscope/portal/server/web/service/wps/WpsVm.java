@@ -4,7 +4,6 @@
 package org.auscope.portal.server.web.service.wps;
 
 import java.io.IOException;
-import java.net.ConnectException;
 
 import javax.persistence.Basic;
 import javax.persistence.Entity;
@@ -12,20 +11,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpConnectionParams;
-import org.apache.commons.httpclient.params.HttpParams;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.params.BasicHttpParams;
 import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
@@ -179,9 +172,9 @@ public class WpsVm {
 			    response.close();
 			}
 		} catch (IOException e) {
-			if (status == VmStatus.UNKNOWN && System.currentTimeMillis() - getOrderTime() > VM_UNRESPONSIVE_TIMEOUT) {
+			if (status == VmStatus.UNKNOWN && System.currentTimeMillis() - getOrderTime() > VM_STARTUP_TIMEOUT) {
 				status = VmStatus.FAILED;
-				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). I assume its dead and will remove from VM Pool. Error: "+e.getMessage());
+				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). Running out of patience ... I assume its dead and will remove from VM Pool. Error: "+e.getMessage());
 			} else {
 				log.info("Can't connect to WPS VM: "+id + " ("+ipAddress+"). Will try again shortly. Error: "+e.getMessage());
 			}
