@@ -37,6 +37,14 @@ public class CSVService {
         Text
     }
 
+    /**
+     * Simple tuple of DataValueType and parsed value (if applicable to the data value type)
+     */
+    private class DataValue {
+        public DataValueType type;
+        public double value;
+    }
+
     private CSVWriter generateWriter(OutputStream os) {
         return new CSVWriter(new OutputStreamWriter(os), ',', CSVWriter.NO_QUOTE_CHARACTER);
     }
@@ -162,23 +170,29 @@ public class CSVService {
     /**
      * Turns a raw value from CSV into a DataValueType enum
      * @param dataValue
+     * @param target Will have the return value written to this object to avoid thrashing the GC
      * @return
      */
-    private DataValueType getDataValueType(String dataValue) {
+    private DataValue getDataValueType(String dataValue, DataValue target) {
         String trimmed = dataValue.trim();
 
         if (trimmed.length() == 0) {
-            return DataValueType.Missing;
+            target.type = DataValueType.Missing;
+            return target;
         }
 
         try {
-            if (Double.parseDouble(trimmed) == 0) {
-                return DataValueType.Zero;
+            target.value = Double.parseDouble(trimmed);
+            if (target.value == 0) {
+                target.type = DataValueType.Zero;
+                return target;
             }
 
-            return DataValueType.Numeric;
+            target.type = DataValueType.Numeric;
+            return target;
         } catch (NumberFormatException ex) {
-            return DataValueType.Text;
+            target.type = DataValueType.Text;
+            return target;
         }
     }
 
@@ -187,9 +201,10 @@ public class CSVService {
      *
      * @param details
      * @param dataValues
+     * @param target Preallocated datavalue to avoid thrashing GC
      * @return True if the stats are applied. False if the row was ignored
      */
-    private boolean applyRowToDetails(List<ParameterDetails> details, String[] dataValues) {
+    private boolean applyRowToDetails(List<ParameterDetails> details, String[] dataValues, DataValue target) {
         if (dataValues.length != details.size()) {
             return false;
         }
@@ -198,12 +213,22 @@ public class CSVService {
             ParameterDetails pd = details.get(i);
             String value = dataValues[i];
 
-            switch (getDataValueType(value)) {
+            getDataValueType(value, target);
+            switch (target.type) {
             case Missing:
                 pd.setTotalMissing(pd.getTotalMissing() + 1);
                 break;
             case Numeric:
                 pd.setTotalNumeric(pd.getTotalNumeric() + 1);
+
+                if (target.value > pd.getMaxValue()) {
+                    pd.setMaxValue(target.value);
+                }
+
+                if (target.value < pd.getMinValue()) {
+                    pd.setMinValue(target.value);
+                }
+
                 break;
             case Zero:
                 pd.setTotalZeroes(pd.getTotalZeroes() + 1);
@@ -244,9 +269,10 @@ public class CSVService {
     /**
      * Returns true if a line of data could be considered a header line (if it's at the top of the CSV file)
      * @param data
+     * @param target Pre allocated DataValue to avoid thrashing the GC
      * @return
      */
-    private boolean isHeaderLine(String[] data) {
+    private boolean isHeaderLine(String[] data, DataValue target) {
         if (data == null) {
             return false;
         }
@@ -255,7 +281,7 @@ public class CSVService {
         //Otherwise assume it's data. This isn't a perfect test but it should catch all but the most ugly edge cases
         int missingCount = 0, textCount = 0, numericCount = 0;
         for (String value : data) {
-            switch(getDataValueType(value)) {
+            switch(getDataValueType(value, target).type) {
             case Missing:
                 missingCount++;
                 break;
@@ -287,7 +313,7 @@ public class CSVService {
     public List<ParameterDetails> extractParameterDetails(InputStream csvData) throws PortalServiceException {
         CSVReader reader = null;
         List<ParameterDetails> details = new ArrayList<ParameterDetails>();
-
+        DataValue dataValue = new DataValue();
         try {
             reader = generateReader(csvData);
 
@@ -297,7 +323,7 @@ public class CSVService {
             }
 
             //Initialize the parameters (one for each column)
-            if (isHeaderLine(headerLine)) {
+            if (isHeaderLine(headerLine, dataValue)) {
                 //It looks like we have a header line, let's try and parse it
                 for (int i = 0; i < headerLine.length; i++) {
                     if (headerLine[i].trim().isEmpty()) {
@@ -312,12 +338,12 @@ public class CSVService {
                 for (int i = 0; i < headerLine.length; i++) {
                     details.add(new ParameterDetails(integerToHeaderName(i), i));
                 }
-                applyRowToDetails(details, headerLine); // Make sure we don't forget to treat this line as data
+                applyRowToDetails(details, headerLine, dataValue); // Make sure we don't forget to treat this line as data
             }
 
             String[] dataLine;
             while ((dataLine = getNextNonEmptyRow(reader)) != null) {
-                applyRowToDetails(details, dataLine);
+                applyRowToDetails(details, dataLine, dataValue);
             }
         } catch (Exception ex) {
             throw new PortalServiceException("Unable to parse Parameter Details", ex);
@@ -497,6 +523,7 @@ public class CSVService {
     public double[] getParameterValues(InputStream csvData, int columnIndex, boolean includeMissing) throws PortalServiceException {
         CSVReader reader = null;
         List<Double> values = new ArrayList<Double>();
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
@@ -507,7 +534,7 @@ public class CSVService {
             }
 
             //Initialize the parameters (one for each column)
-            if (!isHeaderLine(headerLine)) {
+            if (!isHeaderLine(headerLine, dataValue)) {
                 appendNumericValueToList(values, headerLine, columnIndex, includeMissing);
             }
 
@@ -600,6 +627,7 @@ public class CSVService {
     private int findReplace(InputStream csvData, OutputStream replacedCsvData, int columnIndex, String find, boolean matchZeroes, String replace, boolean forceHeaderLine) throws PortalServiceException {
         CSVReader reader = null;
         CSVWriter writer = null;
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
@@ -611,7 +639,7 @@ public class CSVService {
             }
 
             int linesWritten = 0;
-            if (!isHeaderLine(headerLine) && forceHeaderLine) {
+            if (!isHeaderLine(headerLine, dataValue) && forceHeaderLine) {
                 //Insert a header line
                 String[] newHeaderLine = new String[headerLine.length];
                 for (int i = 0; i < headerLine.length; i++) {
@@ -812,6 +840,7 @@ public class CSVService {
     public double[][] getRawData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes, boolean skipEmptyLines) throws PortalServiceException {
         CSVReader reader = null;
         List<double[]> rows = new ArrayList<double[]>();
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
@@ -823,7 +852,7 @@ public class CSVService {
             int nCols = columnIndexes == null ? headerLine.length : (includeColumnIndexes ? columnIndexes.size() : headerLine.length - columnIndexes.size());
 
             //Initialize the parameters (one for each column)
-            if (!isHeaderLine(headerLine)) {
+            if (!isHeaderLine(headerLine, dataValue)) {
                 if (columnIndexes == null) {
                     appendNumericValuesToList(rows, headerLine, skipEmptyLines);
                 } else {
@@ -864,6 +893,7 @@ public class CSVService {
     public String[][] getRawStringData(InputStream csvData, List<Integer> columnIndexes, boolean includeColumnIndexes) throws PortalServiceException {
         CSVReader reader = null;
         List<String[]> rows = new ArrayList<String[]>();
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
@@ -875,7 +905,7 @@ public class CSVService {
             int nCols = columnIndexes == null ? headerLine.length : columnIndexes.size();
 
             //Initialize the parameters (one for each column)
-            if (!isHeaderLine(headerLine)) {
+            if (!isHeaderLine(headerLine, dataValue)) {
                 if (columnIndexes == null) {
                     appendValuesToList(rows, headerLine);
                 } else {
@@ -922,13 +952,14 @@ public class CSVService {
             List<Integer> headerColIndexes, boolean includeHeaderColIndexes)
             throws IOException {
         CSVReader reader = null;
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
 
             // Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
-            if (isHeaderLine(headerLine)) {
+            if (isHeaderLine(headerLine, dataValue)) {
                 if (headerColIndexes == null) {
                     return headerLine;
                 } else {
@@ -1040,13 +1071,14 @@ public class CSVService {
      */
     public Integer columnNameToIndex(InputStream csvData, String name) throws PortalServiceException {
         CSVReader reader = null;
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
 
             //Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
-            if (!isHeaderLine(headerLine)) {
+            if (!isHeaderLine(headerLine, dataValue)) {
                 return null;
             }
 
@@ -1081,13 +1113,14 @@ public class CSVService {
      */
     public List<Integer> columnNameToIndex(InputStream csvData, List<String> names) throws PortalServiceException {
         CSVReader reader = null;
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
 
             //Copy the header line (if it exists)
             String[] headerLine = getNextNonEmptyRow(reader);
-            boolean isHeader = isHeaderLine(headerLine);
+            boolean isHeader = isHeaderLine(headerLine, dataValue);
 
             List<Integer> indexes = new ArrayList<Integer>(names.size());
             for (String name : names) {
@@ -1279,6 +1312,7 @@ public class CSVService {
     public void cullEmptyRows(InputStream csvData, OutputStream culledCsvData, List<Integer> columnIndexes, boolean includeColumnIndexes) throws PortalServiceException {
         CSVReader reader = null;
         CSVWriter writer = null;
+        DataValue dataValue = new DataValue();
 
         try {
             reader = generateReader(csvData);
@@ -1289,7 +1323,7 @@ public class CSVService {
                 return;
             }
             //Initialize the parameters (one for each column)
-            if (isHeaderLine(headerLine)) {
+            if (isHeaderLine(headerLine, dataValue)) {
                 writer.writeNext(headerLine);
             } else {
                 if (columnIndexes == null) {
@@ -1345,6 +1379,7 @@ public class CSVService {
     public void scaleColumns(InputStream csvData, OutputStream scaledData, List<Integer> columnIndexes, List<Double> scalingFactors, List<String> newColumnNames) throws PortalServiceException {
        CSVReader reader = null;
        CSVWriter writer = null;
+       DataValue dataValue = new DataValue();
 
        try {
            if (columnIndexes.size() != scalingFactors.size() || columnIndexes.size() != newColumnNames.size()) {
@@ -1360,7 +1395,7 @@ public class CSVService {
            }
 
            //Rewrite header line
-           if (isHeaderLine(dataLine)) {
+           if (isHeaderLine(dataLine, dataValue)) {
                for (int i = 0; i < columnIndexes.size(); i++) {
                    String newName = newColumnNames.get(i);
                    if (newName != null && !newName.isEmpty()) {

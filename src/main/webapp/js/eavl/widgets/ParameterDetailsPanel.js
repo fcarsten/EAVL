@@ -166,9 +166,17 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
      * Fired when a user clicks a cell value
      */
     _handleTextValueClick : function(grid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
+        
+        var msg = null;
+        if (record.get('name') === '') {
+            msg = Ext.util.Format.format('Replace <b><i>(Zero Values)</i></b> with what?<br>Values range from {0} to {1}<br>Leave blank to enter a missing value', this.parameterDetails.get('minValue'), this.parameterDetails.get('maxValue'));
+        } else {
+            msg = Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to enter a missing value', record.get('name'));
+        }
+        
         Ext.MessageBox.show({
             title: 'Find and Replace',
-            msg: Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to enter a missing value', record.get('name') === '' ? '<i>(Zero Values)</i>' : record.get('name')),
+            msg: msg,
             animateTarget: grid.getEl(),
             icon: Ext.window.MessageBox.QUESTION,
             prompt: true,
