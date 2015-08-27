@@ -169,9 +169,9 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
         
         var msg = null;
         if (record.get('name') === '') {
-            msg = Ext.util.Format.format('Replace <b><i>(Zero Values)</i></b> with what?<br>Values range from {0} to {1}<br>Leave blank to enter a missing value', this.parameterDetails.get('minValue'), this.parameterDetails.get('maxValue'));
+            msg = Ext.util.Format.format('Replace <b><i>(Zero Values)</i></b> with what?<br>Parameter ranges from {0} to {1}<br>Leave blank to impute a value', this.parameterDetails.get('minValue'), this.parameterDetails.get('maxValue'));
         } else {
-            msg = Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to enter a missing value', record.get('name'));
+            msg = Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to impute a value', record.get('name'));
         }
         
         Ext.MessageBox.show({
