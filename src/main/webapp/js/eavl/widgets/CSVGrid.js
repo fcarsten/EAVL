@@ -19,6 +19,7 @@ Ext.define('eavl.widgets.CSVGrid', {
      *  file : String - [Optional] EavlJob file name to request CSV data from (defaults to session job)
      *  readOnly: Boolean - [Optional - default false] Is this grid read only?
      *  sortColumns: Boolean - [Optional - default true] Sort the column headers so bad columns are first
+     *  hideHeaderIcons: Boolean - [Optional - default false] Hide the parameter details icons for each column
      * }
      *
      * Adds the following events
@@ -30,6 +31,7 @@ Ext.define('eavl.widgets.CSVGrid', {
 
         this.parameterDetails = config.parameterDetails ? config.parameterDetails : [];
         this.cachedStyles = null;
+        this.hideHeaderIcons = config.hideHeaderIcons ? true : false;
 
         this.readOnly = config.readOnly ? true : false;
         this.sortColumns = config.sortColumns === false ? false : true;
@@ -148,6 +150,10 @@ Ext.define('eavl.widgets.CSVGrid', {
     },
 
     _parameterDetailsToColHeader : function(pd) {
+        if (this.hideHeaderIcons) {
+            return pd.get('name');
+        }
+        
         var status = pd.calculateStatus();
 
         var img = '../img/tick.png';
