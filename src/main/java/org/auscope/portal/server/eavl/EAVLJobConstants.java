@@ -60,4 +60,10 @@ public final class EAVLJobConstants {
      * The name of the estimate column encoded in the final results file
      */
     public static final String PARAMETER_ESTIMATE = "probability";
+
+    /**
+     * Applied to proxy names in FILE_IMPUTED_CENLR_CSV
+     */
+    public static final String CLR_PREFIX = "clr.";
+
 }

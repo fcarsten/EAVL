@@ -271,7 +271,13 @@ public class KDECallable implements Callable<Object> {
                         proxyNames);
                 IOUtils.closeQuietly(in);
 
-                cenlrHeader[index] = proxy.getNumerator();
+                String numerator = proxy.getNumerator();
+                if (numerator.equals(job.getPredictionParameter())) {
+                    cenlrHeader[index] = proxy.getNumerator();
+                } else {
+                    cenlrHeader[index] = EAVLJobConstants.CLR_PREFIX + proxy.getNumerator();
+                }
+
                 int proxyNameIndex =  proxyNames.indexOf(proxy.getNumerator());
                 cenlrData[index++] = CSVService.extractColumn(centredLogRatio(clrIndeces), proxyNameIndex);
             }
