@@ -116,6 +116,7 @@ public class ResultsController extends BasePortalController {
             List<ModelMap> files = new ArrayList<ModelMap>();
             for (StagedFile file : fss.listStageInDirectoryFiles(job)) {
                 if (file.getName().endsWith(EAVLJobConstants.PD_CACHE_SUFFIX) ||
+                    file.getName().endsWith(".json") ||
                     file.getName().equals(EAVLJobConstants.FILE_TEMP_DATA_CSV)) {
                     continue;
                 }
