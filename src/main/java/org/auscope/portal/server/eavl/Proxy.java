@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.auscope.portal.server.web.controllers;
+package org.auscope.portal.server.eavl;
 
 import java.io.Serializable;
 import java.util.Set;

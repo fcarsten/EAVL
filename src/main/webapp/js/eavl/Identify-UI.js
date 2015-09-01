@@ -73,8 +73,10 @@ Ext.application({
 
                         var ds = Ext.getCmp("noncomppanel").getStore();
                         var saveColNames = [];
+                        var saveColIndexes = [];
                         for (var i = 0; i < ds.getCount(); i++) {
                             saveColNames.push(ds.getAt(i).get('name'));
+                            saveColIndexes.push(ds.getAt(i).get('columnIndex'));
                         }
 
                         eavl.widgets.SplashScreen.showLoadingSplash("Saving selection...");
@@ -82,8 +84,10 @@ Ext.application({
                             url: 'identify/saveConfig.do',
                             params : {
                                 saveColName : saveColNames,
+                                saveColIndex : saveColIndexes,
                                 predictorName : predictorPd.get('name'),
-                                holeIdName : holePd.get('name')
+                                holeIdName : holePd.get('name'),
+                                holeIdIndex : holePd.get('columnIndex')
                             },
                             callback : function(options, success, response) {
                                 eavl.widgets.SplashScreen.hideLoadingScreen();

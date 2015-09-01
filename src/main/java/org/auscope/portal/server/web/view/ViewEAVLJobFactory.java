@@ -2,11 +2,14 @@ package org.auscope.portal.server.web.view;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.eavl.Parameter;
 import org.auscope.portal.server.web.service.JobTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,13 +67,18 @@ public class ViewEAVLJobFactory {
             status = STATUS_UNSUBMITTED;
         }
 
+        Set<String> savedParams = new HashSet<String>();
+        for (Parameter p : job.getSavedParameters()) {
+            savedParams.add(p.getName());
+        }
+
         ModelMap m = new ModelMap();
         m.put("id", job.getId());
         m.put("name", job.getName());
         m.put("status", status);
         m.put("predictionCutoff", job.getPredictionCutoff());
         m.put("predictionParameter", job.getPredictionParameter());
-        m.put("savedParameters", job.getSavedParameters());
+        m.put("savedParameters", savedParams);
         m.put("proxyParameters", job.getProxyParameters());
         m.put("imputationTaskId", job.getImputationTaskId());
         m.put("imputationTaskError", job.getImputationTaskError());

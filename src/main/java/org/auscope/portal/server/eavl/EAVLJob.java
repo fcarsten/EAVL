@@ -6,7 +6,6 @@ import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -19,7 +18,6 @@ import javax.persistence.TemporalType;
 
 import org.auscope.portal.core.cloud.StagedFileOwner;
 import org.auscope.portal.server.security.oauth2.EavlUser;
-import org.auscope.portal.server.web.controllers.Proxy;
 
 /**
  * EAVL Job
@@ -51,8 +49,8 @@ public class EAVLJob implements StagedFileOwner {
         this.user = user;
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> savedParameters;
+    @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
+    private Set<Parameter> savedParameters;
 
     @OneToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     private Set<Proxy> proxyParameters;
@@ -177,7 +175,7 @@ public class EAVLJob implements StagedFileOwner {
      *
      * @return
      */
-    public Set<String> getSavedParameters() {
+    public Set<Parameter> getSavedParameters() {
         return savedParameters;
     }
 
@@ -188,7 +186,7 @@ public class EAVLJob implements StagedFileOwner {
      * Can be null if not yet set.
      * @param savedParameters can be null or empty
      */
-    public void setSavedParameters(Set<String> savedParameters) {
+    public void setSavedParameters(Set<Parameter> savedParameters) {
         this.savedParameters = savedParameters;
     }
 

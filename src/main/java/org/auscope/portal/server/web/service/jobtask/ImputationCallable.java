@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -15,6 +17,7 @@ import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.eavl.Parameter;
 import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
@@ -57,7 +60,18 @@ public class ImputationCallable implements Callable<Object> {
     protected List<Integer> getExcludedColumns() throws PortalServiceException {
         List<Integer> exclusions = new ArrayList<Integer>();
 
-        List<String> savedParamList = new ArrayList<String>(job.getSavedParameters());
+        List<Parameter> sortedParameters = new ArrayList<Parameter>(job.getSavedParameters());
+        Collections.sort(sortedParameters, new Comparator<Parameter>() {
+            @Override
+            public int compare(Parameter p1, Parameter p2) {
+                return p1.getOriginalIndex() - p2.getOriginalIndex();
+            }
+        });
+        List<String> savedParamList = new ArrayList<String>();
+        for (Parameter p : sortedParameters) {
+            savedParamList.add(p.getName());
+        }
+
         InputStream in = this.fss.readFile(job, EAVLJobConstants.FILE_DATA_CSV);
         List<Integer> savedParamIndexes = csvService.columnNameToIndex(in, savedParamList);
         exclusions.addAll(savedParamIndexes);
