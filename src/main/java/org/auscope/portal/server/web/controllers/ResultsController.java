@@ -26,6 +26,7 @@ import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.eavl.ParameterDetails;
+import org.auscope.portal.server.eavl.Proxy;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
@@ -198,11 +199,24 @@ public class ResultsController extends BasePortalController {
                 responsePoints.add(point);
             }
 
+            Proxy proxy1 = null;
+            Proxy proxy2 = null;
+            Proxy proxy3 = null;
+            for (Proxy p : job.getProxyParameters()) {
+                if (clrPds.get(0).getName().contains(p.getNumerator())) {
+                    proxy1 = p;
+                } else if (clrPds.get(1).getName().contains(p.getNumerator())) {
+                    proxy2 = p;
+                } else {
+                    proxy3 = p;
+                }
+            }
+
             ModelMap response = new ModelMap();
             response.put("points", responsePoints);
-            response.put("xLabel", clrPds.get(0).getName());
-            response.put("yLabel", clrPds.get(1).getName());
-            response.put("zLabel", clrPds.get(2).getName());
+            response.put("xLabel", proxy1.getDisplayName());
+            response.put("yLabel", proxy2.getDisplayName());
+            response.put("zLabel", proxy3.getDisplayName());
 
             return generateJSONResponseMAV(true, response, "");
         } catch (Exception ex) {

@@ -52,19 +52,19 @@ Ext.define('eavl.widgets.JobInfoWindow', {
         } else {
             bottomPanelItems = [{
                 xtype: 'jobinfowindow-proxypanel',
-                title: 'Proxy Ratio 1',
+                title: config.job.get('proxyParameters')[0].displayName ? config.job.get('proxyParameters')[0].displayName : '<Untitled Proxy Ratio>',
                 flex: 1,
                 margin: '0 10 0 0',
                 pp: config.job.get('proxyParameters')[0]
             },{
                 xtype: 'jobinfowindow-proxypanel',
-                title: 'Proxy Ratio 2',
+                title: config.job.get('proxyParameters')[1].displayName ? config.job.get('proxyParameters')[1].displayName : '<Untitled Proxy Ratio>',
                 flex: 1,
                 margin: '0 10 0 0',
                 pp: config.job.get('proxyParameters')[1]
             },{
                 xtype: 'jobinfowindow-proxypanel',
-                title: 'Proxy Ratio 3',
+                title: config.job.get('proxyParameters')[2].displayName ? config.job.get('proxyParameters')[2].displayName : '<Untitled Proxy Ratio>',
                 flex: 1,
                 pp: config.job.get('proxyParameters')[2]
             }];

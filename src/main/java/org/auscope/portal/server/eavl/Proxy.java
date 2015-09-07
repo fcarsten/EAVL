@@ -32,6 +32,8 @@ public class Proxy implements Serializable {
     private Set<String> denom;
     @Basic
     private String numerator;
+    @Basic
+    private String displayName;
 
     /**
      * @return the id
@@ -75,11 +77,39 @@ public class Proxy implements Serializable {
         this.numerator = numerator;
     }
 
+
+    /**
+     * The name for this proxy for use when displaying its data. Returns numerator if displayname is null/empty
+     * @return
+     */
+    public String getDisplayName() {
+        if (displayName == null || displayName.isEmpty()) {
+            return numerator;
+        }
+
+        return displayName;
+    }
+
+    /**
+     * The name for this proxy for use when displaying its data
+     * @param displayName
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public Proxy() {
     }
 
     public Proxy(String numerator, String[] denom) {
         this.numerator=numerator;
+        this.denom=Sets.newHashSet(denom);
+        this.displayName=numerator;
+    }
+
+    public Proxy(String numerator, String[] denom, String displayName) {
+        this.numerator=numerator;
+        this.displayName=displayName;
         this.denom=Sets.newHashSet(denom);
     }
 
