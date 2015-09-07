@@ -150,6 +150,8 @@ Ext.application({
                             text: 'These parameters will not be imputed or used in calculations. They will however be included in the final output.'
                         }]
                     },{
+                        xtype: 'splitter'
+                    },{
                         id : 'comppanel',
                         xtype : 'pdlist',
                         title : 'Compositional Parameters',
@@ -178,6 +180,8 @@ Ext.application({
                             ptype: 'headerhelp',
                             text: 'These parameters will be imputed and used in conditional probability calculations.'
                         }]
+                    },{
+                        xtype: 'splitter'
                     },{
                         xtype: 'container',
                         flex: 1,
