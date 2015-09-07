@@ -27,3 +27,35 @@
     stroke: black;
     stroke-width: 2.5px;
 }
+
+.bhe-legend {
+	background-color: white;
+	border: 1px;
+	border-style: solid;
+	border-color: black;
+	padding: 5;
+}
+
+.bhe-legend.horizontal .bhe-legend-row {
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.bhe-legend-row {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.bhe-legend-box {
+    height: 16px;
+    width: 16px;
+    margin-right: 10px;
+    display: inline-block;	
+}
+
+.bhe-legend-text {
+	color: black;
+	display: inline-block;
+	position: relative;
+    top: -2px;
+}

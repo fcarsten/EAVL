@@ -61,6 +61,11 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                     allowSelection : true,
                     flex: 1,
                     listeners: {
+                        afterrender: function(plot) {
+                            var domSpec = eavl.widgets.charts.BoreholeEstimateChart.legendMarkup(null, null, 'position: absolute; right: 10px; top: 10px;');
+                            Ext.DomHelper.insertAfter(plot.getEl(), domSpec);
+                        },
+                        
                         select: function(plot, data) {
                             var parent = plot.ownerCt.down('#details');
 
@@ -132,7 +137,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
 
         this.callParent(arguments);
     },
-
+    
     /**
      * function(job, fileName) job - EAVLJob - Job to preview
      * fileName - String - name of the job file to preview

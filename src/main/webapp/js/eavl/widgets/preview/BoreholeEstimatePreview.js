@@ -12,7 +12,12 @@ Ext.define('eavl.widgets.preview.BoreholeEstimatePreview', {
             items: [{
                 xtype: 'bhestimatechart',
                 itemId: 'chart',
-
+                listeners: {
+                    afterrender: function(chart) {
+                        var domSpec = eavl.widgets.charts.BoreholeEstimateChart.legendMarkup(null, 'horizontal', 'position: absolute; right: 10px; bottom: 10px;');
+                        Ext.DomHelper.insertAfter(chart.getEl(), domSpec);
+                    }
+                }
             }]
         });
 

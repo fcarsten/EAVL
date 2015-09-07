@@ -44,6 +44,7 @@
         <link rel="stylesheet" type="text/css" href="../js/eavl/widgets/ParameterDetailsList.css">
         <link rel="stylesheet" type="text/css" href="../js/eavl/widgets/ErrorWindow.css">
         <link rel="stylesheet" type="text/css" href="../js/eavl/widgets/JobInfoWindow.css">
+        <link rel="stylesheet" type="text/css" href="../js/eavl/widgets/preview/3DScatterPlotPreview.css">
         <link rel="stylesheet" type="text/css" href="../js/eavl/Results-UI.css">
         <link rel="stylesheet" type="text/css" href="../js/eavl/EAVL-Common.css">
         
