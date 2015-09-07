@@ -110,8 +110,15 @@ Ext.define('eavl.models.ParameterDetails', {
             
             //Generate the uom from the layer name by guessing
             return eavl.models.ParameterDetails.nameToUom(data.get('name'));
+        }},
+        { name: 'originalUom', type: 'string', convert: function(v, data) { //The original unit of measure (or null)
+            if (v) {
+                return v;
+            }
+            
+            //Generate the uom from the layer name by guessing
+            return eavl.models.ParameterDetails.nameToUom(data.get('name'));
         }} 
-
     ],
 
     idProperty : 'name',

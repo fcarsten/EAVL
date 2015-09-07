@@ -168,10 +168,11 @@ Ext.define('eavl.widgets.ParameterDetailsPanel', {
     _handleTextValueClick : function(grid, td, cellIndex, record, tr, rowIndex, e, eOpts) {
         
         var msg = null;
+        var uom = this.parameterDetails.get('originalUom') ? this.parameterDetails.get('originalUom') : '???';
         if (record.get('name') === '') {
-            msg = Ext.util.Format.format('Replace <b><i>(Zero Values)</i></b> with what?<br>Parameter ranges from {0} to {1}<br>Leave blank to impute a value', this.parameterDetails.get('minValue'), this.parameterDetails.get('maxValue'));
+            msg = Ext.util.Format.format('Replace <b><i>(Zero Values)</i></b> with what?<br>Parameter ranges from {0} to {1} in {2}<br>Leave blank to impute a value.', this.parameterDetails.get('minValue'), this.parameterDetails.get('maxValue'), uom);
         } else {
-            msg = Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Leave blank to impute a value', record.get('name'));
+            msg = Ext.util.Format.format('Replace <b>{0}</b> with what?<br>Parameter ranges from {1} to {2} in {3}<br>Leave blank to impute a value.', record.get('name'), this.parameterDetails.get('minValue'), this.parameterDetails.get('maxValue'), uom);
         }
         
         Ext.MessageBox.show({
