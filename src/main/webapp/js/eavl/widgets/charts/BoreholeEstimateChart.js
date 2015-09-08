@@ -12,6 +12,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
     rowHeight: 50,
     rowMargin: 3,
     textWidth: 100,
+    scrollMargin: 20,
     
     statics : {
         PERCENTILE_BRACKETS: [{text: '&gt; 95th Percentile', color: '#eb403b'},
@@ -77,6 +78,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
      * Adds the following config
      * {
      *  data - see plot function
+     *  scrollMargin: Number- How many pixels to reserve for a scroll bar on the right
      * }
      *
      */
@@ -84,8 +86,8 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
         if (config.data) {
             config.initialPlotData = config.data;
         }
-
-        config.svgClass = 'scroll-svg';
+        
+        this.scrollMargin = Ext.isNumber(config.scrollMargin) ? config.scrollMargin : this.scrollMargin; 
 
         this.callParent(arguments);
     },
@@ -122,8 +124,8 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             .attr("height", height);
 
         this.d3svg
-            .attr("width", width)
-            .attr("height", this.data == null ? 0 : this.data.length * this.rowHeight);
+            .attr("width", Math.max(width - this.scrollMargin, 0))
+            .attr("height", this.data == null ? 0 : (this.data.length + 1) * this.rowHeight);
 
         if (requireReplot) {
             this.plot(this.data);
@@ -144,8 +146,8 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             return;
         }
 
-        this.d3svg.attr("height", data.length * this.rowHeight);
-        var width = this.viewport.attr('width');
+        this.d3svg.attr("height", (data.length + 1) * this.rowHeight);
+        var width = Math.max(this.viewport.attr('width') - this.scrollMargin, 0);
         var chartWidth = width - this.textWidth;
 
         var tip = d3.tip()
