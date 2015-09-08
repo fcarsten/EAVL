@@ -22,6 +22,7 @@
 }
 
 .bhe-line {
+	pointer-events: none;
 	fill: none;
     stroke: black;
     stroke-width: 2.5px;
