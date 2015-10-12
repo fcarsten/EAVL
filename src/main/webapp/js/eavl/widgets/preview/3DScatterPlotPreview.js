@@ -61,6 +61,11 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
                     allowSelection : true,
                     flex: 1,
                     listeners: {
+                        afterrender: function(plot) {
+                            var domSpec = eavl.widgets.charts.BoreholeEstimateChart.legendMarkup(null, null, 'position: absolute; right: 10px; top: 10px;');
+                            Ext.DomHelper.insertAfter(plot.getEl(), domSpec);
+                        },
+                        
                         select: function(plot, data) {
                             var parent = plot.ownerCt.down('#details');
 
@@ -132,7 +137,7 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
 
         this.callParent(arguments);
     },
-
+    
     /**
      * function(job, fileName) job - EAVLJob - Job to preview
      * fileName - String - name of the job file to preview
@@ -170,9 +175,9 @@ Ext.define('eavl.widgets.preview.3DScatterPlotPreview', {
 
                 var scatterPlot = this.down('#plot');
 
-                scatterPlot.xLabel = 'clr.' + responseObj.data.xLabel;
-                scatterPlot.yLabel = 'clr.' + responseObj.data.yLabel;
-                scatterPlot.zLabel = 'clr.' + responseObj.data.zLabel;
+                scatterPlot.xLabel = responseObj.data.xLabel.indexOf('clr.') == 0 ? responseObj.data.xLabel : 'clr.' + responseObj.data.xLabel;
+                scatterPlot.yLabel = responseObj.data.yLabel.indexOf('clr.') == 0 ? responseObj.data.yLabel : 'clr.' + responseObj.data.yLabel;
+                scatterPlot.zLabel = responseObj.data.zLabel.indexOf('clr.') == 0 ? responseObj.data.zLabel : 'clr.' + responseObj.data.zLabel;
                 
                 //Calculate a percentile field based on incoming data
                 var totalItems = responseObj.data.points.length / 100; //we divide by 100 so our final result comes out *100 (i.e. a percentile) 

@@ -5,7 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -17,6 +19,7 @@ import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.eavl.Parameter;
 import org.auscope.portal.server.eavl.ParameterDetails;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
@@ -190,9 +193,15 @@ public class ValidationController extends BasePortalController {
             String fileToRead = (file == null || file.isEmpty()) ?  EAVLJobConstants.FILE_DATA_CSV : file;
             List<ParameterDetails> pds = pdService.getParameterDetails(job, fileToRead);
             if (job.getSavedParameters() != null) {
+                Set<String> savedParamNames = new HashSet<String>();
+                for (Parameter p : job.getSavedParameters()) {
+                    savedParamNames.add(p.getName());
+                }
+
+
                 for (int i = pds.size() - 1; i >= 0; i--) {
                     String pdName = pds.get(i).getName();
-                    if (job.getSavedParameters().contains(pdName) ||
+                    if (savedParamNames.contains(pdName) ||
                             (!includePredictionParam && pdName.equals(job.getPredictionParameter()))) {
                         pds.remove(i);
                     }

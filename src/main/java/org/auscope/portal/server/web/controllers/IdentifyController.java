@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
+import org.auscope.portal.server.eavl.Parameter;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.EAVLJobService;
 import org.auscope.portal.server.web.service.ParameterDetailsService;
@@ -18,8 +19,6 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
-import com.google.common.collect.Sets;
 
 /**
  * Controller for supporting validation of a new data upload
@@ -78,9 +77,14 @@ public class IdentifyController extends BasePortalController {
     public ModelAndView saveConfig(HttpServletRequest request, @AuthenticationPrincipal EavlUser user,
             @RequestParam(required=false,value="jobId") Integer jobId,
             @RequestParam("holeIdName") String holeIdName,
+            @RequestParam("holeIdIndex") Integer holeIdIndex,
             @RequestParam("predictorName") String predictorName,
-            @RequestParam(value="saveColName", required=false) String[] saveColNames) {
+            @RequestParam(value="saveColName", required=false) String[] saveColNames,
+            @RequestParam(value="saveColIndex", required=false) Integer[] saveColIndexes) {
 
+        if (saveColIndexes != null && saveColNames != null && saveColNames.length != saveColIndexes.length) {
+            return generateJSONResponseMAV(false, null, "");
+        }
 
         try {
             EAVLJob job;
@@ -91,14 +95,14 @@ public class IdentifyController extends BasePortalController {
                 job = jobService.getUserJobById(request, user, jobId);
             }
 
-            //The hole ID column is automatically "saved" (by definition it's non compositional)
-            HashSet<String> set;
+
+            HashSet<Parameter> set = new HashSet<Parameter>();
             if (saveColNames != null) {
-                set = Sets.newHashSet(saveColNames);
-            } else {
-                set = new HashSet<String>();
+                for (int i = 0; i < saveColNames.length; i++) {
+                    set.add(new Parameter(saveColNames[i], saveColIndexes[i]));
+                }
             }
-            set.add(holeIdName);
+            set.add(new Parameter(holeIdName, holeIdIndex)); //The hole ID column is automatically "saved" (by definition it's non compositional)
 
             job.setSavedParameters(set);
             job.setHoleIdParameter(holeIdName);

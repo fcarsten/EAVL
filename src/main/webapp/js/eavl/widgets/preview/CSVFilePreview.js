@@ -57,7 +57,8 @@ Ext.define('eavl.widgets.preview.CSVFilePreview', {
                     file: fileName,
                     parameterDetails : parameterDetails,
                     readOnly: true,
-                    sortColumns: false
+                    sortColumns: false,
+                    hideHeaderIcons: true
                 }));
                 me.doLayout();
             }

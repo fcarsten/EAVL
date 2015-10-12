@@ -93,6 +93,8 @@ Ext.define('eavl.models.ParameterDetails', {
         { name: 'totalText', type: 'int' }, //Total number of text values in this parameter
         { name: 'totalZeroes', type: 'int' }, //Total number of numerical 0 values in this parameter
         { name: 'columnIndex', type: 'int' }, //The index of the column in the CSV file (0 based)
+        { name: 'maxValue', type: 'number' }, //The maximum (non zero) value in this parameter
+        { name: 'minValue', type: 'number' }, //The minimum (non zero) value in this parameter
         { name: 'textValues', type: 'auto' }, //Hashmap of totals keyed by each text (non numeric) value in this parameter
         { name: 'scaleFactor', type: 'number'}, //Will not be sent by the backend, but will be entered by the user
         { name: 'displayName', type: 'string', convert: function(v, data) { //The name of this ParameterDetails with any edits applied by the user
@@ -108,8 +110,15 @@ Ext.define('eavl.models.ParameterDetails', {
             
             //Generate the uom from the layer name by guessing
             return eavl.models.ParameterDetails.nameToUom(data.get('name'));
+        }},
+        { name: 'originalUom', type: 'string', convert: function(v, data) { //The original unit of measure (or null)
+            if (v) {
+                return v;
+            }
+            
+            //Generate the uom from the layer name by guessing
+            return eavl.models.ParameterDetails.nameToUom(data.get('name'));
         }} 
-
     ],
 
     idProperty : 'name',

@@ -9,6 +9,7 @@ import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
+import org.auscope.portal.server.eavl.Proxy;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
@@ -47,10 +48,13 @@ public class SetProxyController extends BasePortalController {
             @AuthenticationPrincipal EavlUser user,
             @RequestParam("numerator1") String numerator1,
             @RequestParam("denom1") String[] denom1,
+            @RequestParam("name1") String name1,
             @RequestParam("numerator2") String numerator2,
             @RequestParam("denom2") String[] denom2,
+            @RequestParam("name2") String name2,
             @RequestParam("numerator3") String numerator3,
-            @RequestParam("denom3") String[] denom3) {
+            @RequestParam("denom3") String[] denom3,
+            @RequestParam("name3") String name3) {
 
         EAVLJob job;
         try {
@@ -61,9 +65,9 @@ public class SetProxyController extends BasePortalController {
         }
 
         HashSet<Proxy> proxies = new HashSet<Proxy>();
-        proxies.add(new Proxy(numerator1, denom1));
-        proxies.add(new Proxy(numerator2, denom2));
-        proxies.add(new Proxy(numerator3, denom3));
+        proxies.add(new Proxy(numerator1, denom1, name1));
+        proxies.add(new Proxy(numerator2, denom2, name2));
+        proxies.add(new Proxy(numerator3, denom3, name3));
         try {
             job.setProxyParameters(proxies);
             JobTask newTask = new JobTask(job);

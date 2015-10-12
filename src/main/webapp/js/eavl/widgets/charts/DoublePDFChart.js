@@ -21,6 +21,24 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
         this.callParent(arguments);
     },
 
+    _generateLegendItem : function(gLegend, dashPattern, text, index) {
+        var legendLinePoints = [[0, 0], [20, 0]];
+        var lineLegend = this.d3.lineLegend ? this.d3.lineLegend : this.d3.lineLegend = d3.svg.line()
+                .x(function(d) { return d[0]; })
+                .y(function(d) { return d[1]; });
+        
+        var gLegendItem = gLegend.append("g")
+            .attr("transform","translate(5," + (5 + index * 15) + " )");
+        gLegendItem.append("path")
+            .attr("class", "line")
+            .attr("stroke-dasharray", dashPattern)
+            .attr("transform", "translate(0, -4)")
+            .attr("d", lineLegend(legendLinePoints));
+        gLegendItem.append("text")
+            .attr("transform", "translate(30, 0)")
+            .text(text);
+    },
+    
     /**
      * Requests PDF data for the specified parameter details.
      * The resulting data will be displayed
@@ -133,6 +151,21 @@ Ext.define('eavl.widgets.charts.DoublePDFChart', {
                     me.d3.brushgroup.selectAll("rect")
                         .attr("height", height);
                 }
+                
+                //Generate our legend
+                var legendWidth = 50;
+                me.legend = me.d3svg.append("g")
+                    .attr("class","legend")
+                    .attr("transform","translate(" + (width - legendWidth) + ",50)")
+                    .style("font-size","12px");
+                me.legend.append("rect")
+                    .attr("width", 105)
+                    .attr("height", 40)
+                    .attr("transform","translate(0, -12)")
+                    
+                me._generateLegendItem(me.legend, "5, 5", "High Values", 0);
+                me._generateLegendItem(me.legend, "", "All Values", 1);
+                
 
                 me.d3svg.append("text")
                     .attr("x", margin.left + (width / 2))

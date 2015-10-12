@@ -138,6 +138,13 @@ public class TestCSVService extends PortalTestClass{
         Assert.assertEquals(0, details.get(4).getTotalText());
         Assert.assertEquals(5, details.get(4).getTotalNumeric());
         Assert.assertEquals(3, details.get(4).getTotalMissing());
+
+        Assert.assertEquals(1, details.get(0).getMinValue(), 0.001);
+        Assert.assertEquals(7, details.get(0).getMaxValue(), 0.001);
+        Assert.assertEquals(11, details.get(1).getMinValue(), 0.001);
+        Assert.assertEquals(48, details.get(1).getMaxValue(), 0.001);
+        Assert.assertEquals(100, details.get(2).getMinValue(), 0.001);
+        Assert.assertEquals(103, details.get(2).getMaxValue(), 0.001);
     }
 
     @Test

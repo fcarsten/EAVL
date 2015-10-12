@@ -12,8 +12,15 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
     rowHeight: 50,
     rowMargin: 3,
     textWidth: 100,
+    scrollMargin: 20,
     
     statics : {
+        PERCENTILE_BRACKETS: [{text: '&gt; 95th Percentile', color: '#eb403b'},
+                              {text: '80th - 95th Percentile', color: '#e98931'},
+                              {text: '65th - 80th Percentile', color: '#fbb735'},
+                              {text: '50th - 65th Percentile', color: '#39c0b3'},
+                              {text: '&lt; 50th Percentile', color: '#227fb0'}],
+                              
         percentileToColor : function(e) {
             if (e < 50) {
                 return '#227fb0';
@@ -26,6 +33,44 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             } else {
                 return '#eb403b';
             }
+        },
+        
+        /**
+         * Generates HTML markup for rendering a legend for this chart. The top level element of this markup can be stamped with
+         * a particular ID if required. 
+         */
+        legendMarkup: function(parentId, parentCls, parentStyle) {
+            var parentClasses = ['bhe-legend'];
+            if (parentCls) {
+                parentClasses.push(parentCls);
+            }
+            
+            var children = [];
+            var brackets = eavl.widgets.charts.BoreholeEstimateChart.PERCENTILE_BRACKETS;
+            for (var i = 0; i < brackets.length; i++) {
+                var bracket = brackets[i];
+                children.push({
+                    tag: 'div',
+                    cls: 'bhe-legend-row',
+                    children: [{
+                        tag: 'div',
+                        cls: 'bhe-legend-box',
+                        style: 'background-color:' + bracket.color + ';'
+                    },{
+                        tag: 'div',
+                        cls: 'bhe-legend-text',
+                        html: bracket.text
+                    }]
+                });
+            }
+            
+            return {
+                tag: 'div',
+                id: parentId,
+                cls: parentClasses.join(' '),
+                style: parentStyle,
+                children: children
+            };
         }
     },
 
@@ -33,6 +78,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
      * Adds the following config
      * {
      *  data - see plot function
+     *  scrollMargin: Number- How many pixels to reserve for a scroll bar on the right
      * }
      *
      */
@@ -40,8 +86,8 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
         if (config.data) {
             config.initialPlotData = config.data;
         }
-
-        config.svgClass = 'scroll-svg';
+        
+        this.scrollMargin = Ext.isNumber(config.scrollMargin) ? config.scrollMargin : this.scrollMargin; 
 
         this.callParent(arguments);
     },
@@ -78,8 +124,8 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             .attr("height", height);
 
         this.d3svg
-            .attr("width", width)
-            .attr("height", this.data == null ? 0 : this.data.length * this.rowHeight);
+            .attr("width", Math.max(width - this.scrollMargin, 0))
+            .attr("height", this.data == null ? 0 : (this.data.length + 1) * this.rowHeight);
 
         if (requireReplot) {
             this.plot(this.data);
@@ -90,7 +136,7 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
         this.data = null;
         this._onResize(this, this.viewport.attr('width'), this.viewport.attr('height'))
         this.callParent(arguments);
-        this.d3svg.select('g.bhe-group').remove();
+        this.d3svg.selectAll('g.bhe-group').remove();
     },
 
     plot : function(data) {
@@ -100,8 +146,8 @@ Ext.define('eavl.widgets.charts.BoreholeEstimateChart', {
             return;
         }
 
-        this.d3svg.attr("height", data.length * this.rowHeight);
-        var width = this.viewport.attr('width');
+        this.d3svg.attr("height", (data.length + 1) * this.rowHeight);
+        var width = Math.max(this.viewport.attr('width') - this.scrollMargin, 0);
         var chartWidth = width - this.textWidth;
 
         var tip = d3.tip()

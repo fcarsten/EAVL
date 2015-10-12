@@ -22,7 +22,7 @@ import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
-import org.auscope.portal.server.web.controllers.Proxy;
+import org.auscope.portal.server.eavl.Proxy;
 import org.auscope.portal.server.web.controllers.WPSController;
 import org.auscope.portal.server.web.service.CSVService;
 import org.auscope.portal.server.web.service.EAVLJobService;
@@ -68,27 +68,6 @@ public class KDECallable implements Callable<Object> {
 //
 //        return inclusions;
 //    }
-
-    protected List<Integer> getExcludedColumns() throws PortalServiceException {
-        List<Integer> exclusions = new ArrayList<Integer>();
-
-        List<String> savedParamList = new ArrayList<String>(
-                job.getSavedParameters());
-        InputStream in = this.fss.readFile(job,
-                EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-        List<Integer> savedParamIndexes = csvService.columnNameToIndex(in,
-                savedParamList);
-        exclusions.addAll(savedParamIndexes);
-
-        in = this.fss.readFile(job, EAVLJobConstants.FILE_IMPUTED_SCALED_CSV);
-        Integer index = csvService.columnNameToIndex(in,
-                job.getHoleIdParameter());
-        if (index != null && !exclusions.contains(index)) {
-            exclusions.add(index);
-        }
-
-        return exclusions;
-    }
 
     private HpiKdeJSON hpiKde(double cutOff)
             throws PortalServiceException, WPSClientException {
@@ -271,7 +250,13 @@ public class KDECallable implements Callable<Object> {
                         proxyNames);
                 IOUtils.closeQuietly(in);
 
-                cenlrHeader[index] = proxy.getNumerator();
+                String numerator = proxy.getNumerator();
+                if (numerator.equals(job.getPredictionParameter())) {
+                    cenlrHeader[index] = proxy.getNumerator();
+                } else {
+                    cenlrHeader[index] = EAVLJobConstants.CLR_PREFIX + proxy.getNumerator();
+                }
+
                 int proxyNameIndex =  proxyNames.indexOf(proxy.getNumerator());
                 cenlrData[index++] = CSVService.extractColumn(centredLogRatio(clrIndeces), proxyNameIndex);
             }

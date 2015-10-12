@@ -37,3 +37,9 @@
     font-family: "Helvetica Neue",Arial,Verdana,sans-serif;
     font-size: 24px;
 }
+
+.legend rect {
+	fill:white;
+    stroke:black;
+    opacity:0.8;
+}

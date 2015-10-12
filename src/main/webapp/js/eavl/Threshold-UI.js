@@ -88,8 +88,10 @@ Ext.application({
                     items: [{
                         xtype: 'panel',
                         title: 'Drag to select threshold for the element to predict',
-                        width: 1000,
-                        height: 600,
+                        maxWidth: 1000,
+                        maxHeight: 600,
+                        width: '100%',
+                        flex: 1,
                         layout: 'fit',
                         items : [{
                             xtype: 'pdfchart',

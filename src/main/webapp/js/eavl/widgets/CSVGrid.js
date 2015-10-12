@@ -19,6 +19,8 @@ Ext.define('eavl.widgets.CSVGrid', {
      *  file : String - [Optional] EavlJob file name to request CSV data from (defaults to session job)
      *  readOnly: Boolean - [Optional - default false] Is this grid read only?
      *  sortColumns: Boolean - [Optional - default true] Sort the column headers so bad columns are first
+     *  hideHeaderIcons: Boolean - [Optional - default false] Hide the parameter details icons for each column
+     *  unroundedColumns: Boolean - [Optional - default false] If true, numerical columns will display raw data. Otherwise will round to 4 decimal places
      * }
      *
      * Adds the following events
@@ -30,6 +32,8 @@ Ext.define('eavl.widgets.CSVGrid', {
 
         this.parameterDetails = config.parameterDetails ? config.parameterDetails : [];
         this.cachedStyles = null;
+        this.hideHeaderIcons = config.hideHeaderIcons ? true : false;
+        this.unroundedColumns = config.unroundedColumns ? true : false;
 
         this.readOnly = config.readOnly ? true : false;
         this.sortColumns = config.sortColumns === false ? false : true;
@@ -107,7 +111,7 @@ Ext.define('eavl.widgets.CSVGrid', {
         var find = record.get(pd.get('name')).trim();
 
         //Don't do popup if we selected a number
-        if (this._isNumber(find)) {
+        if (this._parseFiniteNumber(find)) {
             return;
         }
 
@@ -148,6 +152,10 @@ Ext.define('eavl.widgets.CSVGrid', {
     },
 
     _parameterDetailsToColHeader : function(pd) {
+        if (this.hideHeaderIcons) {
+            return pd.get('name');
+        }
+        
         var status = pd.calculateStatus();
 
         var img = '../img/tick.png';
@@ -233,15 +241,25 @@ Ext.define('eavl.widgets.CSVGrid', {
     },
 
     /**
-     * Return true if n is a number
+     * Return Number representation of n (if it's parseable to a finite NUmber)
+     * Return null otherwise
      */
-    _isNumber : function(n) {
-        return !isNaN(parseFloat(n)) && isFinite(n);
+    _parseFiniteNumber : function(n) {
+        var f = parseFloat(n);
+        if (isNaN(f) || !isFinite(f)) {
+            return null;
+        }
+        return f;
     },
 
     _handleCellRender : function(value, metadata, record, rowIndex, colIndex, store, view) {
-        if (this._isNumber(value)) {
-            return value;
+        var parsedValue = this._parseFiniteNumber(value);
+        if (parsedValue) {
+            if (this.unroundedColumns) {
+                return value;
+            } else {
+                return Ext.util.Format.number(parsedValue, '0.####');
+            }
         } else {
             if (value.trim() === "") {
                 return '<span class="csv-grid-missing">No sample</span>';

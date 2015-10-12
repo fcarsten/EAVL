@@ -248,6 +248,8 @@ Ext.application({
                                 }
                             }
                         },{
+                            xtype: 'splitter'
+                        },{
                             id : 'trashpanel',
                             xtype : 'pdlist',
                             title : 'Trashed Parameters',
@@ -277,6 +279,8 @@ Ext.application({
                                 text: 'Parameters dragged here will be deleted before any imputation takes place.'
                             }]
                         }]
+                    },{
+                        xtype: 'splitter'
                     },{
                         id : 'pdpanel',
                         xtype : 'pdpanel',

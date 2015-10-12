@@ -71,9 +71,11 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
         this.d3.brushgroup.selectAll('.resize.w rect').attr("width", 9999);
 
 
-        var text = Ext.util.Format.format("{0}% High Values", Ext.util.Format.number(totalArea * 100, '0'));
-        this.d3.brushgroup.selectAll('.brush-text').attr("x", Number(x) + 100).text(text);
-
+        var percentileText = Ext.util.Format.format("{0}% High Values", Ext.util.Format.number(totalArea * 100, '0'));
+        var thresholdText = Ext.util.Format.format("{0} {1}", Ext.util.Format.number(this.getCutoffValue(), '0.0000'), this.parameterDetails.get('name'));
+        this.d3.brushgroup.selectAll('.brush-text').attr("x", Number(x) + 100);
+        this.d3.brushgroup.selectAll('.brush-text-percentile').text(percentileText);
+        this.d3.brushgroup.selectAll('.brush-text-threshold').text(thresholdText);
         if (fireEvent) {
             this.fireEvent('cutoffchanged', this, value);
         }
@@ -184,7 +186,13 @@ Ext.define('eavl.widgets.charts.ProbabilityDensityFunctionChart', {
                     me.d3.brushgroup.append("text")
                     .attr("x", 9999) //initially off the side
                     .attr("y", 0 + (margin.top / 2) +  170)
-                    .attr("class", "brush-text")
+                    .attr("class", "brush-text brush-text-percentile")
+                    .text("High values");
+                    
+                    me.d3.brushgroup.append("text")
+                    .attr("x", 9999) //initially off the side
+                    .attr("y", 0 + (margin.top / 2) +  140)
+                    .attr("class", "brush-text brush-text-threshold")
                     .text("High values");
 
                     //Setup our initial brush position

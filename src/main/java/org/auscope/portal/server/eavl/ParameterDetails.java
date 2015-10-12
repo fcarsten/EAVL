@@ -19,6 +19,11 @@ public class ParameterDetails implements Serializable {
     private Map<String, Integer> textValues;
     /** The index of the column in the CSV file (0 based)*/
     private int columnIndex;
+    /** The maximum value in this column (ignoring 0 values)*/
+    private double maxValue;
+    /** The minimum value in this column (ignoring 0 values)*/
+    private double minValue;
+
     /**
      * @param name Unique name of this parameter
      * @param columnIndex The index of the column in the CSV file (0 based)
@@ -27,6 +32,8 @@ public class ParameterDetails implements Serializable {
         this.name = name;
         this.columnIndex = columnIndex;
         this.textValues = new HashMap<String, Integer>();
+        this.maxValue = -Double.MAX_VALUE;
+        this.minValue = Double.MAX_VALUE;
     }
 
     /**
@@ -125,6 +132,38 @@ public class ParameterDetails implements Serializable {
     /** The index of the column in the CSV file*/
     public void setColumnIndex(int columnIndex) {
         this.columnIndex = columnIndex;
+    }
+
+    /**
+     * The maximum value in this column (ignoring 0 values)
+     * @return
+     */
+    public double getMaxValue() {
+        return maxValue;
+    }
+
+    /**
+     * The maximum value in this column (ignoring 0 values)
+     * @param maxValue
+     */
+    public void setMaxValue(double maxValue) {
+        this.maxValue = maxValue;
+    }
+
+    /**
+     * The minimum value in this column (ignoring 0 values)
+     * @return
+     */
+    public double getMinValue() {
+        return minValue;
+    }
+
+    /**
+     * The minimum value in this column (ignoring 0 values)
+     * @param minValue
+     */
+    public void setMinValue(double minValue) {
+        this.minValue = minValue;
     }
 
     @Override

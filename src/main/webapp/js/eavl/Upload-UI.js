@@ -55,6 +55,7 @@ Ext.application({
                 jobId: id,
                 readOnly: true,
                 sortColumns: false,
+                hideHeaderIcons: true,
                 width: width,
                 flex: 1,
                 parameterDetails : parameterDetails,

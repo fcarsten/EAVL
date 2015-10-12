@@ -50,8 +50,14 @@ Ext.application({
             var p1Denoms = [];
             var p2Denoms = [];
             var p3Denoms = [];
+            var p1Name = null;
+            var p2Name = null;
+            var p3Name = null;
             if (initialParams && !Ext.isEmpty(initialParams.proxyParameters)) {
                 
+                p1Name = initialParams.proxyParameters[0].displayName;
+                p2Name = initialParams.proxyParameters[1].displayName;
+                p3Name = initialParams.proxyParameters[2].displayName;
                 Ext.each(initialParams.proxyParameters[0].denom, function(pdName) {
                     var pd = eavl.models.ParameterDetails.extractFromArray(records, pdName, true);
                     if (pd) {
@@ -79,7 +85,8 @@ Ext.application({
                     region: 'north',
                     allowNext: function(callback) {
                         var pdField1 = Ext.getCmp('setproxy-1').down('#pdfield');
-                        var pdtag1 = Ext.getCmp('setproxy-1').down('#pdtagfield'); 
+                        var pdtag1 = Ext.getCmp('setproxy-1').down('#pdtagfield');
+                        var pdname1 = Ext.getCmp('setproxy-1').down('#pddisplay');
                         if (!pdField1.isValid() || !pdtag1.isValid()) {
                             callback(false);
                             return;
@@ -87,6 +94,7 @@ Ext.application({
 
                         var pdField2 = Ext.getCmp('setproxy-2').down('#pdfield');
                         var pdtag2 = Ext.getCmp('setproxy-2').down('#pdtagfield');
+                        var pdname2 = Ext.getCmp('setproxy-2').down('#pddisplay');
                         if (!pdField2.isValid() || !pdtag2.isValid()) {
                             callback(false);
                             return;
@@ -94,6 +102,7 @@ Ext.application({
 
                         var pdField3 = Ext.getCmp('setproxy-3').down('#pdfield');
                         var pdtag3 = Ext.getCmp('setproxy-3').down('#pdtagfield');
+                        var pdname3 = Ext.getCmp('setproxy-3').down('#pddisplay');
                         if (!pdField3.isValid() || !pdtag3.isValid()) {
                             callback(false);
                             return;
@@ -104,12 +113,15 @@ Ext.application({
                             params : {
                                 numerator1 : pdField1.getValue(),
                                 denom1 : pdtag1.getValue(),
+                                name1 : pdname1.getValue(),
                                 
                                 numerator2 : pdField2.getValue(),
                                 denom2 : pdtag2.getValue(),
+                                name2 : pdname2.getValue(),
                                 
                                 numerator3 : pdField3.getValue(),
                                 denom3 : pdtag3.getValue(),
+                                name3 : pdname3.getValue()
                             },
                             callback : function(options, success, response) {
                                 eavl.widgets.SplashScreen.hideLoadingScreen();
@@ -146,27 +158,31 @@ Ext.application({
                     items: [{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy Ratio 1',
                         margin: '0 10 0 0',
                         id: 'setproxy-1',
                         allPds : records,
+                        proxyDisplayName: p1Name,
+                        defaultDisplayName: 'Proxy Ratio 1',
                         pdNumerator: p1Value,
                         pdDenominator: p1Denoms
+                        
                     },{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy Ratio 2',
                         margin: '0 10 0 0',
                         id: 'setproxy-2',
                         allPds : records,
+                        proxyDisplayName: p2Name,
+                        defaultDisplayName: 'Proxy Ratio 2',
                         pdNumerator: p2Value,
                         pdDenominator: p2Denoms
                     },{
                         xtype: 'setproxyselection',
                         flex: 1,
-                        title: 'Proxy Ratio 3',
                         id: 'setproxy-3',
                         allPds : records,
+                        proxyDisplayName: p3Name,
+                        defaultDisplayName: 'Proxy Ratio 3',
                         pdNumerator: p3Value,
                         pdDenominator: p3Denoms
                     }]
@@ -262,6 +278,7 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
         var pd = config.pdNumerator ? config.pdNumerator : null;
         var denom = config.pdDenominator ? config.pdDenominator : null;
         var allPds = config.allPds ? config.allPds : null;
+        var displayName = config.proxyDisplayName ? config.proxyDisplayName : '';
         
         Ext.apply(config, {
             xtype: 'container',
@@ -276,11 +293,15 @@ Ext.define('eavl.setproxy.ProxySelectionPanel', {
                 width: '100%',
                 layout : 'anchor',
                 border: false,
-                plugins: [{
-                    ptype: 'headerhelp',
-                    text: 'A proxy ratio requires a single parameter to act as numerator and at least one other parameter to be compared against.'
-                }],
                 items: [{
+                    xtype: 'textfield',
+                    value: displayName,
+                    itemId : 'pddisplay',
+                    width: '100%',
+                    fieldStyle: 'font-size: 24px;',
+                    height: 45,
+                    emptyText: config.defaultDisplayName
+                },{
                     xtype : 'pdcombo',
                     width: '100%',
                     height: 45,
