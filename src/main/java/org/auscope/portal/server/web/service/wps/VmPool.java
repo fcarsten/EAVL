@@ -504,7 +504,7 @@ public class VmPool {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
 
         runInstancesRequest.withImageId("ami-b706798d")
-                .withInstanceType("t2.small").withMinCount(1).withMaxCount(1)
+                .withInstanceType("t2.large").withMinCount(1).withMaxCount(1)
                 .withKeyName("eavlaws").withSecurityGroups("WPS Server");
         RunInstancesResult runResult = ec2Client
                 .runInstances(runInstancesRequest);
@@ -622,14 +622,16 @@ public class VmPool {
      * @return
      */
     public List<VmStatus> calculatePoolStatus() {
+        ArrayList<WpsVm> testPool;
         synchronized (vmPool) {
-            List<VmStatus> statusList = new ArrayList<VmStatus>(vmPool.size());
-            for (WpsVm vm : vmPool) {
+            testPool = new ArrayList<>(vmPool);
+        }
+            List<VmStatus> statusList = new ArrayList<VmStatus>(testPool.size());
+            for (WpsVm vm : testPool) {
                 vm.updateStatus();
                 statusList.add(vm.getStatus());
             }
             return statusList;
-        }
     }
 
     private WpsVm findVm(String endpoint) {

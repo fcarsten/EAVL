@@ -189,7 +189,7 @@ public class ImputationCallable implements Callable<Object> {
 
             //If our element to predict had a name change, update the job too
             int index = Arrays.asList(uomNameKeys).indexOf(job.getPredictionParameter());
-            if (!uomChangedNames[index].equals(job.getPredictionParameter())) {
+            if ((index >= 0) && (!uomChangedNames[index].equals(job.getPredictionParameter()))) {
                 job.setPredictionParameter(uomChangedNames[index]);
                 jobService.save(job);
             }
