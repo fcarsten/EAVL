@@ -16,7 +16,6 @@ import org.auscope.portal.core.cloud.StagedFile;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.core.services.cloud.FileStagingService;
-import org.auscope.portal.core.view.JSONView;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.eavl.EAVLJobConstants;
 import org.auscope.portal.server.eavl.Parameter;
@@ -39,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import com.google.common.collect.Sets;
 import com.hp.hpl.jena.util.iterator.ArrayIterator;
@@ -251,7 +251,11 @@ public class ValidationController extends BasePortalController {
             ModelMap response = new ModelMap();
             response.put("totalCount", totalData);
             response.put("rows", data);
-            return new ModelAndView(new JSONView(), response);
+            
+            // Carsten 30/08/2017:
+            //    Changed to compile with portal-core 1.7.0
+            //    Probably won't actually work 
+            return new ModelAndView(new MappingJackson2JsonView (), response);
         } catch (Exception ex) {
             log.warn("Unable to stream rows: ", ex);
             return generateJSONResponseMAV(false, null, "Error reading file");

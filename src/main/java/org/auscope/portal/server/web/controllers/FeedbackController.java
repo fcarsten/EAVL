@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.internet.MimeMessage;
+import javax.mail.util.ByteArrayDataSource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -13,18 +14,16 @@ import net.sf.json.JSONObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.io.Charsets;
-import org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer;
 import org.auscope.portal.core.server.controllers.BasePortalController;
 import org.auscope.portal.server.security.oauth2.EavlUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import com.sun.istack.ByteArrayDataSource;
 
 /**
  * Controller methods for the feedback widget
@@ -36,12 +35,20 @@ import com.sun.istack.ByteArrayDataSource;
 public class FeedbackController extends BasePortalController {
 
     private JavaMailSender mailSender;
-    private PortalPropertyPlaceholderConfigurer properties;
+    @Value("${env.feedback.email}")
+    private String emailSenderAddress;
 
-    @Autowired
-    public FeedbackController(JavaMailSender mailSender, PortalPropertyPlaceholderConfigurer properties) {
+    public String getEmailSenderAddress() {
+		return emailSenderAddress;
+	}
+
+	public void setEmailSenderAddress(String emailSenderAddress) {
+		this.emailSenderAddress = emailSenderAddress;
+	}
+
+	@Autowired
+    public FeedbackController(JavaMailSender mailSender) {
         this.mailSender = mailSender;
-        this.properties = properties;
     }
 
     @RequestMapping("/sendFeedback.do")
@@ -106,8 +113,8 @@ public class FeedbackController extends BasePortalController {
             MimeMessage msg = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(msg, true);
 
-            helper.setFrom(properties.resolvePlaceholder("env.feedback.email"));
-            helper.setTo(properties.resolvePlaceholder("env.feedback.email"));
+            helper.setFrom(emailSenderAddress);
+            helper.setTo(emailSenderAddress);
             if (email) {
                 helper.setCc(user.getEmail());
             }

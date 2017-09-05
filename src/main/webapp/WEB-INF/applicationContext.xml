@@ -22,14 +22,14 @@
 
     <jpa:repositories base-package="org.auscope" />
 
-    <bean id="propertyConfigurer"
-        class="org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer">
+    <!-- Turn on HostPrecedingPropertyPlaceholderConfigurer -->
+    <!-- http://jdwyah.blogspot.com/2006/12/updated-spring-configuration.html -->
+    <bean id="propertyConfigurer" class="org.auscope.portal.core.server.PortalPropertySourcesPlaceholderConfigurer">
         <property name="locations">
             <list>
                 <value>classpath:config.properties</value>
-                <value>#{contextParameters['envPropertiesLocation'] ?:
-                    'classpath:env.properties'}
-                </value>
+                <!--  Spring SpEL magic - use context parameter or the default war env.properties -->
+                <value>#{contextParameters['envPropertiesLocation'] ?: 'classpath:env.properties'}</value>
             </list>
         </property>
     </bean>

@@ -14,7 +14,6 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.auscope.portal.core.server.PortalPropertyPlaceholderConfigurer;
 import org.auscope.portal.core.services.PortalServiceException;
 import org.auscope.portal.server.eavl.EAVLJob;
 import org.auscope.portal.server.security.oauth2.EavlUser;
@@ -37,12 +36,10 @@ public class MenuController {
 
    protected final Log logger = LogFactory.getLog(getClass());
 
-   private PortalPropertyPlaceholderConfigurer hostConfigurer;
    private EAVLJobService jobService;
 
    @Autowired
-   public MenuController(PortalPropertyPlaceholderConfigurer hostConfigurer, EAVLJobService jobService) {
-       this.hostConfigurer = hostConfigurer;
+   public MenuController(EAVLJobService jobService) {
        this.jobService = jobService;
    }
 
@@ -51,13 +48,13 @@ public class MenuController {
     * @param mav
     */
    private void addGoogleKeys(ModelAndView mav) {
-       String googleKey = hostConfigurer.resolvePlaceholder("HOST.googlemap.key");
-       String analyticKey = hostConfigurer.resolvePlaceholder("HOST.google.analytics.key");
-
-       mav.addObject("googleKey", googleKey);
-       if (analyticKey != null && !analyticKey.isEmpty()) {
-           mav.addObject("analyticKey", analyticKey);
-       }
+//       String googleKey = hostConfigurer.resolvePlaceholder("HOST.googlemap.key");
+//       String analyticKey = hostConfigurer.resolvePlaceholder("HOST.google.analytics.key");
+//
+//       mav.addObject("googleKey", googleKey);
+//       if (analyticKey != null && !analyticKey.isEmpty()) {
+//           mav.addObject("analyticKey", analyticKey);
+//       }
    }
 
    /**
@@ -157,11 +154,11 @@ public class MenuController {
 
        //We don't just want "email@domain" in the page. Let's obscure it slightly so it cant be
        //scraped easily
-       String[] obscuredEmailParts = hostConfigurer.resolvePlaceholder("env.feedback.email").split("@");
-       String obscuredEmail = "\"" + obscuredEmailParts[0] + "\" + \"@\" + \"" + obscuredEmailParts[1] + "\"";
+//       String[] obscuredEmailParts = hostConfigurer.resolvePlaceholder("env.feedback.email").split("@");
+//       String obscuredEmail = "\"" + obscuredEmailParts[0] + "\" + \"@\" + \"" + obscuredEmailParts[1] + "\"";
 
        mav.addObject("isNewSession", isNewSession);
-       mav.addObject("OBSCURED_CONTACT_EMAIL", obscuredEmail);
+//       mav.addObject("OBSCURED_CONTACT_EMAIL", obscuredEmail);
        mav.addObject("CURRENT_USER_EMAIL", (user == null) ? "null" : ("'" + user.getEmail() + "'"));
 
 

@@ -14,7 +14,7 @@
         <script type="text/javascript" src="../js/feedback.js/feedback.min.js"></script>
         <link rel="stylesheet" type="text/css" href="../js/feedback.js/feedback.css">
         
-        <script type="text/javascript" src="../portal-core/js/ext-5.1.0/build/packages/sencha-charts/build/sencha-charts.js"></script>
+        <script type="text/javascript" src="../portal-core/js/ext-5.1.1/build/packages/sencha-charts/build/sencha-charts.js"></script>
         <script type="text/javascript" src="../portal-core/js/d3/d3.min.js"></script>
         
         <script src="../portal-core/js/portal/charts/BaseD3Chart.js" type="text/javascript"></script>
