@@ -35,6 +35,117 @@
     </bean>
 
     <cache:annotation-driven />
+
+    <!-- This is the core threadpool shared by object instances throughout the portal -->
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5" />
+        <property name="maxPoolSize" value="5" />
+        <property name="queueCapacity" value="25" />
+    </bean>
+
+    <bean id="httpServiceCaller" class="org.auscope.portal.core.server.http.HttpServiceCaller">
+        <constructor-arg type="int" name="connectionTimeOut">
+            <value>900000</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="opendapService" class="org.auscope.portal.core.services.OpendapService" >
+        <constructor-arg name="serviceCaller" ref="httpServiceCaller"/>
+        <constructor-arg name="getDataMethodMaker">
+            <bean class="org.auscope.portal.core.services.methodmakers.OPeNDAPGetDataMethodMaker">
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="viewCswRecordFactory" class="org.auscope.portal.core.view.ViewCSWRecordFactory">
+    </bean>
+
+    <bean id="viewKnownLayerFactory" class="org.auscope.portal.core.view.ViewKnownLayerFactory">
+    </bean>
+
+    <bean id="wcsService" class="org.auscope.portal.core.services.WCSService">
+        <constructor-arg name="serviceCaller" ref="httpServiceCaller"/>
+        <constructor-arg name="methodMaker">
+            <bean class="org.auscope.portal.core.services.methodmakers.WCSMethodMaker">
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="wfsMethodMaker" class="org.auscope.portal.core.services.methodmakers.WFSGetFeatureMethodMaker">
+        <property name="namespaces">
+            <bean class="org.auscope.portal.core.services.namespaces.ErmlNamespaceContext"/>
+        </property>
+    </bean>
+
+    <bean id="gmlToHtml" class="org.auscope.portal.core.xslt.GmlToHtml">
+    </bean>
+
+    <bean id="wfsService" class="org.auscope.portal.core.services.WFSService" lazy-init = "true">
+        <constructor-arg name="httpServiceCaller" ref="httpServiceCaller"/>
+        <constructor-arg name="wfsMethodMaker">
+            <bean class="org.auscope.portal.core.services.methodmakers.WFSGetFeatureMethodMaker">
+            </bean>
+        </constructor-arg>
+        <constructor-arg name="gmlToHtml">
+            <bean class="org.auscope.portal.core.xslt.GmlToHtml">
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="cswKnownLayerService" class="org.auscope.portal.core.services.KnownLayerService">
+        <constructor-arg name="knownTypes" ref="knownTypes"/> <!-- This is pulled from the profile xml -->
+        <constructor-arg name="cswCacheService" ref="cswCacheService"/>
+    </bean>
+
+    <bean id="cswCacheService" class="org.auscope.portal.core.services.CSWCacheService">
+        <constructor-arg name="executor" ref="taskExecutor"/>
+        <constructor-arg name="serviceCaller" ref="httpServiceCaller"/>
+        <constructor-arg name="cswServiceList" ref="cswServiceList"/> <!-- This is pulled from the profile xml -->
+        <constructor-arg name="transformerFactory">
+            <bean class="org.auscope.portal.core.services.responses.csw.CSWRecordTransformerFactory"/>
+        </constructor-arg>
+        <property name="forceGetMethods" value="true"/>
+    </bean>
+
+    <bean id="cswFilterService" class="org.auscope.portal.core.services.CSWFilterService">
+        <constructor-arg name="executor" ref="taskExecutor"/>
+        <constructor-arg name="serviceCaller" ref="httpServiceCaller"/>
+        <constructor-arg name="cswServiceList" ref="cswServiceList"/> <!-- This is pulled from the profile xml -->
+        <constructor-arg name="transformerFactory">
+            <bean class="org.auscope.portal.core.services.responses.csw.CSWRecordTransformerFactory"/>
+        </constructor-arg>
+    </bean>
+
+     <bean id="service-configuration" class="java.util.ArrayList">
+        <constructor-arg>
+            <list>
+                <ref bean="cswRegVeglProduction" />
+            </list>
+        </constructor-arg>
+    </bean>  
+
+    <bean id="NSWERML2_WFSTest" class="org.auscope.portal.core.configuration.ServiceConfigurationItem">
+        <constructor-arg name="id" value="NSWERML2Test"/>
+        <constructor-arg name="url" value="http://aus-test-worker2.arrc.csiro.au:8080/gsnsw-earthresource/wfs"/>
+        <constructor-arg name="paging" type="boolean" value="false"/>      
+        <constructor-arg name="isGml32" type="boolean" value="true"/>        
+    </bean>
+
+    <bean id="service-configuration2" class="org.auscope.portal.core.configuration.ServiceConfiguration">        
+        <constructor-arg name="serviceConfigurationItems">
+            <list>
+               <ref bean="NSWERML2_WFSTest"/>         
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="cswRegVeglProduction" class="org.auscope.portal.core.services.csw.custom.CustomRegistry">
+        <constructor-arg name="id" value="cswRegVeglProduction" />
+        <constructor-arg name="title" value="SISS ANU Geonetwork" />
+        <constructor-arg name="serviceUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/csw" />
+        <constructor-arg name="recordInformationUrl" value="http://vgl-reg.auscope.org/geonetwork/srv/eng/main.home?uuid=%1$s" />
+    </bean>
+
     <bean id="cacheManager"
         class="org.springframework.cache.ehcache.EhCacheCacheManager"
         p:cache-manager-ref="ehcache" />
