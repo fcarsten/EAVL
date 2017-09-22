@@ -22,26 +22,16 @@ Ext.application({
                          '<img src="docs/cp-equation.png" width="414" height="59"/>' +
                          '<p>where <i>Au</i> is gold assay, <i>v</i> is a threshold value, and <i>G1, G2, G3</i>... are the geochemical proxies.</p>',
             contacts: [
-                Ext.create('eavl.models.Contact', {
-                    name: 'Joshua Vote',
-                    email: ['Josh.Vote', 'csiro.au'].join('@'),
-                    group: 'Developers'
-                }),
-                Ext.create('eavl.models.Contact', {
-                    name: 'Carsten Friedrich',
-                    email: ['Carsten.Friedrich', 'csiro.au'].join('@'),
-                    group: 'Developers'
-                }),
-                Ext.create('eavl.models.Contact', {
-                    name: 'June Hill',
-                    email: ['June.Hill', 'csiro.au'].join('@'),
-                    group: 'Researchers'
-                }),
-                Ext.create('eavl.models.Contact', {
-                    name: 'Andrew Rodger',
-                    email: ['Andrew.Rodger', 'csiro.au'].join('@'),
-                    group: 'Project Lead'
-                })
+                   Ext.create('eavl.models.Contact', {
+                       name: 'June Hill',
+                       email: ['June.Hill', 'csiro.au'].join('@'),
+                       group: 'Contact'
+                   }),
+	                Ext.create('eavl.models.Contact', {
+	                    name: 'Rob Woodcock',
+	                    email: ['Rob.Woodcock', 'csiro.au'].join('@'),
+	                    group: 'Contact'
+	                }),
             ]
         });
         
@@ -50,14 +40,29 @@ Ext.application({
             name: 'Geophysical Inversions',
             version: 'VGL-1.0.0',
             background: 'img/workflows/vgl.png',
-            description: '<p>This workflow is still a work in progress. Please check back later.</p>' +
-                         '<p>In the interim the <a href="http://vgl.csiro.au">Virtual Geophysics Laboratory<a> is available for performing inversions.</p>',
+            initialLink: 'https://vgl.auscope.org',
+            resultsLink: 'https://vgl.auscope.org/joblist.html',            
+            description: '<p>The Virtual Geophysics Laboratory (VGL) allows users to browse and visualise large repositories of NCI and Geoscience' +
+            ' Australia hosted datasets. After selecting a target dataset and region, users can select a model that they want to run on the' +
+            ' dataset (e.g. magnetic or gravity inversion for the purpose of understanding what\'s under the observable surface in an' +
+            ' area). The analytic model gets submitted to a cloud provider of choice (e.g. Amazon cloud or NCI HPC facility) by VGL and' +
+            ' results are made available to the user after completion.</p>',
             contacts: [
-                Ext.create('eavl.models.Contact', {
-                    name: 'Joshua Vote',
-                    email: ['Josh.Vote', 'csiro.au'].join('@'),
-                    group: 'Developers'
-                })
+                       Ext.create('eavl.models.Contact', {
+                           name: 'Ryan Fraser',
+                           email: ['Ryan.Fraser', 'csiro.au'].join('@'),
+                           group: 'Contact'
+                       }),
+    	                Ext.create('eavl.models.Contact', {
+    	                    name: 'Carsten Friedrich',
+    	                    email: ['Carsten.Friedrich', 'csiro.au'].join('@'),
+    	                    group: 'Contact'
+    	                }),
+    	                Ext.create('eavl.models.Contact', {
+    	                    name: 'Rob Woodcock',
+    	                    email: ['Rob.Woodcock', 'csiro.au'].join('@'),
+    	                    group: 'Contact'
+    	                }),
             ]
         });
         
@@ -66,26 +71,49 @@ Ext.application({
             name: 'Data Browser',
             version: '0.0.1-BETA',
             background: 'img/workflows/data.png',
-            description: '<p>This workflow is still a work in progress. Please check back later.</p>',
+            initialLink: 'https://vgl.auscope.org',
+            description: '<p>The AuScope Discovery provides a web based interface for searching and accessing data, information, imagery,' +
+            'services and applications connected to the Grid. It allows users to discover, browse, save, and process geospatial information '+
+            'from Earth science data sources around Australia. Hyperspectral, borehole, global navigation satellite, geodesy, mineral '+ 
+            'occurrence and geology data are all available through the portal.</p>',
             contacts: [
-                Ext.create('eavl.models.Contact', {
-                    name: 'Joshua Vote',
-                    email: ['Josh.Vote', 'csiro.au'].join('@'),
-                    group: 'Developers'
-                }),
-                Ext.create('eavl.models.Contact', {
-                    name: 'Carsten Friedrich',
-                    email: ['Carsten.Friedrich', 'csiro.au'].join('@'),
-                    group: 'Developers'
-                }),
-                Ext.create('eavl.models.Contact', {
-                    name: 'Robert Woodcock',
-                    email: ['Rober.Woodcock', 'csiro.au'].join('@'),
-                    group: 'Project Lead'
-                })
+   	                Ext.create('eavl.models.Contact', {
+	                    name: 'Rob Woodcock',
+	                    email: ['Rob.Woodcock', 'csiro.au'].join('@'),
+	                    group: 'Contact'
+	                }),
             ]
         });
         
+        var eavlDomaining = Ext.create('eavl.models.Workflow', {
+            id: 'eavl-spatial-domaining',
+            name: 'Data Mosaic Virtual Laboratory',
+            version: '0.0.1-BETA',
+            background: 'img/workflows/domaining.png',
+            initialLink: 'https://datamosaicvl.csiro.au/DataMosaicVL/about',
+            description: '<p>Drilling for mineral exploration typically includes the collection of continuous down hole data, including multi-element '+
+            'geochemical analysis and wire line natural gamma logging. When this data is numerical, it is desirable to convert it to geological'+
+            ' units (i.e. categorical data) to enable geological interpretation and construction of a 3D geology model. Manual interpretation of '+
+            'numerical data is slow and subjective and can be particularly challenging in the presence of high levels of noise.</p>'+
+            '<p>The Data Mosaic method automatically determines the locations of geological boundaries at multiple scales. Data Mosaic provides '+
+            'the results as a user-friendly plot from which it is easy to identify spatial patterns in the data at a range of scales of'+
+            ' analysis. When interpreting the Data Mosaic plot, the distance that each boundary extends along the coefficient index axis is '+
+            'an indication of its relative strength. Pairs of adjacent boundaries define each spatial domain. Spatial domains can be coloured '+
+            'by statistical values, e.g. mean, variance or inter-quartile range, to provide extra information.</p>',
+            contacts: [
+                       Ext.create('eavl.models.Contact', {
+                           name: 'June Hill',
+                           email: ['June.Hill', 'csiro.au'].join('@'),
+                           group: 'Contact'
+                       }),
+    	                Ext.create('eavl.models.Contact', {
+    	                    name: 'Rob Woodcock',
+    	                    email: ['Rob.Woodcock', 'csiro.au'].join('@'),
+    	                    group: 'Contact'
+    	                }),
+            ]
+        });
+
         Ext.app.Application.viewport = Ext.create('Ext.container.Viewport', {
             layout: 'border',
             style: {
@@ -129,7 +157,7 @@ Ext.application({
                 items: [{
                     title: 'Workflows',
                     xtype: 'workflowselectionpanel',
-                    workflows: [wfCp, test1, test2],
+                    workflows: [wfCp, test1, test2, eavlDomaining],
                     listeners: {
                         select: function(panel, wf, e) {
                             Ext.create('eavl.widgets.EAVLModalWindow', {
